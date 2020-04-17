@@ -1,4 +1,4 @@
-import planners.pyhop.pyhop
+import pyhop
 from a_start import a_star_search
 import sys
 
@@ -295,14 +295,17 @@ def pick_closest_target(state, agent):
 
 
 def pick_coop_target(state, agent, other):
+	print('PICK COOP', agent, other)
 	best = ('', 100000)
 	for ptarget in state.agents:
 		if hunts(agent, ptarget) and ptarget[1] == 'stag' and ptarget not in state.captured:
 			d = distance(state, agent, ptarget) + distance(state, other, ptarget)
 			if d < best[1]:
 				best = (ptarget, d)
+				print(best)
 	if best[1] < 100: # arbitrary distance
 		state.target[agent] = best[0]
+		print('target is', best)
 		state.goal[agent]['huntWith'] = (agent, best[0], other)
 		return state
 	else:
@@ -349,12 +352,14 @@ def capture_target(state, hunter, target):
 				state.loc[state.goal[hunter]['cooperateWith'][1]] == state.loc[hunter]:
 					print(hunter, state.loc[hunter], 'caught', target, state.loc[target])
 					state.captured.append(target)
+					state.score[hunter] += 5
 					return state
 			else:
 				return False
 		else:
 			print(hunter, state.loc[hunter], 'caught', target, state.loc[target])
 			state.captured.append(target)
+			state.score[hunter] += 1
 			return state
 	else:
 		return False
