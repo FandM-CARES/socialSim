@@ -226,14 +226,7 @@ maps = [[map5x5x1, map5x5x3, map5x5x5],
 def get_start_state():
     state = pyhop.State('init')
     state.agents = [('r1', 'rabbit'), ('r2', 'rabbit'), ('s1', 'stag'), ('s2', 'stag'), ('s3', 'stag'), ('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')]
-    state.loc = {('h1', 'hunter'):(3,5), ('s1', 'stag'):(3,4), ('s2', 'stag'):(5,1), ('s3', 'stag'):(1,2), ('h2', 'hunter'):(3,1), ('h3', 'hunter'):(4,2), ('r1', 'rabbit'):(5,3), ('r2', 'rabbit'):(4,1)}
-    # state.map = [[0,0,0,0,0,0,0],
-    #              [0,1,1,1,1,1,0],
-    #              [0,1,0,0,0,1,0],
-    #              [0,1,0,1,0,1,0],
-    #              [0,1,0,1,0,1,0],
-    #              [0,1,1,1,1,1,0],
-    #              [0,0,0,0,0,0,0]]
+    state.loc = {('h1', 'hunter'):(4,4), ('s1', 'stag'):(3,4), ('s2', 'stag'):(4,2), ('s3', 'stag'):(1,2), ('h2', 'hunter'):(2,1), ('h3', 'hunter'):(4,3), ('r1', 'rabbit'):(5,3), ('r2', 'rabbit'):(4,1)}
     state.map = map5x5x3
     state.target = {}
     state.goal = {}
@@ -381,8 +374,16 @@ def simulate_state(state):
 if __name__ == '__main__':
     #run_all()
     #run_one(0)
+    ##
     state = get_start_state()
-    print("before", state.goal)
-    decide(state)
-    print("after", state.goal)
+    # print("before", state.goal)
+    # decide(state)
+    # print("after", state.goal)
+    ##
+    assignGoals(state, 4)
+    print('**** goals ****', state.goal)
+    states,_ = simulate_state(state)
+    print('**** scores ****', states[-1].score)
+    # WHEN GOAL IS TO COOPARTE WITH H2 (GOAL SET 3)
+    # WHY IS H3 MOVING AWAY FROM TARGET (S1)?
 

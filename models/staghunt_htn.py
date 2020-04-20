@@ -57,6 +57,7 @@ def plan(state, hunter, goal):
 	p = a_star_search(state, hunter, goal, [step_up, step_down, step_left, step_right])
 	if p:
 		return [(p[0].__name__, hunter)]
+	print("no plan", hunter, goal)
 	return False
 
 # def plan(state, hunter):
@@ -113,6 +114,7 @@ def betray(state, agent):
 	# 	return [('pick_closest_target', agent)]
 	# else:
 	# 	return False
+	print('betray', agent)
 	return [('pick_closest_target', agent)]
 
 
@@ -120,6 +122,7 @@ def betray(state, agent):
 def move_towards_up(state, agent, goal):
 	# if goal is a valid goal of agent
 	if state.loc[goal][1] < state.loc[agent][1]:
+		print('move towards up', agent, goal)
 		return [('step_up', agent)]
 	else:
 		return False
@@ -127,6 +130,7 @@ def move_towards_up(state, agent, goal):
 
 def move_towards_down(state, agent, goal):
 	if state.loc[goal][1] > state.loc[agent][1]:
+		print('move towards up', agent, goal)
 		return [('step_down', agent)]
 	else:
 		return False
@@ -134,6 +138,7 @@ def move_towards_down(state, agent, goal):
 
 def move_towards_left(state, agent, goal):
 	if state.loc[goal][0] < state.loc[agent][0]:
+		print('move towards up', agent, goal)
 		return [('step_left', agent)]
 	else:
 		return False
@@ -141,6 +146,7 @@ def move_towards_left(state, agent, goal):
 
 def move_towards_right(state, agent, goal):
 	if state.loc[goal][0] > state.loc[agent][0]:
+		print('move towards up', agent, goal)
 		return [('step_right', agent)]
 	else:
 		return False
@@ -279,6 +285,7 @@ def pick_closest_target(state, agent):
 		if hunts(agent, ptarget) and ptarget[1] == 'rabbit' and ptarget not in state.captured and distance(state, agent, ptarget) < best[1]:
 			best = (ptarget, distance(state, agent, ptarget))
 	if best[1] < 20: # arbitrary distance
+		print('closest target', agent, best)
 		state.target[agent] = best[0]
 		if agent not in state.goal:
 			state.goal[agent] = {}
@@ -314,45 +321,71 @@ def pick_coop_target(state, agent, other):
 
 
 def step_right(state, agent):
+	# print('try: step right', agent)
 	if state.map[state.loc[agent][0]+1][state.loc[agent][1]] > 0:
 		state.loc[agent] = (state.loc[agent][0]+1, state.loc[agent][1])
 		return state
 	else:
+		# print('-fail')
 		return False
 
 
 def step_left(state, agent):
+	# print('try: step left', agent)
 	if state.map[state.loc[agent][0]-1][state.loc[agent][1]] > 0:
 		state.loc[agent] = (state.loc[agent][0]-1, state.loc[agent][1])
 		return state
 	else:
+		# print('-fail')
 		return False
 
 
 def step_up(state, agent):
+	# print('try: step up', agent)
 	if state.map[state.loc[agent][0]][state.loc[agent][1]-1] > 0:
 		state.loc[agent] = (state.loc[agent][0], state.loc[agent][1]-1)
 		return state
 	else:
+		# print('-fail')
 		return False
 
 
 def step_down(state, agent):
+	# print('try: step down', agent)
 	if state.map[state.loc[agent][0]][state.loc[agent][1]+1] > 0:
 		state.loc[agent] = (state.loc[agent][0], state.loc[agent][1]+1)
 		return state
 	else:
+		# print('-fail')
 		return False
 
 #if stag need cooperator
+### REALLY neeed to break this into separate actions
 def capture_target(state, hunter, target):
-	if state.loc[hunter] == state.loc[target]:
+	if state.loc[hunter] == state.loc[target] and target not in state.captured:
 		if target[1] == 'stag':
-			if hunter in state.goal and 'cooperateWith' in state.goal[hunter] and \
-				state.loc[state.goal[hunter]['cooperateWith'][1]] == state.loc[hunter]:
-					print(hunter, state.loc[hunter], 'caught', target, state.loc[target])
-					state.captured.append(target)
-					state.score[hunter] += 5
+			if hunter in state.goal and 'cooperateWith' in state.goal[hunter]:
+					teammate = state.goal[hunter]['cooperateWith'][1]
+					# check for additional teammate
+					if state.goal[teammate]['cooperateWith'][1] == hunter:
+						if state.loc[teammate] == state.loc[hunter]:
+							print(hunter, state.loc[hunter], 'caught', target, state.loc[target], 'with', teammate)
+							state.captured.append(target)
+							state.score[hunter] += 5
+							state.score[teammate] += 5
+						else:
+							return False
+					else:
+						# third party member
+						third = state.goal[teammate]['cooperateWith'][1]
+						if state.loc[hunter] == state.loc[teammate] and state.loc[teammate] == state.loc[third]:
+							print(hunter, state.loc[hunter], 'caught', target, state.loc[target], 'with', teammate, 'and', third)
+							state.captured.append(target)
+							state.score[hunter] += 5
+							state.score[teammate] += 5
+							state.score[third] += 5
+						else:
+							return False
 					return state
 			else:
 				return False

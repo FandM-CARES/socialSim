@@ -10,7 +10,6 @@ def a_star_search(start, agent, goal, steps):
 
     while len(frontier) > 0:
         n = heapq.heappop(frontier)
-        #print(n)
         f = n[0]
         current = n[1][0]
         path = n[1][1]
