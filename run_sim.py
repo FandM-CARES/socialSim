@@ -223,19 +223,6 @@ maps = [[map5x5x1, map5x5x3, map5x5x5],
         [map7x7x1, map7x7x3, map7x7x5],
         [map9x9x1, map9x9x3, map9x9x5]]
 
-def get_start_state():
-    state = pyhop.State('init')
-    state.agents = [('r1', 'rabbit'), ('r2', 'rabbit'), ('s1', 'stag'), ('s2', 'stag'), ('s3', 'stag'), ('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')]
-    state.loc = {('h1', 'hunter'):(4,4), ('s1', 'stag'):(3,4), ('s2', 'stag'):(4,2), ('s3', 'stag'):(1,2), ('h2', 'hunter'):(2,1), ('h3', 'hunter'):(4,3), ('r1', 'rabbit'):(5,3), ('r2', 'rabbit'):(4,1)}
-    state.map = map5x5x3
-    state.target = {}
-    state.goal = {}
-    state.goal[('h2', 'hunter')] = {'cooperateWith': (('h2', 'hunter'), ('h3', 'hunter'))}
-    state.goal[('h3', 'hunter')] = {'cooperateWith': (('h3', 'hunter'), ('h2', 'hunter'))}
-    state.captured = []
-    state.score = {('h1', 'hunter'):0, ('h2', 'hunter'):0, ('h3', 'hunter'):0}
-    return state
-
 
 # conditions
 # map size
@@ -326,14 +313,20 @@ def decide(state):
         sims.append(deepcopy(state))
         assignGoals(sims[c], c)
         print('**** goals ****', sims[c].goal)
-        states,_ = simulate_state(sims[c])
+        states,_ = simulate_state(sims[c], 3)
         sims[c] = states
         print('**** scores ****', sims[c][-1].score)
+    # reset goals
+    state.goal = {}
     # for each agent, pick best result
     for agent in state.agents:
         if agent[1] == 'hunter':
             s = argmax(range(4), lambda x: sims[x][-1].score[agent])
+            print('argmax', s, agent)
+            print('-sims score', sims[s][-1].score)
+            print('-sims goal', sims[s][0].goal)
             if agent in sims[s][0].goal:
+                print('--assigning goal', sims[s][0].goal[agent])
                 state.goal[agent] = sims[s][0].goal[agent]
 
 
@@ -350,16 +343,16 @@ def argmax(args, fn):
 def run_one(condition):
     state = get_start_state_rand(condition)
     #state = get_start_state()
-    return simulate_state(state)
+    return simulate_state(state, 3)
 
-def simulate_state(state):
+def simulate_state(state, sim_steps):
     planner = pyhop.Pyhop('hippity-hop')
     models.staghunt_htn.load_operators(planner)
     models.staghunt_htn.load_methods(planner)
     states = [state]
     plans = []
     pt.print_map(state.map, state.loc)
-    for i in range(0, 3):
+    for i in range(0, sim_steps):
         plan = planner.pyhop(state, [('sim_all',)], verbose=0)
         plans.append(plan)
         pt.print_plan(plan)
@@ -384,6 +377,9 @@ if __name__ == '__main__':
     print('**** goals ****', state.goal)
     states,_ = simulate_state(state)
     print('**** scores ****', states[-1].score)
-    # WHEN GOAL IS TO COOPARTE WITH H2 (GOAL SET 3)
-    # WHY IS H3 MOVING AWAY FROM TARGET (S1)?
+   
 
+    # Tests
+    # - scenario for each goal set winning out in mental sim
+    # - 3-way collab is difficult to succeed
+    # - 2.5-way collab with(1,2), with(2,1), with(3,1) -> no stag c
