@@ -5,6 +5,8 @@ import pickle
 import models.staghunt_htn
 import print_trace as pt
 
+MENTAL_SIM_LEN = 5
+
 # maps = [0,1,2,3,4,5,6,7,8,9,10]
 #
 # maps[0] = [[0, 0, 0, 0, 0, 0, 0],
@@ -313,7 +315,7 @@ def decide(state):
             sims[c].score[agent] = 0
         assignGoals(sims[c], c)
         print('**** goals ****', sims[c].goal)
-        states,_ = simulate_state(sims[c], 3)
+        states,_ = simulate_state(sims[c], MENTAL_SIM_LEN)
         sims[c] = states
         print('**** scores ****', sims[c][-1].score)
     # reset goals
@@ -368,17 +370,5 @@ def simulate_state(state, sim_steps, goal_manager = None):
     return states, plans
 
 if __name__ == '__main__':
-    #run_all()
-    #run_one(0)
-    ##
-    state = get_start_state()
-    # print("before", state.goal)
-    # decide(state)
-    # print("after", state.goal)
-    ##
-    assignGoals(state, 4)
-    print('**** goals ****', state.goal)
-    states,_ = simulate_state(state)
-    print('**** scores ****', states[-1].score)
-   
-
+    run_all()
+    
