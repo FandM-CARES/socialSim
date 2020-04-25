@@ -229,13 +229,10 @@ maps = [[map5x5x1, map5x5x3, map5x5x5],
 # map density
 # stag quantity
 def get_start_state_rand(condition):
-    state = pyhop.State('init')
-    #state.map = map0
+    state = models.staghunt_htn.get_start_state()
     pickMap(state, condition)
     setupAgents(state, condition)
-    state.target = {}
     pickRandomGoals(state)
-    state.captured = []
     return state
 
 def pickRandomGoals(state):
@@ -311,6 +308,9 @@ def decide(state):
     for c in range(5):
         print('goal set', c)
         sims.append(deepcopy(state))
+        # reset scores for each mental sim
+        for agent in sims[c].score:
+            sims[c].score[agent] = 0
         assignGoals(sims[c], c)
         print('**** goals ****', sims[c].goal)
         states,_ = simulate_state(sims[c], 3)
@@ -342,10 +342,9 @@ def argmax(args, fn):
 
 def run_one(condition):
     state = get_start_state_rand(condition)
-    #state = get_start_state()
-    return simulate_state(state, 3)
+    return simulate_state(state, 3, decide)
 
-def simulate_state(state, sim_steps):
+def simulate_state(state, sim_steps, goal_manager = None):
     planner = pyhop.Pyhop('hippity-hop')
     models.staghunt_htn.load_operators(planner)
     models.staghunt_htn.load_methods(planner)
@@ -353,6 +352,10 @@ def simulate_state(state, sim_steps):
     plans = []
     pt.print_map(state.map, state.loc)
     for i in range(0, sim_steps):
+        # decisions, decisions.  to decide or not to decide
+        if goal_manager:
+            goal_manager(state) # side-effects goals
+        print('* goals *', state.goal)
         plan = planner.pyhop(state, [('sim_all',)], verbose=0)
         plans.append(plan)
         pt.print_plan(plan)
@@ -379,7 +382,3 @@ if __name__ == '__main__':
     print('**** scores ****', states[-1].score)
    
 
-    # Tests
-    # - scenario for each goal set winning out in mental sim
-    # - 3-way collab is difficult to succeed
-    # - 2.5-way collab with(1,2), with(2,1), with(3,1) -> no stag c

@@ -4,6 +4,20 @@ import sys
 
 INFINITY = sys.maxsize
 
+# general start state with all the necessary fields, and some necessary values
+def get_start_state():
+    state = pyhop.State('init')
+    state.agents = [('r1', 'rabbit'), ('r2', 'rabbit'), ('s1', 'stag'), ('s2', 'stag'), ('s3', 'stag'), ('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')]
+    state.loc = {}
+    state.map = None
+    state.target = {}
+    state.goal = {}
+    state.captured = []
+    state.score = {('h1', 'hunter'):0, ('h2', 'hunter'):0, ('h3', 'hunter'):0}
+    state.ready = []
+    return state
+
+
 # general rules
 def hunts(agent1, agent2):
 	return agent1[1] == 'hunter' and (agent2[1] == 'stag' or agent2[1] == 'rabbit')
