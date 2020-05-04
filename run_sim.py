@@ -330,6 +330,7 @@ def decide(state):
             if agent in sims[s][0].goal:
                 print('--assigning goal', sims[s][0].goal[agent])
                 state.goal[agent] = sims[s][0].goal[agent]
+            state.assumes[agent] = sims[s][0].goal
 
 
 def argmax(args, fn):

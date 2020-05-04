@@ -38,6 +38,8 @@ def print_trace(states, plans):
         # print(s.goal)
         for g in s.goal:
             print(f' (goal {g[0]} {s.goal[g]})')
+        for a in s.assumes:
+            print(f' (assumes {a[0]} {s.assumes[a]})')
         
         if i < len(plans)-1:
             print_plan(plans[i])
@@ -113,7 +115,7 @@ def print_stats(stats):
 
 
 if __name__ == '__main__':
-    print_visuals = False
+    print_visuals = True
     stats = { 'goals':{}, 'goalsChanged':{True:0, False:0}}
     all = pickle.load(open('all.pickle', 'rb'))
     for i, cond1 in enumerate(all):

@@ -200,6 +200,7 @@ class PassTest(unittest.TestCase):
         self.assertIn(('h2', 'hunter'), state.goal)
         self.assertIn(('h3', 'hunter'), state.goal)
 
+
     def testSimulateStateDecide(self):
         state = self.get_start_state()
         states,_ = run_sim.simulate_state(state, 1, run_sim.decide)
@@ -224,6 +225,31 @@ class PassTest(unittest.TestCase):
         self.assertEqual(states[-1].loc, last.loc)
         self.assertEqual(states[-1].goal, last.goal)
         
+
+    def testAssumesForDecideEveryManForThemselves(self):
+        state = self.get_start_state()
+        state.loc[('s2', 'stag')] = (1,5)
+        run_sim.decide(state)
+        print('**** assumes ****', state.assumes)
+        self.assertNotIn(('h1', 'hunter'), state.assumes[('h1', 'hunter')])
+        self.assertNotIn(('h2', 'hunter'), state.assumes[('h2', 'hunter')])
+        self.assertNotIn(('h3', 'hunter'), state.assumes[('h3', 'hunter')])
+
+
+    def testAssumesForDecideAllWorkTogether(self):
+        state = self.get_start_state()
+        state.loc[('s2', 'stag')] = (4,1)
+        state.loc[('r2', 'rabbit')] = (5,5)
+        state.loc[('h3', 'hunter')] = (4,1)
+        state.loc[('h1', 'hunter')] = (3,1)
+        state.loc[('h2', 'hunter')] = (4,2)
+        run_sim.decide(state)
+        # test above verifies that all hunters have a goal
+        print('**** assumes ****', state.assumes)
+        self.assertEqual(state.goal[('h1', 'hunter')], state.assumes[('h1', 'hunter')][('h1', 'hunter')])
+        self.assertEqual(state.goal[('h2', 'hunter')], state.assumes[('h2', 'hunter')][('h2', 'hunter')])
+        self.assertEqual(state.goal[('h3', 'hunter')], state.assumes[('h3', 'hunter')][('h3', 'hunter')])
+
 
     def testRunOneSim(self):
         states,_ = run_sim.run_one((0,0,0))

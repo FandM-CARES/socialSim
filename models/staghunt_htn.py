@@ -12,6 +12,7 @@ def get_start_state():
     state.map = None
     state.target = {}
     state.goal = {}
+    state.assumes = {}
     state.captured = []
     state.score = {('h1', 'hunter'):0, ('h2', 'hunter'):0, ('h3', 'hunter'):0}
     state.ready = []
