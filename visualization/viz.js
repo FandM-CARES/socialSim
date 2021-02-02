@@ -81,8 +81,8 @@ function drawWalls() {
 		return row.map(function(col, j) {
 			var fill = col ? "none" : "#000";
 			return {
-				x: j,
-				y: i,
+				x: i,
+				y: j,
 				wall: fill
 			};
 		});
