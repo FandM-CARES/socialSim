@@ -42,36 +42,18 @@ var dLookup = {
 
 // parse json file - characters per state
 var characters = [];
-var data;
-
-console.log("----fetch----");
-// run http-server to host the HTML and JavaScript and then reload the page wiht SHIFT + Reload Page
-//fetch("/staghunt.json").then(results => results.json()).then(console.log);
-//var staghunt = fetch("/staghunt.json").then(results => results.json()); // RETURNS PROMISE
-
-var getStagHunt = fetch("/staghunt.json").then(results => results.json()).then(createStates).then(initialDraw).catch(error => {
-    console.error('There has been a problem with your fetch operation:', error);
-  });
-
-
-function createStates(result){
-	console.log("Function:\n"); // TEMP
-	result["states"].forEach(function (configFileState) {
-		var state = [];
-		for (const [configFileCharId, configFileLoc] of Object.entries(configFileState)) {
-			state.push({
-				id: configFileCharId,
-				type: configFileCharId[0],
-				x: configFileLoc[0],
-				y: configFileLoc[1]
-			});
-		}
-		characters.push(state);
-	});
-	data = result;
-	console.log(characters); // TEMP
-}
-
+staghunt["states"].forEach(function (configFileState) {
+	var state = [];
+	for (const [configFileCharId, configFileLoc] of Object.entries(configFileState)) {
+		state.push({
+			id: configFileCharId,
+			type: configFileCharId[0],
+			x: configFileLoc[0],
+			y: configFileLoc[1]
+		});
+	}
+	characters.push(state);
+})
 // console.log(characters);
 
 // --- CONSTANTS END ---
@@ -80,7 +62,6 @@ function createStates(result){
 
 // previous button behavior
 function prevData() {
-	console.log("Prev"); // TEMP
 	if (stateCounter > 0) {
 		stateCounter--;
 		drawCharacters();
@@ -89,7 +70,6 @@ function prevData() {
 
 // next button behavior
 function nextData() {
-	console.log("Next"); // TEMP
 	if (stateCounter < stateLength - 1) {
 		stateCounter++;
 		drawCharacters();
@@ -97,8 +77,6 @@ function nextData() {
 }
 
 function drawWalls() {
-	console.log("walls"); // TEMP
-	var staghunt = data;
 	var wallsCoord = staghunt["map"].map(function (row, i) {
 		return row.map(function(col, j) {
 			var fill = col ? "none" : "#000";
@@ -127,7 +105,6 @@ function drawWalls() {
 }
 
 function drawCharacters() {
-	console.log("characters"); // TEMP
 	// draw character text
 	huntspace.selectAll(".characters")
 		.selectAll("text")
@@ -167,13 +144,6 @@ function drawCharacters() {
 		});
 }
 
-function initialDraw(){
-	// have these functions in here so that they operate after the ASYNC call
-	console.log("initial draw"); // TEMP
-	drawWalls();
-	drawCharacters();
-}
-
 // --- FUNCTIONS END ---
 
 // --- SVG SPACE INIT START ---
@@ -196,13 +166,8 @@ huntspace.append("g")
 	.attr("font-size", cellWidth/3.)
 	.attr("class", "characters");
 
-// drawWalls();
+drawWalls();
 
-// drawCharacters();
+drawCharacters();
 
-/*
-Doesn't seem to be working right. No errors but the visuals aren't working correctly. 
-Maybe try implementing the example first might help. I think the API isn't being called
-correctly because d3 is being used but never defined. How to get methods from external
-JavaScript file.
-*/
+
