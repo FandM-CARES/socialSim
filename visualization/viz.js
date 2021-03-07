@@ -1,3 +1,4 @@
+console.log("Running StagHunt");
 // --- CONSTANTS START ---
 var width = 500,
 height = 500;
@@ -48,7 +49,7 @@ console.log("----fetch----");
 // run http-server to host the HTML and JavaScript and then reload the page wiht SHIFT + Reload Page
 //fetch("/staghunt.json").then(results => results.json()).then(console.log);
 //var staghunt = fetch("/staghunt.json").then(results => results.json()); // RETURNS PROMISE
-
+// http-server command to  host locally
 var getStagHunt = fetch("/staghunt.json").then(results => results.json()).then(createStates).then(initialDraw).catch(error => {
     console.error('There has been a problem with your fetch operation:', error);
   });
@@ -203,6 +204,8 @@ huntspace.append("g")
 /*
 Doesn't seem to be working right. No errors but the visuals aren't working correctly. 
 Maybe try implementing the example first might help. I think the API isn't being called
-correctly because d3 is being used but never defined. How to get methods from external
+correctly because is being used but never defined. How to get methods from external
 JavaScript file.
+
+We just needed to move the JS file to the end!
 */

@@ -1,7 +1,25 @@
+console.log("Running Example");
+// var d3 = require("d3"); // Require D3 before use
+var data = [
+	{date: new Date(2007, 3, 24), value: 93.24},
+	{date: new Date(2007, 3, 25), value: 95.35},
+	{date: new Date(2007, 3, 26), value: 98.84},
+	{date: new Date(2007, 3, 27), value: 99.92},
+	{date: new Date(2007, 3, 30), value: 99.80},
+	{date: new Date(2007, 4,  1), value: 99.47},
+  ];
+  
+  var line = d3.line()
+	  .x(function(d) { return x(d.date); })
+	  .y(function(d) { return y(d.value); });
+// TEST 
+
 var margin = {top: 50, right: 50, bottom: 50, left: 50},
 width = 500 - margin.left - margin.right,
 height = 500 - margin.top - margin.bottom;
 
+console.log("d3:"); // REMOVE
+console.log(d3); // REMOVE
 var grid = d3.select("#grid")
 .append("svg")
 .attr("width", width + margin.left + margin.right)
@@ -10,6 +28,7 @@ var grid = d3.select("#grid")
 .attr("transform",
 	"translate(" + margin.left + "," + margin.top + ")");
 
+console.log(grid); // REMOVE
 
 var data1 = [{x:10, y:20}, {x:20, y:40}, {x:30, y:50}]
 var data2 = [{x:30, y:80}, {x:40, y:90}]
@@ -38,6 +57,8 @@ function updateCircle() {
 	for (var i = 0; i < num_circle; i++) {
 		data.push({"x": Math.random() * 100, "y": Math.random() * 100});
 	}
+
+	console.log(data); // REMOVE
 
 	var circle = grid.selectAll("circle")
 		.data(data);
