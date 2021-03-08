@@ -1,4 +1,3 @@
-console.log("Running StagHunt");
 // --- CONSTANTS START ---
 var width = 500,
 height = 500;
@@ -45,18 +44,12 @@ var dLookup = {
 var characters = [];
 var data;
 
-console.log("----fetch----");
-// run http-server to host the HTML and JavaScript and then reload the page wiht SHIFT + Reload Page
-//fetch("/staghunt.json").then(results => results.json()).then(console.log);
-//var staghunt = fetch("/staghunt.json").then(results => results.json()); // RETURNS PROMISE
-// http-server command to  host locally
 var getStagHunt = fetch("/staghunt.json").then(results => results.json()).then(createStates).then(initialDraw).catch(error => {
     console.error('There has been a problem with your fetch operation:', error);
   });
 
 
 function createStates(result){
-	console.log("Function:\n"); // TEMP
 	result["states"].forEach(function (configFileState) {
 		var state = [];
 		for (const [configFileCharId, configFileLoc] of Object.entries(configFileState)) {
@@ -70,7 +63,6 @@ function createStates(result){
 		characters.push(state);
 	});
 	data = result;
-	console.log(characters); // TEMP
 }
 
 // console.log(characters);
@@ -81,7 +73,6 @@ function createStates(result){
 
 // previous button behavior
 function prevData() {
-	console.log("Prev"); // TEMP
 	if (stateCounter > 0) {
 		stateCounter--;
 		drawCharacters();
@@ -90,7 +81,6 @@ function prevData() {
 
 // next button behavior
 function nextData() {
-	console.log("Next"); // TEMP
 	if (stateCounter < stateLength - 1) {
 		stateCounter++;
 		drawCharacters();
@@ -98,7 +88,6 @@ function nextData() {
 }
 
 function drawWalls() {
-	console.log("walls"); // TEMP
 	var staghunt = data;
 	var wallsCoord = staghunt["map"].map(function (row, i) {
 		return row.map(function(col, j) {
@@ -128,7 +117,6 @@ function drawWalls() {
 }
 
 function drawCharacters() {
-	console.log("characters"); // TEMP
 	// draw character text
 	huntspace.selectAll(".characters")
 		.selectAll("text")
@@ -170,7 +158,6 @@ function drawCharacters() {
 
 function initialDraw(){
 	// have these functions in here so that they operate after the ASYNC call
-	console.log("initial draw"); // TEMP
 	drawWalls();
 	drawCharacters();
 }
@@ -196,16 +183,3 @@ huntspace.append("g")
 	.attr("font-family", "sans-serif")
 	.attr("font-size", cellWidth/3.)
 	.attr("class", "characters");
-
-// drawWalls();
-
-// drawCharacters();
-
-/*
-Doesn't seem to be working right. No errors but the visuals aren't working correctly. 
-Maybe try implementing the example first might help. I think the API isn't being called
-correctly because is being used but never defined. How to get methods from external
-JavaScript file.
-
-We just needed to move the JS file to the end!
-*/
