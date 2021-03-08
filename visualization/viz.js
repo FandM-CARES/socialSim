@@ -44,10 +44,14 @@ var dLookup = {
 var characters = [];
 var data;
 
-var getStagHunt = fetch("/staghunt.json").then(results => results.json()).then(createStates).then(initialDraw).catch(error => {
-    console.error('There has been a problem with your fetch operation:', error);
-  });
+// var getStagHunt = fetch("/staghunt.json").then(results => results.json()).then(createStates).then(initialDraw).catch(error => {
+//     console.error('There has been a problem with your fetch operation:', error);
+//   });
 
+function getStagHunt(json_file){
+	createStates(json_file);
+	initialDraw();
+}
 
 function createStates(result){
 	result["states"].forEach(function (configFileState) {
