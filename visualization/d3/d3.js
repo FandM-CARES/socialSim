@@ -1,4 +1,4 @@
-// https://d3js.org v5.16.0 Copyright 2020 Mike Bostock
+d3.js// https://d3js.org v5.16.0 Copyright 2020 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 typeof define === 'function' && define.amd ? define(['exports'], factory) :

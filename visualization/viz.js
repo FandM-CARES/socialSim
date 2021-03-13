@@ -42,18 +42,29 @@ var dLookup = {
 
 // parse json file - characters per state
 var characters = [];
-staghunt["states"].forEach(function (configFileState) {
-	var state = [];
-	for (const [configFileCharId, configFileLoc] of Object.entries(configFileState)) {
-		state.push({
-			id: configFileCharId,
-			type: configFileCharId[0],
-			x: configFileLoc[0],
-			y: configFileLoc[1]
-		});
-	}
-	characters.push(state);
-})
+var data;
+
+var getStagHunt = fetch("/staghunt.json").then(results => results.json()).then(createStates).then(initialDraw).catch(error => {
+    console.error('There has been a problem with your fetch operation:', error);
+  });
+
+
+function createStates(result){
+	result["states"].forEach(function (configFileState) {
+		var state = [];
+		for (const [configFileCharId, configFileLoc] of Object.entries(configFileState)) {
+			state.push({
+				id: configFileCharId,
+				type: configFileCharId[0],
+				x: configFileLoc[0],
+				y: configFileLoc[1]
+			});
+		}
+		characters.push(state);
+	});
+	data = result;
+}
+
 // console.log(characters);
 
 // --- CONSTANTS END ---
@@ -77,6 +88,7 @@ function nextData() {
 }
 
 function drawWalls() {
+	var staghunt = data;
 	var wallsCoord = staghunt["map"].map(function (row, i) {
 		return row.map(function(col, j) {
 			var fill = col ? "none" : "#000";
@@ -144,6 +156,12 @@ function drawCharacters() {
 		});
 }
 
+function initialDraw(){
+	// have these functions in here so that they operate after the ASYNC call
+	drawWalls();
+	drawCharacters();
+}
+
 // --- FUNCTIONS END ---
 
 // --- SVG SPACE INIT START ---
@@ -165,9 +183,3 @@ huntspace.append("g")
 	.attr("font-family", "sans-serif")
 	.attr("font-size", cellWidth/3.)
 	.attr("class", "characters");
-
-drawWalls();
-
-drawCharacters();
-
-
