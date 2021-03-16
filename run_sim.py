@@ -1,10 +1,12 @@
-import pyhop
+from socialSim import pyhop
 from copy import deepcopy
 import random
 import pickle
-import models.staghunt_htn
-import print_trace as pt
+import socialSim.models.staghunt_htn
+import socialSim.print_trace as pt
+
 import itertools
+import logging
 
 
 MENTAL_SIM_LEN = 5
@@ -260,7 +262,7 @@ maps = [[map5x5x1, map5x5x3, map5x5x5],
 #         state.goal[('h3', 'hunter')] = {'cooperateWith': (('h3', 'hunter'), ('h1', 'hunter'))}
 
 
-def my_assignGoals(state, c=None):
+def my_assignRandomGoals(state, c=None):
     hunters = []
     for agent in state.agents:
         if agent[1] == 'hunter':
@@ -284,6 +286,15 @@ def my_assignGoals(state, c=None):
     for hunter in poss_goals[c]:
         state.goal[hunter] = poss_goals[c][hunter]
         return len(poss_goals)
+
+# assigns coop goal with specific hunter
+def my_assignGoals(state, agent, hunter):
+    logger = logging.getLogger('StagHuntAgent')
+    if agent not in state.agents or hunter not in state.agents:
+        raise ValueError
+    logger.debug("cooperation between " + agent[0] + ' ' + hunter[0])
+    state.goal[agent] = {'cooperateWith': (agent, hunter)}  # assumes only coop with one at a time for now
+    logger.debug("finished\n\n")
 
 
 # def pickMap(state, condition):
@@ -370,13 +381,32 @@ def my_setupAgents(state, agents):
 # agents = (num rabbits, num stags, num hunters)
 # runs n number of simulations on random maps, loc, goals, and constant num agents
 def my_run_sim(agents, n):
+    logger = logging.getLogger('StagHuntAgent')
     for i in range(n):
         print("\n****** NEW GAME ******\n")
-        state = models.staghunt_htn.get_start_state()
+        state = socialSim.models.staghunt_htn.get_start_state()
         my_rand_pickMap(state)
         my_setupAgents(state, agents)
-        num_poss_goals = my_assignGoals(state)
+        num_poss_goals = my_assignRandomGoals(state)
+        logger.debug("simulating state")
         simulate_state(state, 3, my_decide, num_poss_goals)
+        logger.debug("finished\n\n")
+
+
+def my_make_game(agents):
+    print("\n****** NEW GAME ******\n")
+    state = socialSim.models.staghunt_htn.get_start_state()
+    my_rand_pickMap(state)
+    my_setupAgents(state, agents)
+    return state
+
+
+def my_run_one(state):
+    logger = logging.getLogger('StagHuntAgent')
+    logger.debug("simulating state")
+    my_assignRandomGoals(state)                 # in future,
+    states, plans = simulate_state(state, 1)
+    return states[1]    # next state
 
 
 # def decide(state):
@@ -417,7 +447,7 @@ def my_decide(state, num_poss_goals):
         # reset scores for each mental sim
         for agent in sims[c].score:
             sims[c].score[agent] = 0
-        my_assignGoals(sims[c], c)
+        my_assignRandomGoals(sims[c], c)
         print('**** goals ****', sims[c].goal)
         states, _ = simulate_state(sims[c], MENTAL_SIM_LEN) # simulate each goal with 5 steps each?
         sims[c] = states
@@ -456,8 +486,8 @@ def argmax(args, fn):
 
 def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
     planner = pyhop.Pyhop('hippity-hop')
-    models.staghunt_htn.load_operators(planner)
-    models.staghunt_htn.load_methods(planner)
+    socialSim.models.staghunt_htn.load_operators(planner)
+    socialSim.models.staghunt_htn.load_methods(planner)
     states = [state]
     plans = []
     pt.print_map(state.map, state.loc)
@@ -481,7 +511,12 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
 if __name__ == '__main__':
     # run_all()
 
-    agents = (2, 1, 3)  # rabbits, stags, hunters
-    n = 3
-    my_run_sim(agents, n)
+    # agents = (2, 1, 3)  # rabbits, stags, hunters
+    # n = 3
+    # my_run_sim(agents, n)
+
+    agents = (2, 2, 3)
+    state = my_make_game(agents)
+    state2 = my_run_one(state)
+    my_run_one(state2)
 
