@@ -1,5 +1,5 @@
 from companionsKQML.pythonian import Pythonian
-import run_sim as sim
+import socialSim.run_sim as sim
 import logging
 
 logger = logging.getLogger('StagHuntAgent')
