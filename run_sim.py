@@ -1,8 +1,8 @@
-from socialSim import pyhop
+import socialSim.pyhop
 from copy import deepcopy
 import random
 import pickle
-import socialSim.models.staghunt_htn
+import socialSim.staghunt_htn
 import socialSim.print_trace as pt
 
 import itertools
@@ -287,6 +287,7 @@ def my_assignRandomGoals(state, c=None):
         state.goal[hunter] = poss_goals[c][hunter]
         return len(poss_goals)
 
+
 # assigns coop goal with specific hunter
 def my_assignGoals(state, agent, hunter):
     logger = logging.getLogger('StagHuntAgent')
@@ -353,7 +354,6 @@ def my_setupAgents(state, agents):
         while not done:
             x = random.randint(0, len(state.map) - 1)
             y = random.randint(0, len(state.map[0]) - 1)
-            print(x, y)
             if state.map[x][y] > 0:
                 done = True
                 for other in state.loc:
@@ -361,6 +361,7 @@ def my_setupAgents(state, agents):
                         done = False
                         break
                 if done:
+                    print(x, y)
                     state.loc[agent] = (x, y)
 
 
@@ -384,7 +385,7 @@ def my_run_sim(agents, n):
     logger = logging.getLogger('StagHuntAgent')
     for i in range(n):
         print("\n****** NEW GAME ******\n")
-        state = socialSim.models.staghunt_htn.get_start_state()
+        state = socialSim.staghunt_htn.get_start_state()
         my_rand_pickMap(state)
         my_setupAgents(state, agents)
         num_poss_goals = my_assignRandomGoals(state)
@@ -395,7 +396,7 @@ def my_run_sim(agents, n):
 
 def my_make_game(agents):
     print("\n****** NEW GAME ******\n")
-    state = socialSim.models.staghunt_htn.get_start_state()
+    state = socialSim.staghunt_htn.get_start_state()
     my_rand_pickMap(state)
     my_setupAgents(state, agents)
     return state
@@ -485,9 +486,9 @@ def argmax(args, fn):
 
 
 def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
-    planner = pyhop.Pyhop('hippity-hop')
-    socialSim.models.staghunt_htn.load_operators(planner)
-    socialSim.models.staghunt_htn.load_methods(planner)
+    planner = socialSim.pyhop.Pyhop('hippity-hop')
+    socialSim.staghunt_htn.load_operators(planner)
+    socialSim.staghunt_htn.load_methods(planner)
     states = [state]
     plans = []
     pt.print_map(state.map, state.loc)
@@ -517,5 +518,9 @@ if __name__ == '__main__':
 
     agents = (2, 2, 3)
     state = my_make_game(agents)
+    print("\n----STEP 1----\n")
     state2 = my_run_one(state)
-    my_run_one(state2)
+    print("\n----STEP 2----\n")
+    state3 = my_run_one(state2)
+    print("\n----STEP 3----\n")
+    my_run_one(state3)
