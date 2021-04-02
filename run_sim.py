@@ -1,9 +1,9 @@
-from socialSim import pyhop
+import pyhop
 from copy import deepcopy
 import random
 import pickle
-import socialSim.models.staghunt_htn
-import socialSim.print_trace as pt
+import staghunt_htn
+import print_trace as pt
 
 import itertools
 import logging
@@ -380,22 +380,25 @@ def my_setupAgents(state, agents):
 
 # agents = (num rabbits, num stags, num hunters)
 # runs n number of simulations on random maps, loc, goals, and constant num agents
-def my_run_sim(agents, n):
+def my_run_sim(agents, n, sim=False):
     logger = logging.getLogger('StagHuntAgent')
     for i in range(n):
         print("\n****** NEW GAME ******\n")
-        state = socialSim.models.staghunt_htn.get_start_state()
+        state = staghunt_htn.get_start_state()
         my_rand_pickMap(state)
         my_setupAgents(state, agents)
         num_poss_goals = my_assignRandomGoals(state)
         logger.debug("simulating state")
-        simulate_state(state, 3, my_decide, num_poss_goals)
+        if sim:
+            simulate_state(state, 3, my_decide, num_poss_goals)
+        else:
+            simulate_state(state, 3)
         logger.debug("finished\n\n")
 
 
 def my_make_game(agents):
     print("\n****** NEW GAME ******\n")
-    state = socialSim.models.staghunt_htn.get_start_state()
+    state = staghunt_htn.get_start_state()
     my_rand_pickMap(state)
     my_setupAgents(state, agents)
     return state
@@ -486,8 +489,8 @@ def argmax(args, fn):
 
 def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
     planner = pyhop.Pyhop('hippity-hop')
-    socialSim.models.staghunt_htn.load_operators(planner)
-    socialSim.models.staghunt_htn.load_methods(planner)
+    staghunt_htn.load_operators(planner)
+    staghunt_htn.load_methods(planner)
     states = [state]
     plans = []
     pt.print_map(state.map, state.loc)
@@ -509,14 +512,13 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
 
 
 if __name__ == '__main__':
-    # run_all()
 
-    # agents = (2, 1, 3)  # rabbits, stags, hunters
-    # n = 3
-    # my_run_sim(agents, n)
+    agents = (2, 1, 3)  # rabbits, stags, hunters
+    n = 1
+    my_run_sim(agents, n)
 
-    agents = (2, 2, 3)
-    state = my_make_game(agents)
-    state2 = my_run_one(state)
-    my_run_one(state2)
+    # agents = (2, 2, 3)
+    # state = my_make_game(agents)
+    # state2 = my_run_one(state)
+    # my_run_one(state2)
 

@@ -1,12 +1,12 @@
-import socialSim.pyhop
-from socialSim.a_start import a_star_search
+import pyhop
+from a_start import a_star_search
 import sys
 
 INFINITY = sys.maxsize
 
 # general start state with all the necessary fields, and some necessary values
 def get_start_state():
-	state = socialSim.pyhop.State('init')
+	state = pyhop.State('init')
 	state.agents = [('r1', 'rabbit'), ('r2', 'rabbit'), ('s1', 'stag'), ('s2', 'stag'), ('s3', 'stag'), ('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')]
 	state.loc = {}		# agent: (x,y)
 	state.map = None
