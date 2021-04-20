@@ -5,11 +5,11 @@
   <meta charset="utf-8">
   <link rel="shortcut icon" href="#">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-  <script src="./d3/d3.min.js"></script>
+  <script type="application/html" src="./d3/d3.min.js"></script>
 </head>
 
 <body>
-	
+
 	<h1>Staghunt</h1>
 
   <form method="GET" action="/simulation.html">
@@ -17,8 +17,8 @@
     <input type="number" id="sim_number" name="sim_id" min="0" max="10"/>
     <input type="submit" onclick="getSimulation()"/>
     </form>
-  
-  <p>Click the "Submit" button and the form-data will be sent to a page on the 
+
+  <p>Click the "Submit" button and the form-data will be sent to a page on the
   server called "backend.js".</p>
 
 </body>

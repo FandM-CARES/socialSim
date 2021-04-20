@@ -49,6 +49,7 @@ var data;
 //   });
 
 function getStagHunt(json_file){
+	console.log("Visualizing")
 	createStates(json_file);
 	initialDraw();
 }
@@ -138,8 +139,8 @@ function drawCharacters() {
 		.transition().duration(function() {
 			return (stateCounter) ? 1000 : 0;
 		})
-		.attr("x", function(d) { 
-			return scale(d.x + labelOffset[d.id][0]); 
+		.attr("x", function(d) {
+			return scale(d.x + labelOffset[d.id][0]);
 		})
 		.attr("y", function(d) { return scale(d.y + labelOffset[d.id][1]); });
 
@@ -152,7 +153,7 @@ function drawCharacters() {
 			return (stateCounter) ? 1000 : 0;
 		})
 		.attr("transform", function (d) {
-			return "translate(" + scale(d.x + .25) + "," + scale(d.y + .25) + 
+			return "translate(" + scale(d.x + .25) + "," + scale(d.y + .25) +
 			") scale(.07)";
 		})
 		.attr("d", function (d) {
@@ -177,7 +178,7 @@ var huntspace = d3.select("#huntspace")
 // TODO: look at staghunt file
 var scale = d3.scaleLinear()
 	.domain([0, 7])
-	.range([0, width]); 
+	.range([0, width]);
 
 // --- SVG SPACE INIT END ---
 

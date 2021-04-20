@@ -1,0 +1,19 @@
+{
+  "name": "visualization",
+  "version": "1.0.0",
+  "description": "This is the web part of the staghunt project.",
+  "main": "get_simulation.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"node server.js"
+  },
+  "keywords": [
+    "staghunt",
+    "heroku"
+  ],
+  "author": "",
+  "license": "MIT"
+}
