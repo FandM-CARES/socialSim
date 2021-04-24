@@ -2,7 +2,7 @@
   "name": "visualization",
   "version": "1.0.0",
   "description": "This is the web part of the staghunt project.",
-  "main": "get_simulation.js",
+  "main": "server.js",
   "directories": {
     "example": "example"
   },

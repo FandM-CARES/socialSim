@@ -1,25 +1,26 @@
 const http = require('http')
 const fs = require('fs')
+const url = require('url')
 
-var filename = 'index.html'
-
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'content-type': 'text/html' })
-  urlArray = req.url.split(".")
-  filetype = urlArray[urlArray.length - 1]
-  if(req.url != "/" && req.url != null && filetype != "js" && filetype != "json" && filetype != "py"){
-    filename = req.url
-    if(req.url.includes("?")){
-      urlArray = req.url.split("?")
-      urlArray = urlArray[0].split("/")
-      filename = urlArray[1]
-    }
-  }
-  // console.log(req.url)
-  // console.log(filename)
-  fs.createReadStream(filename).pipe(res)
+const server = http.createServer((request, response) => {
+  response.writeHead(200, { 'content-type': 'text/html' });
+  var pathName = url.parse(request.url).pathname;
+  console.log(pathName);
+  // fs.createReadStream('index.html').pipe(response);
+  response.write("Welcome")
+  fs.readFile('./index.html', null, function (error, data) {
+        if (error) {
+            response.writeHead(404);
+            respone.write('Whoops! File not found!');
+        } else {
+            response.write(data);
+        }
+    });
+  response.end();
+  // changing the filename just loads a different, static, html file
+  // trying to load simulation.html like this doesn't allow the map to show
 })
 
-server.listen(process.env.PORT || 3000, function() {
-  console.log("Node app is running at localhost:" + process.env.PORT)
+server.listen(8080, function() {
+  console.log("Node app is running at localhost:" + 8080)
 });
