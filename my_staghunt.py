@@ -19,7 +19,7 @@ class StagHuntAgent(Pythonian):
     @staticmethod
     def set_goal(hunter, coopWith):
         state = run_sim.my_make_game(list(map(kqml.convert_to_int, (2, 1, 3))))
-        run_sim.my_assignGoals(state, hunter, coopWith)
+        run_sim.my_assignGoals(state, ('h1', 'hunter'), ('h2', 'hunter'))
         return run_sim.my_run_one(state, False)
 
     @staticmethod
