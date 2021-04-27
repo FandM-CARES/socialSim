@@ -1,0 +1,15 @@
+(in-microtheory GameOntologyMt)
+(genlMt GoalsPlansMt GameOntologyMt)
+(genlMt Session-ReasonerPlanMt GoalsPlansMt)
+
+(isa pickCooperate ComplexActionPredicate)
+(arity pickCooperate 1)
+
+(isa hunter1 Hunter)
+(isa hunter2 Hunter)
+
+(isa Stag Collection)
+(genls Stag Animal)
+
+(isa stag1 Stag)
+
