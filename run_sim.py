@@ -1,9 +1,9 @@
-import socialSim.pyhop
+import pyhop
 from copy import deepcopy
 import random
 import pickle
-import socialSim.staghunt_htn
-import socialSim.print_trace as pt
+import staghunt_htn
+import print_trace as pt
 
 import itertools
 import logging
@@ -336,7 +336,8 @@ def my_rand_pickMap(state):
 
 
 # assigns number of each agent to state according to amounts in agents
-def my_setupAgents(state, agents):
+# if passed n, ensures hunters are at least n moves away from all prey
+def my_setupAgents(state, agents, n=None):
     if agents[0] < 1 or agents[1] < 1 or agents[2] < 1:
         raise ValueError
     state.agents.clear()
@@ -354,15 +355,42 @@ def my_setupAgents(state, agents):
         while not done:
             x = random.randint(0, len(state.map) - 1)
             y = random.randint(0, len(state.map[0]) - 1)
-            if state.map[x][y] > 0:
+            if state.map[x][y] > 0:         # space is empty
                 done = True
-                for other in state.loc:
+                for other in state.loc:     # other agent not occupying
                     if state.loc[other] == (x, y):
                         done = False
                         break
-                if done:
-                    print(x, y)
+                if n and agent[1] == 'hunter' and my_within_n_moves(state, (x, y), n):  # hunter not within n of a prey
+                    done = False
+                elif done:
                     state.loc[agent] = (x, y)
+                    print(x, y)
+
+
+# returns whether there is a prey within n legal moves of a hunter's location on a given board using bfs
+def my_within_n_moves(state, hunter_loc, n):
+    depth = 0
+    queue = [hunter_loc]
+    visited = []
+    while depth < n and queue:
+        curr = queue.pop()
+        if curr in state.loc.values():
+            key = next(key for key, value in state.loc.items() if value == curr)    # lookup agent by loc
+            if key[1] != 'hunter':
+                return True     # prey found within n moves
+        visited.append(curr)
+        # up, down, left, right
+        poss_moves = ((curr[0], curr[1]+1), (curr[0], curr[1]-1), (curr[0]+1, curr[1]), (curr[0]-1, curr[1]))
+        for move in poss_moves:
+            if 0 <= move[0] < len(state.map[0]) and 0 <= move[1] < len(state.map) \
+                    and state.map[move[1]][move[0]] != 0 and move not in visited:       # add move to queue if legal
+                queue.append(move)
+        depth += 1
+    if not queue:
+        raise ValueError
+    return False
+
 
 
 # runs all possible maps (3x3 dis sizes and densities) in 30 different conditions
@@ -381,31 +409,35 @@ def my_setupAgents(state, agents):
 
 # agents = (num rabbits, num stags, num hunters)
 # runs n number of simulations on random maps, loc, goals, and constant num agents
-def my_run_sim(agents, n):
+def my_run_sim(agents, n, sim=False):
     logger = logging.getLogger('StagHuntAgent')
     for i in range(n):
         print("\n****** NEW GAME ******\n")
-        state = socialSim.staghunt_htn.get_start_state()
+        state = staghunt_htn.get_start_state()
         my_rand_pickMap(state)
         my_setupAgents(state, agents)
         num_poss_goals = my_assignRandomGoals(state)
         logger.debug("simulating state")
-        simulate_state(state, 3, my_decide, num_poss_goals)
+        if sim:
+            simulate_state(state, 3, my_decide, num_poss_goals)
+        else:
+            simulate_state(state, 3)
         logger.debug("finished\n\n")
 
 
-def my_make_game(agents):
+def my_make_game(agents, n=None):
     print("\n****** NEW GAME ******\n")
-    state = socialSim.staghunt_htn.get_start_state()
+    state = staghunt_htn.get_start_state()
     my_rand_pickMap(state)
-    my_setupAgents(state, agents)
+    my_setupAgents(state, agents, n)
     return state
 
 
-def my_run_one(state):
+def my_run_one(state, randGoals=True):
     logger = logging.getLogger('StagHuntAgent')
     logger.debug("simulating state")
-    my_assignRandomGoals(state)                 # in future,
+    if randGoals:
+        my_assignRandomGoals(state)
     states, plans = simulate_state(state, 1)
     return states[1]    # next state
 
@@ -486,9 +518,9 @@ def argmax(args, fn):
 
 
 def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
-    planner = socialSim.pyhop.Pyhop('hippity-hop')
-    socialSim.staghunt_htn.load_operators(planner)
-    socialSim.staghunt_htn.load_methods(planner)
+    planner = pyhop.Pyhop('hippity-hop')
+    staghunt_htn.load_operators(planner)
+    staghunt_htn.load_methods(planner)
     states = [state]
     plans = []
     pt.print_map(state.map, state.loc)
@@ -510,17 +542,13 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
 
 
 if __name__ == '__main__':
-    # run_all()
 
     # agents = (2, 1, 3)  # rabbits, stags, hunters
-    # n = 3
+    # n = 1
     # my_run_sim(agents, n)
 
     agents = (2, 2, 3)
     state = my_make_game(agents)
-    print("\n----STEP 1----\n")
-    state2 = my_run_one(state)
-    print("\n----STEP 2----\n")
-    state3 = my_run_one(state2)
-    print("\n----STEP 3----\n")
-    my_run_one(state3)
+    # state2 = my_make_game(agents, 3)
+    pt.print_map(state.map, state.loc)
+    # pt.print_map(state2.map, state2.loc)
