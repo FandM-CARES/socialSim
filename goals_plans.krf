@@ -11,5 +11,5 @@
   (actionSequence
    (TheList
     (doRemoteAgentPlan
-     StagHuntAgent (setGoal hunter1 hunter2))
+     StagHuntAgent (set_goal hunter1 hunter2))
     ))))
