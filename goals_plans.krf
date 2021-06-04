@@ -1,0 +1,15 @@
+(in-microtheory GoalsPlansMt)
+
+;;; Cooperate with the closest hunter within 3 moves
+(preconditionForMethod
+ (and
+      (distanceBetween hunter1 hunter2 ?distance)
+      (lessThan ?distance 4)
+      )
+ (methodForAction
+  (pickCooperate ?hunter1)
+  (actionSequence
+   (TheList
+    (doRemoteAgentPlan
+     StagHuntAgent (setGoal hunter1 hunter2))
+    ))))
