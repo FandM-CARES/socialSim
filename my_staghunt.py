@@ -1,6 +1,5 @@
 from companionsKQML.pythonian import Pythonian
 from companionsKQML.companionsKQMLModule import CompanionsKQMLModule as kqml
-# import CompanionsKQMLModule as kqml
 import run_sim
 import logging
 
