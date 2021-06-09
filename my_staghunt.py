@@ -31,7 +31,7 @@ class StagHuntAgent(Pythonian):
 
     @staticmethod
     def run_one():
-        StagHuntAgent.state = run_sim.my_run_one(StagHuntAgent.state, False)
+        StagHuntAgent.state = run_sim.my_run_one(StagHuntAgent.state, True)
 
     @staticmethod
     def run_sim(agents, n):
@@ -41,11 +41,11 @@ class StagHuntAgent(Pythonian):
 if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     AGENT = StagHuntAgent.parse_command_line_args()
-    # AGENT.insert_to_microtheory("StagHuntAgent", "(distanceBetween hunter1 hunter2 2)", "GameOntologyMt")
+    AGENT.insert_to_microtheory("session-reasoner", "(distanceBetween hunter1 hunter3 2)", "GameOntologyMt")
 
 
 # (achieve :receiver StagHuntAgent :content (task :action (run_sim (2 1 3) 1)))
 
 # (achieve :receiver StagHuntAgent :content (task :action (make_game (2 1 3))))
 # (achieve :receiver StagHuntAgent :content (task :action (set_goal hunter1 hunter2)))
-# (achieve :receiver StagHuntAgent :content (task :action (run_one (state??)))
+# (achieve :receiver StagHuntAgent :content (task :action run_one))
