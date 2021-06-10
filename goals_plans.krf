@@ -3,13 +3,13 @@
 ;;; Cooperate with the closest hunter within 3 moves
 (preconditionForMethod
  (and
-      (distanceBetween hunter1 hunter2 ?distance)
+      (distanceBetween ?hunter ?hunter2 ?distance)
       (lessThan ?distance 4)
       )
  (methodForAction
-  (pickCooperate ?hunter1)
+  (pickCooperate ?hunter)
   (actionSequence
    (TheList
     (doRemoteAgentPlan
-     StagHuntAgent (setGoal hunter1 hunter2))
+     StagHuntAgent (set_goal ?hunter ?hunter2))
     ))))
