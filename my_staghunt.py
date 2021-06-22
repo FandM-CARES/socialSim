@@ -22,12 +22,26 @@ class StagHuntAgent(Pythonian):
         if not StagHuntAgent.state:
             logger.debug("no game made")
         else:
-            run_sim.my_assignGoals(StagHuntAgent.state, ('h1', 'hunter'), ('h2', 'hunter'))
+            hunter = StagHuntAgent.get_hunter(hunter)
+            coopWith = StagHuntAgent.get_hunter(coopWith)
+            run_sim.my_assignGoals(StagHuntAgent.state, hunter, coopWith)           #
             StagHuntAgent.state = run_sim.my_run_one(StagHuntAgent.state, False)
 
     @staticmethod
+    def get_hunter(hunter):
+        hunter = hunter.to_string()
+        hunters = {                     # could be generalized
+            'hunter1': ('h1', 'hunter'),
+            'hunter2': ('h2', 'hunter'),
+            'hunter3': ('h3', 'hunter')
+        }
+        if hunter in hunters:           # could add check found hunter num actually exists for this game
+            return hunters[hunter]
+        logger.debug(hunter, 'not found in game')
+
+    @staticmethod
     def make_game(agents):
-         StagHuntAgent.state = run_sim.my_make_game(list(map(kqml.convert_to_int, agents)))
+        StagHuntAgent.state = run_sim.my_make_game(list(map(kqml.convert_to_int, agents)))
 
     @staticmethod
     def run_one():
@@ -41,11 +55,11 @@ class StagHuntAgent(Pythonian):
 if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     AGENT = StagHuntAgent.parse_command_line_args()
-    AGENT.insert_to_microtheory("session-reasoner", "(distanceBetween hunter1 hunter3 2)", "GameOntologyMt")
+    AGENT.insert_to_microtheory("session-reasoner", "(distanceBetween hunter2 hunter3 2)", "GameOntologyMt")
 
 
 # (achieve :receiver StagHuntAgent :content (task :action (run_sim (2 1 3) 1)))
 
 # (achieve :receiver StagHuntAgent :content (task :action (make_game (2 1 3))))
 # (achieve :receiver StagHuntAgent :content (task :action (set_goal hunter1 hunter2)))
-# (achieve :receiver StagHuntAgent :content (task :action run_one))
+# (achieve :receiver StagHuntAgent :content (task :action (run_one)))
