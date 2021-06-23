@@ -337,7 +337,7 @@ def my_rand_pickMap(state):
 
 # assigns number of each agent to state according to amounts in agents
 # if passed n, ensures hunters are at least n moves away from all prey
-def my_setupAgents(state, agents, n=None):
+def my_setupAgents(state, agents):
     if agents[0] < 1 or agents[1] < 1 or agents[2] < 1:
         raise ValueError
     state.agents.clear()
@@ -361,35 +361,33 @@ def my_setupAgents(state, agents, n=None):
                     if state.loc[other] == (x, y):
                         done = False
                         break
-                if n and agent[1] == 'hunter' and my_within_n_moves(state, (x, y), n):  # hunter not within n of a prey
-                    done = False
-                elif done:
+                if done:
                     state.loc[agent] = (x, y)
                     print(x, y)
 
 
 # returns whether there is a prey within n legal moves of a hunter's location on a given board using bfs
-def my_within_n_moves(state, hunter_loc, n):
-    depth = 0
-    queue = [hunter_loc]
-    visited = []
-    while depth < n and queue:
-        curr = queue.pop()
-        if curr in state.loc.values():
-            key = next(key for key, value in state.loc.items() if value == curr)    # lookup agent by loc
-            if key[1] != 'hunter':
-                return True     # prey found within n moves
-        visited.append(curr)
-        # up, down, left, right
-        poss_moves = ((curr[0], curr[1]+1), (curr[0], curr[1]-1), (curr[0]+1, curr[1]), (curr[0]-1, curr[1]))
-        for move in poss_moves:
-            if 0 <= move[0] < len(state.map[0]) and 0 <= move[1] < len(state.map) \
-                    and state.map[move[1]][move[0]] != 0 and move not in visited:       # add move to queue if legal
-                queue.append(move)
-        depth += 1
-    if not queue:
-        raise ValueError
-    return False
+# def my_within_n_moves(state, hunter_loc, n):
+#     depth = 0
+#     queue = [hunter_loc]
+#     visited = []
+#     while depth < n and queue:
+#         curr = queue.pop()
+#         if curr in state.loc.values():
+#             key = next(key for key, value in state.loc.items() if value == curr)    # lookup agent by loc
+#             if key[1] != 'hunter':
+#                 return True     # prey found within n moves
+#         visited.append(curr)
+#         # up, down, left, right
+#         poss_moves = ((curr[0], curr[1]+1), (curr[0], curr[1]-1), (curr[0]+1, curr[1]), (curr[0]-1, curr[1]))
+#         for move in poss_moves:
+#             if 0 <= move[0] < len(state.map[0]) and 0 <= move[1] < len(state.map) \
+#                     and state.map[move[1]][move[0]] != 0 and move not in visited:       # add move to queue if legal
+#                 queue.append(move)
+#         depth += 1
+#     if not queue:
+#         raise ValueError
+#     return False
 
 
 
@@ -408,7 +406,7 @@ def my_within_n_moves(state, hunter_loc, n):
 
 
 # agents = (num rabbits, num stags, num hunters)
-# runs n number of simulations on random maps, loc, goals, and constant num agents
+# runs n number of 3-step simulations on random maps, loc, goals, and constant num agents
 def my_run_sim(agents, n, sim=False):
     logger = logging.getLogger('StagHuntAgent')
     for i in range(n):
@@ -425,20 +423,21 @@ def my_run_sim(agents, n, sim=False):
         logger.debug("finished\n\n")
 
 
-def my_make_game(agents, n=None):
+def my_make_game(agents):
     print("\n****** NEW GAME ******\n")
     state = staghunt_htn.get_start_state()
     my_rand_pickMap(state)
-    my_setupAgents(state, agents, n)
+    my_setupAgents(state, agents)
     return state
 
 
 def my_run_one(state, randGoals=True):
     logger = logging.getLogger('StagHuntAgent')
-    logger.debug("simulating state")
+    logger.debug("simulating state", state.step + 1)
     if randGoals:
         my_assignRandomGoals(state)
     states, plans = simulate_state(state, 1)
+    states[1].step += 1
     return states[1]    # next state
 
 
@@ -543,15 +542,13 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
 
 if __name__ == '__main__':
 
-    # agents = (2, 1, 3)  # rabbits, stags, hunters
-    # n = 1
-    # my_run_sim(agents, n)
+    agents = (2, 1, 3)  # rabbits, stags, hunters
+    n = 1
+    my_run_sim(agents, n)
 
-    agents = (2, 2, 3)
-    state = my_make_game(agents)
-    # state2 = my_make_game(agents, 3)
-    pt.print_map(state.map, state.loc)
-    # pt.print_map(state2.map, state2.loc)
+    # agents = (2, 2, 3)
+    # state = my_make_game(agents)
+    # pt.print_map(state.map, state.loc)
 
 
 

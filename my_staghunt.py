@@ -24,8 +24,9 @@ class StagHuntAgent(Pythonian):
         else:
             hunter = StagHuntAgent.get_hunter(hunter)
             coopWith = StagHuntAgent.get_hunter(coopWith)
-            run_sim.my_assignGoals(StagHuntAgent.state, hunter, coopWith)           #
+            run_sim.my_assignGoals(StagHuntAgent.state, hunter, coopWith)
             StagHuntAgent.state = run_sim.my_run_one(StagHuntAgent.state, False)
+            StagHuntAgent.game_end()
 
     @staticmethod
     def get_hunter(hunter):
@@ -45,11 +46,22 @@ class StagHuntAgent(Pythonian):
 
     @staticmethod
     def run_one():
-        StagHuntAgent.state = run_sim.my_run_one(StagHuntAgent.state, True)
+        if not StagHuntAgent.state:
+            logger.debug("no game made")
+        else:
+            StagHuntAgent.state = run_sim.my_run_one(StagHuntAgent.state, True)
+            StagHuntAgent.game_end()
 
     @staticmethod
     def run_sim(agents, n):
         run_sim.my_run_sim(list(map(kqml.convert_to_int, agents)), kqml.convert_to_int(n))
+
+    @staticmethod
+    def game_end():
+        if StagHuntAgent.state.captured:
+            print('GAME END\n', StagHuntAgent.state.score)
+            StagHuntAgent.state = None
+
 
 
 if __name__ == "__main__":
