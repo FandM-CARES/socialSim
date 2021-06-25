@@ -59,7 +59,11 @@ class StagHuntAgent(Pythonian):
     @staticmethod
     def game_end():
         if StagHuntAgent.state.captured:
-            print('GAME END\n', StagHuntAgent.state.score)
+            print('GAME END')
+            print(StagHuntAgent.state.step, 'steps taken')
+            scores = StagHuntAgent.state.score.items()
+            for hunter in scores:
+                print(hunter)
             StagHuntAgent.state = None
 
 
@@ -72,6 +76,6 @@ if __name__ == "__main__":
 
 # (achieve :receiver StagHuntAgent :content (task :action (run_sim (2 1 3) 1)))
 
-# (achieve :receiver StagHuntAgent :content (task :action (make_game (2 1 3))))
+# (achieve :receiver StagHuntAgent :content (task :action (make_game (2 1 3 0))))
 # (achieve :receiver StagHuntAgent :content (task :action (set_goal hunter1 hunter2)))
 # (achieve :receiver StagHuntAgent :content (task :action (run_one)))

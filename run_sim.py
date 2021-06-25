@@ -336,17 +336,26 @@ def my_rand_pickMap(state):
 
 
 # assigns number of each agent to state according to amounts in agents
-# if passed n, ensures hunters are at least n moves away from all prey
+# agents is (rabbits, stags, companions hunters, A* hunter),
 def my_setupAgents(state, agents):
-    if agents[0] < 1 or agents[1] < 1 or agents[2] < 1:
+    logger = logging.getLogger('StagHuntAgent')
+    if agents[0] < 1 or agents[1] < 1 or (agents[2] + agents[3]) < 1:
+        logger.debug("invalid number of agents")
         raise ValueError
     state.agents.clear()
+    state.score.clear()
     for i in range(0, agents[0]):
         state.agents.append((f'r{i + 1}', 'rabbit'))
     for i in range(0, agents[1]):
         state.agents.append((f's{i + 1}', 'stag'))
     for i in range(0, agents[2]):
-        state.agents.append((f'h{i + 1}', 'hunter'))
+        hunter = (f'h{i + 1}', 'hunter', False) # companions "normal" hunter
+        state.agents.append(hunter)
+        state.score[hunter] = 0
+    for j in range(0, agents[3]):
+        hunter = (f'h{j + i + 1}', 'hunter', True)  # A* hunter
+        state.agents.append(hunter)
+        state.score[hunter] = 0
     # place all agents in random locations
     state.loc = {}
     for agent in state.agents:
@@ -432,12 +441,9 @@ def my_make_game(agents):
 
 
 def my_run_one(state, randGoals=True):
-    logger = logging.getLogger('StagHuntAgent')
-    logger.debug("simulating state", state.step + 1)
     if randGoals:
         my_assignRandomGoals(state)
     states, plans = simulate_state(state, 1)
-    states[1].step += 1
     return states[1]    # next state
 
 
@@ -524,6 +530,8 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
     plans = []
     pt.print_map(state.map, state.loc)
     for i in range(0, sim_steps):
+        state.step += 1
+        print("simulating state", state.step)
         # decisions, decisions.  to decide or not to decide
         if goal_manager:
             goal_manager(state, num_poss_goals)  # side-effects goals
