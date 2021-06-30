@@ -4,6 +4,7 @@ import random
 import pickle
 import staghunt_htn
 import print_trace as pt
+import hagents
 
 import itertools
 import logging
@@ -288,14 +289,15 @@ def my_assignRandomGoals(state, c=None):
         return len(poss_goals)
 
 
-# assigns coop goal with specific hunter
+# assigns coop goal with specific hunter, can only assign goal to a CompanionsAgent
 def my_assignGoals(state, agent, hunter):
     logger = logging.getLogger('StagHuntAgent')
-    if agent not in state.agents or hunter not in state.agents:
-        raise ValueError
-    logger.debug("cooperation between " + agent[0] + ' ' + hunter[0])
-    state.goal[agent] = {'cooperateWith': (agent, hunter)}  # assumes only coop with one at a time for now
-    logger.debug("finished\n\n")
+    if agent not in state.agents or hunter not in state.agents or not isinstance(state.hunters[agent], hagents.CompanionsAgent):
+        logger.debug("cannot assign goal to this agent")
+    else:
+        logger.debug("cooperation between " + agent[0] + ' ' + hunter[0])
+        state.goal[agent] = {'cooperateWith': (agent, hunter)}  # assumes only coop with one at a time for now
+        logger.debug("finished\n\n")
 
 
 # def pickMap(state, condition):
@@ -348,14 +350,12 @@ def my_setupAgents(state, agents):
         state.agents.append((f'r{i + 1}', 'rabbit'))
     for i in range(0, agents[1]):
         state.agents.append((f's{i + 1}', 'stag'))
-    for i in range(0, agents[2]):
-        hunter = (f'h{i + 1}', 'hunter', False) # companions "normal" hunter
-        state.agents.append(hunter)
-        state.score[hunter] = 0
-    for j in range(0, agents[3]):
-        hunter = (f'h{j + i + 1}', 'hunter', True)  # A* hunter
-        state.agents.append(hunter)
-        state.score[hunter] = 0
+    for i in range(0, agents[2]):   # companions "normal" hunter
+        hunter = hagents.Hunter(i + 1, state)
+        hunter.setup()
+    for j in range(0, agents[3]):   # A* hunter
+        hunter = hagents.Hunter(j + i + 1, state)
+        hunter.setup()
     # place all agents in random locations
     state.loc = {}
     for agent in state.agents:
