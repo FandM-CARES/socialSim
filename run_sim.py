@@ -289,15 +289,24 @@ def my_assignRandomGoals(state, c=None):
         return len(poss_goals)
 
 
-# assigns coop goal with specific hunter, can only assign goal to a CompanionsAgent
-def my_assignGoals(state, agent, hunter):
+# assigns goal, either coopWith or hunt, to agent. can only assign goal to a CompanionsAgent
+def my_assignGoals(state, agent, target, other=None):
     logger = logging.getLogger('StagHuntAgent')
-    if agent not in state.agents or hunter not in state.agents or not isinstance(state.hunters[agent], hagents.CompanionsAgent):
+    error = False
+    if not isinstance(state.hunters[agent], hagents.CompanionsAgent):
         logger.debug("cannot assign goal to this agent")
-    else:
-        logger.debug("cooperation between " + agent[0] + ' ' + hunter[0])
-        state.goal[agent] = {'cooperateWith': (agent, hunter)}  # assumes only coop with one at a time for now
-        logger.debug("finished\n\n")
+        error = True
+    for this_agent in (agent, target, other):
+        if this_agent and this_agent not in state.agents:
+            logger.debug(this_agent, "not in state")
+            error = True
+    if not error:
+        if other:
+            state.goal[agent] = {'cooperateWith': (agent, other, target)}
+            print('assign coop goal', agent, 'with', other, 'on', target)
+        else:
+            state.goal[agent] = {'hunt': (agent, target)}
+            print('assign hunt goal', agent, 'on', target)
 
 
 # def pickMap(state, condition):
@@ -351,10 +360,10 @@ def my_setupAgents(state, agents):
     for i in range(0, agents[1]):
         state.agents.append((f's{i + 1}', 'stag'))
     for i in range(0, agents[2]):   # companions "normal" hunter
-        hunter = hagents.Hunter(i + 1, state)
+        hunter = hagents.CompanionsAgent(i + 1, state)
         hunter.setup()
     for j in range(0, agents[3]):   # A* hunter
-        hunter = hagents.Hunter(j + i + 1, state)
+        hunter = hagents.AStarAgent(j + i + 2, state)
         hunter.setup()
     # place all agents in random locations
     state.loc = {}
@@ -373,30 +382,6 @@ def my_setupAgents(state, agents):
                 if done:
                     state.loc[agent] = (x, y)
                     print(x, y)
-
-
-# returns whether there is a prey within n legal moves of a hunter's location on a given board using bfs
-# def my_within_n_moves(state, hunter_loc, n):
-#     depth = 0
-#     queue = [hunter_loc]
-#     visited = []
-#     while depth < n and queue:
-#         curr = queue.pop()
-#         if curr in state.loc.values():
-#             key = next(key for key, value in state.loc.items() if value == curr)    # lookup agent by loc
-#             if key[1] != 'hunter':
-#                 return True     # prey found within n moves
-#         visited.append(curr)
-#         # up, down, left, right
-#         poss_moves = ((curr[0], curr[1]+1), (curr[0], curr[1]-1), (curr[0]+1, curr[1]), (curr[0]-1, curr[1]))
-#         for move in poss_moves:
-#             if 0 <= move[0] < len(state.map[0]) and 0 <= move[1] < len(state.map) \
-#                     and state.map[move[1]][move[0]] != 0 and move not in visited:       # add move to queue if legal
-#                 queue.append(move)
-#         depth += 1
-#     if not queue:
-#         raise ValueError
-#     return False
 
 
 
@@ -441,10 +426,17 @@ def my_make_game(agents):
 
 
 def my_run_one(state, randGoals=True):
+    logger = logging.getLogger('StagHuntAgent')
+    noGoal = False
     if randGoals:
         my_assignRandomGoals(state)
-    states, plans = simulate_state(state, 1)
-    return states[1]    # next state
+    for hunter in state.hunters:
+        if not hunter in state.goal:
+            logger.debug(hunter + ' has no goal assigned')
+            noGoal = True
+    if not noGoal:
+        states, plans = simulate_state(state, 1)
+        return states[1]    # next state
 
 
 # def decide(state):

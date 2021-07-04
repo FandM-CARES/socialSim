@@ -25,6 +25,7 @@ class CompanionsAgent(Hunter):
 
     def __init__(self, num, state):
         Hunter.__init__(self, num, state)
+        self.type = 'Companions'
 
     def __repr__(self):
         return self.name + '[Comp]'
@@ -34,6 +35,7 @@ class AStarAgent(Hunter):
 
     def __init__(self, num, state):
         Hunter.__init__(self, num, state)
+        self.type = 'A*'
 
     def __repr__(self):
         return self.name + '[A*]'
@@ -56,9 +58,12 @@ class AStarAgent(Hunter):
                     coopWith = other
         if best[1] < 20:  # arbitrary distance
             if best[0][1] == 'stag':
-                self.state.goal[self.name] = {'cooperateWith': (self.name, coopWith)}
+                self.state.goal[self.name] = {'cooperateWith': (self.name, coopWith, best[0])}
+                print('A*', self.name, 'coop goal with', coopWith, 'on', best[0])
             else:
-                # FIXME: need way to specify prey in planning w/o cooperating
+                self.state.goal[self.name] = {'hunt': (self.name, best[0])}
+                print('A*', self.name, 'hunt goal on', best[0])
+
         else:
             return False
 
