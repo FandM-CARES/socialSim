@@ -7,15 +7,17 @@ INFINITY = sys.maxsize
 # general start state with all the necessary fields, and some necessary values
 def get_start_state():
 	state = pyhop.State('init')
-	state.agents = [('r1', 'rabbit'), ('r2', 'rabbit'), ('s1', 'stag'), ('s2', 'stag'), ('s3', 'stag'), ('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')]
+	state.agents = [('r1', 'rabbit'), ('r2', 'rabbit'), ('s1', 'stag'), ('s2', 'stag'), ('s3', 'stag'), ('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')]	# is actually cleared at creation of game
+	state.hunters = {}	# hunter name: corresponding hunter object
 	state.loc = {}		# agent: (x,y)
 	state.map = None
 	state.target = {}
 	state.goal = {}
 	state.assumes = {}
 	state.captured = []
-	state.score = {('h1', 'hunter'):0, ('h2', 'hunter'):0, ('h3', 'hunter'):0}
+	state.score = {}
 	state.ready = []
+	state.step = 0
 	return state
 
 
@@ -103,22 +105,27 @@ def survive(state, prey):
 		return False
 
 
-# cooperate or not
+# check if agent has coopWith goal (stag)
 def cooperate(state, agent):
-	# TODO: need better logic here
-	if agent in state.goal and 'cooperateWith' in state.goal[agent]:
+	if agent in state.goal and 'cooperateWith' in state.goal[agent] and state.goal[agent]['cooperateWith'][0] == agent:
 		g = state.goal[agent]['cooperateWith']
-		if g[0] == agent:
-			return [('pick_coop_target', agent, g[1])]
-		else:
-			return False
+		print('cooperate with', agent, g[1])
+		state.target[agent] = g[2]
+		print('target is', state.target[agent])
+		return [('pick_coop_target', agent, g[1])]
 	else:
 		return False
 
-
+# check if agent has hunt goal (rabbit)
 def betray(state, agent):
-	print('betray', agent)
-	return [('pick_closest_target', agent)]
+	if agent in state.goal and 'hunt' in state.goal[agent]:
+		print('betray', agent)
+		state.target[agent] = state.goal[agent]['hunt'][1]
+		print('target is', state.target[agent])
+		return [('pick_closest_target', agent)]
+	else:
+		print(agent, 'has no goal')
+		return False
 
 
 # move towards
@@ -269,51 +276,19 @@ def wait_one(state, agent):
 
 
 def pick_closest_target(state, agent):
-	best = ('', INFINITY)
-	for ptarget in state.agents:
-		if hunts(agent, ptarget) and ptarget[1] == 'rabbit' and ptarget not in state.captured and distance(state, agent, ptarget) < best[1]:
-			best = (ptarget, distance(state, agent, ptarget))
-	if best[1] < 20: # arbitrary distance
-		print('closest target', agent, best)
-		state.target[agent] = best[0]
-		if agent not in state.goal:
-			state.goal[agent] = {}
-		# else:
-		# 	state.goal[agent]= {'hunt':(agent, best[0])}
-		state.goal[agent]['hunt'] = (agent, best[0])
-		# picked a target, hunter is now locked and loaded
-		if agent not in state.ready:
-			state.ready.append(agent)
-		if best[1] == 0:
-			print('****', agent, best[0], '****')
-			print(state.loc)
-			#sys.exit(1)
-		return state
-	else:
-		return False
+	if agent not in state.ready:
+		state.ready.append(agent)
+	dist = distance(state, agent, state.target[agent])
+	if dist == 0:
+		print('****', agent, state.target[agent], '****')
+		print(state.loc)
+	return state
 
 
 def pick_coop_target(state, agent, other):
-	print('PICK COOP', agent, other)
-	best = ('', INFINITY)
-	for ptarget in state.agents:
-		if hunts(agent, ptarget) and ptarget[1] == 'stag' and ptarget not in state.captured:
-			# returns infinity if agent not in state i think
-			d = distance(state, agent, ptarget) + distance(state, other, ptarget)
-			if d < best[1]:
-				best = (ptarget, d)
-				print(best)	# closest stag to 2 hunters
-	if best[1] < 100: # arbitrary distance
-		state.target[agent] = best[0]
-		print('target is', best)
-		state.goal[agent]['huntWith'] = (agent, best[0], other)
-		# picked a target, hunter is now locked and loaded
-		if agent not in state.ready:
-			state.ready.append(agent)
-		return state
-	else:
-		print('**** failed to pick coop target ****')
-		return False
+	if agent not in state.ready:
+		state.ready.append(agent)
+	return state
 
 
 def step_right(state, agent):
@@ -375,7 +350,7 @@ def capture_stag(state, hunter, target):
 			print(hunters, 'caught', target, state.loc[target])
 			state.captured.append(target)
 			del state.loc[target]
-			score = int(6 / len(hunters))
+			score = int(6 / len(hunters))		# stag = 6 pts, shared b/w all hunters that captured it
 			for h in hunters:
 				state.score[h] += score
 				state.ready.remove(h)

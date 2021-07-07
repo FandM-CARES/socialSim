@@ -4,6 +4,7 @@ import random
 import pickle
 import staghunt_htn
 import print_trace as pt
+import hagents
 
 import itertools
 import logging
@@ -288,14 +289,24 @@ def my_assignRandomGoals(state, c=None):
         return len(poss_goals)
 
 
-# assigns coop goal with specific hunter
-def my_assignGoals(state, agent, hunter):
+# assigns goal, either coopWith or hunt, to agent. can only assign goal to a CompanionsAgent
+def my_assignGoals(state, agent, target, other=None):
     logger = logging.getLogger('StagHuntAgent')
-    if agent not in state.agents or hunter not in state.agents:
-        raise ValueError
-    logger.debug("cooperation between " + agent[0] + ' ' + hunter[0])
-    state.goal[agent] = {'cooperateWith': (agent, hunter)}  # assumes only coop with one at a time for now
-    logger.debug("finished\n\n")
+    error = False
+    if not isinstance(state.hunters[agent], hagents.CompanionsAgent):
+        logger.debug("cannot assign goal to this agent")
+        error = True
+    for this_agent in (agent, target, other):
+        if this_agent and this_agent not in state.agents:
+            logger.debug(this_agent, "not in state")
+            error = True
+    if not error:
+        if other:
+            state.goal[agent] = {'cooperateWith': (agent, other, target)}
+            print('assign coop goal', agent, 'with', other, 'on', target)
+        else:
+            state.goal[agent] = {'hunt': (agent, target)}
+            print('assign hunt goal', agent, 'on', target)
 
 
 # def pickMap(state, condition):
@@ -336,17 +347,24 @@ def my_rand_pickMap(state):
 
 
 # assigns number of each agent to state according to amounts in agents
-# if passed n, ensures hunters are at least n moves away from all prey
-def my_setupAgents(state, agents, n=None):
-    if agents[0] < 1 or agents[1] < 1 or agents[2] < 1:
+# agents is (rabbits, stags, companions hunters, A* hunter),
+def my_setupAgents(state, agents):
+    logger = logging.getLogger('StagHuntAgent')
+    if agents[0] < 1 or agents[1] < 1 or (agents[2] + agents[3]) < 1:
+        logger.debug("invalid number of agents")
         raise ValueError
     state.agents.clear()
+    state.score.clear()
     for i in range(0, agents[0]):
         state.agents.append((f'r{i + 1}', 'rabbit'))
     for i in range(0, agents[1]):
         state.agents.append((f's{i + 1}', 'stag'))
-    for i in range(0, agents[2]):
-        state.agents.append((f'h{i + 1}', 'hunter'))
+    for i in range(0, agents[2]):   # companions "normal" hunter
+        hunter = hagents.CompanionsAgent(i + 1, state)
+        hunter.setup()
+    for j in range(0, agents[3]):   # A* hunter
+        hunter = hagents.AStarAgent(j + i + 2, state)
+        hunter.setup()
     # place all agents in random locations
     state.loc = {}
     for agent in state.agents:
@@ -361,35 +379,9 @@ def my_setupAgents(state, agents, n=None):
                     if state.loc[other] == (x, y):
                         done = False
                         break
-                if n and agent[1] == 'hunter' and my_within_n_moves(state, (x, y), n):  # hunter not within n of a prey
-                    done = False
-                elif done:
+                if done:
                     state.loc[agent] = (x, y)
                     print(x, y)
-
-
-# returns whether there is a prey within n legal moves of a hunter's location on a given board using bfs
-def my_within_n_moves(state, hunter_loc, n):
-    depth = 0
-    queue = [hunter_loc]
-    visited = []
-    while depth < n and queue:
-        curr = queue.pop()
-        if curr in state.loc.values():
-            key = next(key for key, value in state.loc.items() if value == curr)    # lookup agent by loc
-            if key[1] != 'hunter':
-                return True     # prey found within n moves
-        visited.append(curr)
-        # up, down, left, right
-        poss_moves = ((curr[0], curr[1]+1), (curr[0], curr[1]-1), (curr[0]+1, curr[1]), (curr[0]-1, curr[1]))
-        for move in poss_moves:
-            if 0 <= move[0] < len(state.map[0]) and 0 <= move[1] < len(state.map) \
-                    and state.map[move[1]][move[0]] != 0 and move not in visited:       # add move to queue if legal
-                queue.append(move)
-        depth += 1
-    if not queue:
-        raise ValueError
-    return False
 
 
 
@@ -408,7 +400,7 @@ def my_within_n_moves(state, hunter_loc, n):
 
 
 # agents = (num rabbits, num stags, num hunters)
-# runs n number of simulations on random maps, loc, goals, and constant num agents
+# runs n number of 3-step simulations on random maps, loc, goals, and constant num agents
 def my_run_sim(agents, n, sim=False):
     logger = logging.getLogger('StagHuntAgent')
     for i in range(n):
@@ -425,21 +417,26 @@ def my_run_sim(agents, n, sim=False):
         logger.debug("finished\n\n")
 
 
-def my_make_game(agents, n=None):
+def my_make_game(agents):
     print("\n****** NEW GAME ******\n")
     state = staghunt_htn.get_start_state()
     my_rand_pickMap(state)
-    my_setupAgents(state, agents, n)
+    my_setupAgents(state, agents)
     return state
 
 
 def my_run_one(state, randGoals=True):
     logger = logging.getLogger('StagHuntAgent')
-    logger.debug("simulating state")
+    noGoal = False
     if randGoals:
         my_assignRandomGoals(state)
-    states, plans = simulate_state(state, 1)
-    return states[1]    # next state
+    for hunter in state.hunters:
+        if not hunter in state.goal:
+            logger.debug(hunter + ' has no goal assigned')
+            noGoal = True
+    if not noGoal:
+        states, plans = simulate_state(state, 1)
+        return states[1]    # next state
 
 
 # def decide(state):
@@ -525,6 +522,8 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
     plans = []
     pt.print_map(state.map, state.loc)
     for i in range(0, sim_steps):
+        state.step += 1
+        print("simulating state", state.step)
         # decisions, decisions.  to decide or not to decide
         if goal_manager:
             goal_manager(state, num_poss_goals)  # side-effects goals
@@ -543,12 +542,10 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
 
 if __name__ == '__main__':
 
-    # agents = (2, 1, 3)  # rabbits, stags, hunters
-    # n = 1
-    # my_run_sim(agents, n)
+    agents = (2, 1, 3)  # rabbits, stags, hunters
+    n = 1
+    my_run_sim(agents, n)
 
-    agents = (2, 2, 3)
-    state = my_make_game(agents)
-    # state2 = my_make_game(agents, 3)
-    pt.print_map(state.map, state.loc)
-    # pt.print_map(state2.map, state2.loc)
+    # agents = (2, 2, 3)
+    # state = my_make_game(agents)
+    # pt.print_map(state.map, state.loc)
