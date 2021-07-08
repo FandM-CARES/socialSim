@@ -84,7 +84,7 @@ def plan(state, hunter, goal):
 	p = a_star_search(state, hunter, goal, [step_up, step_down, step_left, step_right])
 	if p:
 		print('-plan to', p[0].__name__)
-		return [(p[0].__name__, hunter)]
+		return [(p[0].__name__, hunter)]	# first (next) step in path
 	print("no plan", hunter, goal)
 	return False
 
@@ -278,10 +278,10 @@ def wait_one(state, agent):
 def pick_closest_target(state, agent):
 	if agent not in state.ready:
 		state.ready.append(agent)
-	dist = distance(state, agent, state.target[agent])
-	if dist == 0:
-		print('****', agent, state.target[agent], '****')
-		print(state.loc)
+	# dist = distance(state, agent, state.target[agent])
+	# if dist == 0:
+	# 	print('****', agent, state.target[agent], '****')
+	# 	print(state.loc)
 	return state
 
 

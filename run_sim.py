@@ -298,7 +298,7 @@ def my_assignGoals(state, agent, target, other=None):
         error = True
     for this_agent in (agent, target, other):
         if this_agent and this_agent not in state.agents:
-            logger.debug(this_agent, "not in state")
+            logger.debug(str(this_agent), "not in state")
             error = True
     if not error:
         if other:
@@ -382,6 +382,7 @@ def my_setupAgents(state, agents):
                 if done:
                     state.loc[agent] = (x, y)
                     print(x, y)
+    pt.print_map(state.map, state.loc)
 
 
 
@@ -431,12 +432,13 @@ def my_run_one(state, randGoals=True):
     if randGoals:
         my_assignRandomGoals(state)
     for hunter in state.hunters:
-        if not hunter in state.goal:
-            logger.debug(hunter + ' has no goal assigned')
+        if hunter not in state.goal:
+            logger.debug(str(hunter) + ' has no goal assigned')
             noGoal = True
-    if not noGoal:
-        states, plans = simulate_state(state, 1)
-        return states[1]    # next state
+    if noGoal:
+        return False
+    states, plans = simulate_state(state, 1)
+    return states[1]    # next state
 
 
 # def decide(state):
@@ -533,6 +535,7 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
         pt.print_plan(plan)
         state = deepcopy(state)
         for action in plan:
+            print(action[0][0])   # TODO
             fn = planner.operators[action[0][0]]
             fn(state, *action[0][1:])
         pt.print_map(state.map, state.loc)

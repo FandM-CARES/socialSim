@@ -10,8 +10,11 @@
 (isa hunter3 Hunter)
 (distanceBetween hunter1 hunter2 2)
 
+(isa rabbit1 Rabbit)
+(isa rabbit2 Rabbit)
+
 (isa Stag Collection)
 (genls Stag Animal)
-
 (isa stag1 Stag)
+(isa stag2 Stag)
 

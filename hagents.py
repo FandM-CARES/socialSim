@@ -45,7 +45,7 @@ class AStarAgent(Hunter):
         for ptarget in self.state.agents:
             if ptarget[1] != 'hunter' and ptarget not in self.state.captured:
                 if ptarget[1] == 'rabbit':
-                    d = self.distance(ptarget) + 2      # willing to go 2 less steps for less pts
+                    d = self.distance(ptarget) + 1      # willing to go 1 less steps for less pts
                     other = None
                 elif ptarget[1] == 'stag':
                     other, otherDist = self.closestAgent(ptarget)
