@@ -25,9 +25,10 @@ class StagHuntAgent(Pythonian):
         else:
             hunter = StagHuntAgent.get_agent(hunter)
             target = StagHuntAgent.get_agent(target)
-            coopWith = kqml.convert_to_boolean(coopWith)
-            if coopWith:
+            if kqml.convert_to_boolean(coopWith):
                 coopWith = StagHuntAgent.get_agent(coopWith)
+            else:
+                coopWith = False
             if hunter and target:
                 run_sim.my_assignGoals(StagHuntAgent.state, hunter, target, coopWith)
 
@@ -64,10 +65,11 @@ class StagHuntAgent(Pythonian):
         if not StagHuntAgent.state:
             logger.debug("no game made")
         else:
-            rand = kqml.convert_to_boolean(randGoals)
-            StagHuntAgent.state = run_sim.my_run_one(StagHuntAgent.state, rand)
-            StagHuntAgent.state.goal.clear()
-            StagHuntAgent.game_end()
+            next = run_sim.my_run_one(StagHuntAgent.state, kqml.convert_to_boolean(randGoals))
+            if next:
+                next.goal.clear()
+                StagHuntAgent.state = next
+                StagHuntAgent.game_end()
 
     @staticmethod
     def run_sim(agents, n):
