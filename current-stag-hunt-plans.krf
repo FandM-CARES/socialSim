@@ -1,0 +1,502 @@
+;;;; -*-  Mode: LISP; Syntax: Common-Lisp; Base: 10                          -*-
+;;;; ---------------------------------------------------------------------------
+;;;; File name: stag-hunt-plans.krf
+;;;;    System: 
+;;;;    Author: Irina Rabkina
+;;;;   Created: April 3, 2019 11:45:09
+;;;;   Purpose: 
+;;;; ---------------------------------------------------------------------------
+;;;;  $LastChangedDate: 2015-11-19 15:44:07 -0600 (Thu, 19 Nov 2015) $
+;;;;  $LastChangedBy: usher $
+;;;; ---------------------------------------------------------------------------
+
+(in-microtheory StagHuntMt)
+
+;;;(preconditionForMethod
+;;; (and
+;;;      (evalate ?numCases (CardinalityFn ?cases))
+;;;      (greatThan ?numCases ?leaveXOut)
+;;;      (evaluate ?numRounds (QuotientFn (FactorialFn ?numCases) (TimesFn (FactorialFn ?leaveXOut) (FactorialFn (DifferenceFn ?numCases ?leaveXOut)))))
+;;;      (evaluate ?splits
+;;;        (TheClosedRetrievalSetOf ?pair
+;;;          (and
+;;;               (evaluate ?random (RandomizedListFn (SetToListFn ?cases)))
+;;;               (evaluate ?test (ListToSetFn (SublistFromToFn ?random 0 ?leaveXOut))) ;;; possibly (- 1 ?leaveXOut)
+;;;               (evaluate ?train (SetDifferenceFn (ListToSetFn ?random) ?test))
+;;;               (unifies ?pair (TheList ?train ?test)))))
+;;;               
+;;;      )
+;;; (methodForAction 
+;;;  (runMinecraftExperiment ?leaveXOut ?cases)
+;;;  (actionSequence
+;;;   (TheList
+;;;    ))))
+
+
+;(runStagHuntLeaveOneOut (TheSet StagHuntA-DoubleCoop StagHuntB-NoCoop StagHuntC-DoubleCoop StagHuntD-DoubleCoop StagHuntE-NoCoop StagHuntF-NoCoop StagHuntG-TripleCoop  StagHuntH-NoCoop StagHuntI-TripleCoop))
+; (doWriteKBMtToFlatFile StagHuntBookKeepingMt "qrg-file://qrg\irina\stag-hunt\results-4.krf")
+(preconditionForMethod
+ (and
+      (evaluate ?splits 
+        (TheClosedRetrievalSetOf (TheList ?train ?test ?task)
+          (and
+               (elementOf ?test ?set)
+               (evaluate ?train (SetMinusFn ?set ?test))
+               (newUniqueTask TrainAndTest ?task)
+               )))
+      (newUniqueTask SetupAllTask ?setupTask)
+      (localAgent ?agent)
+      (agendaContext ?context)
+      )
+ (methodForAction
+  (runStagHuntLeaveOneOut ?set)
+  (actionSequence
+   (TheList
+    (doAnnounce "enqueueing mt setup")
+    (doEnqueue ?agent ?setupTask
+               (setupAllMts ?set))
+    (doForEach (TheList ?train ?test ?task) ?splits
+               (actionSequence
+                (TheList
+                 (doAnnounce "enqueueing fold for test split: ~A" (?test))
+                 (doEnqueue ?agent ?task
+                            (trainAndTestStagHunt ?train (TheSet ?test))))))))))
+
+;;; train first offline then call predictions/decisions
+;;; What is the training set
+
+(preconditionForMethod
+ (and
+      ;(evaluate ?all-mts
+        ;(TheClosedRetrievalSetOf ?mts
+         
+               (ist-Information StagHuntMt (getMts ?pre ?set ?mts))
+              ; ))
+      
+      (evaluate ?caseUnionMtPairsSet
+        (TheClosedRetrievalSetOf (TheList ?mt ?caseUnionMt)
+          (and
+               (elementOf ?case ?set)
+               (elementOf ?pre (TheSet Step1 Step2 Step3 Train))
+               (caseUnion ?pre ?case ?mts ?caseUnionMt)
+               (unifies ?mt (CombinedMtFn ?pre ?case))
+      )))
+      
+     
+      
+      (localAgent ?agent)
+      ;(agendaContext ?context)
+
+      )
+ (methodForAction
+  (setupAllMts ?set)
+  (actionSequence
+   (TheList
+    (doForEach (TheList ?mt ?caseUnionMt) ?caseUnionMtPairsSet
+               (actionSequence
+                (TheList
+                 (doAnnounce "setting up mt for: ~A" (?mt))
+                 (doTell (ist-Information StagHuntBookKeepingMt (constructCaseInWM ?caseUnionMt)))
+                 (doTell (ist-Information StagHuntBookKeepingMt (copyWMCaseToKB ?caseUnionMt ?mt)))
+                 (doRecord (ist-Information StagHuntMt (genlMts ?mt StagHuntMt)))
+                 (doRecord (ist-Information ?mt (matchConstraintsMtFor ?mt StagHuntConstraintsMt)))
+                 )))
+                ))))
+
+;;; Step1 is the state of the game at step1
+;;; Train is the state of the whole game, Step1 + Step2 + Step3 + CooperationFact
+;;; Step2 is Step1 + Step2
+;;; Step3 is Step1 + Step2 + Step3
+;;; This is the CaseUnionMt, grabbing all the facts into 1 Mt
+
+;;;(preconditionForMethod
+;;; (and
+;;;      (evaluate ?caseUnionMtPairsSet
+;;;        (TheClosedRetrievalSetOf (TheList ?mt ?caseUnionMt)
+;;;          (and
+;;;               (elementOf ?case ?nameSet)
+;;;               (caseUnion ?pre ?case ?mtSet ?caseUnionMt)
+;;;               (unifies ?mt (CombinedMtFn ?pre ?case))
+;;;      ))))
+;;; (methodForAction
+;;;  (setupMts ?pre ?nameSet ?mtSet)
+;;;  (actionSequence
+;;;   (TheList
+;;;    (doForEach (TheList ?mt ?caseUnionMt) ?caseUnionMtPairsSet
+;;;               (actionSequence
+;;;                (TheList
+;;;                 (doTell (ist-Information StagHuntBookKeepingMt (constructCaseInWM ?caseUnionMt)))
+;;;                 (doTell (ist-Information StagHuntBookKeepingMt (copyWMCaseToKB ?caseUnionMt ?mt)))
+;;;                 (doRecord (ist-Information StagHuntMt (genlMts ?mt StagHuntMt)))
+;;;                 (doRecord (ist-Information ?mt (matchConstraintsMtFor ?mt StagHuntConstraintsMt)))
+;;;                 )))
+;;;    
+;;;    ;(doPauseAgenda) ;;; TODO: REMOVE ME
+;;;
+;;;    ))))
+                
+                
+
+;;;(runStagHuntFold (TheSet StagHuntB-NoCoop StagHuntC-DoubleCoop StagHuntD-DoubleCoop StagHuntE-NoCoop StagHuntF-NoCoop StagHuntG-TripleCoop  StagHuntH-NoCoop StagHuntI-TripleCoop) (TheSet StagHuntA-DoubleCoop))
+;;;(preconditionForMethod
+;;; (and
+;;;
+;;;      (localAgent ?local-agent)
+;;;      (agendaContext ?context)
+;;;
+;;;      (newUniqueTask Step1 ?step1-task)
+;;;      (newUniqueTask Step2 ?step2-task)
+;;;      (newUniqueTask Step3 ?step3-task)
+;;;      )
+;;; (methodForAction 
+;;;  (runStagHuntFold ?trainSet ?testSet)
+;;;  (actionSequence
+;;;   (TheList
+;;;    
+;;;    (doRecord (ist-Information ?context (startsAfterEndingOf ?step1-task ?setup-step1-task)))
+;;;    (doRecord (ist-Information?context (startsAfterEndingOf ?step2-task ?setup-step2-task)))
+;;;    (doRecord (ist-Information?context (startsAfterEndingOf ?step3-task ?setup-step3-task)))
+;;;
+;;;    (doRecord (ist-Information ?context (startsAfterEndingOf ?step1-task ?setup-train-task)))
+;;;    (doRecord (ist-Information ?context (startsAfterEndingOf ?step2-task ?setup-train-task)))
+;;;    (doRecord (ist-Information ?context (startsAfterEndingOf ?step3-task ?setup-train-task)))
+;;;    
+;;;   
+;;;    (doAnnounce "enqueueing training for test split: ~A" (?testSet))
+;;;    (doEnqueue ?local-agent ?step3-task
+;;;               (trainAndTestStagHunt ?trainSet ?testSet))
+;;;    ))))
+
+
+
+
+(preconditionForMethod
+ (and
+      ;;; gather training-mts
+      (evaluate ?trainMts
+        (TheClosedRetrievalSetOf ?mt
+          (and
+               (elementOf ?case ?trainSet)
+               (unifies ?mt (CombinedMtFn Train ?case)))))
+
+;;; First thing it will do is get all of the mts in the training set. Tells us which scenarios to use, getting the mts that correspond to
+;;; those scenarios. Reusing CombinedmtFn Train... specifically want the training
+      
+      ;;; gather testing-mts
+      (evaluate ?testMts
+        (TheClosedRetrievalSetOf ?mt
+          (and
+               (elementOf ?case ?testSet)
+               (elementOf ?pre (TheSet Step1 Step2 Step3))
+               (unifies ?mt (CombinedMtFn ?pre ?case)))))
+
+;;; Testing at step 1, 2, and 3
+;;; gather all for step 1, 2, and 3
+;;; TestMts should have 3 cases because the test set has 1 scenario in it, but it also has the step1, step2, and step3 for that scenario
+
+      ;;; set up testing
+      (evaluate ?testList (SetToListFn ?testMts))
+      (unifies ?gpool (StagHuntGpoolMt ?trainSet ?testSet))
+ 
+;;; Changing the set to a list
+;;; Creates a generalization pool... creating a separate one for each of the train and test examples because we do not want them to mix
+;;; Do not want a test example in the train set
+
+      (evaluate ?pairs
+        (MapFunctionOverList
+         (FunctionToArg 2
+                        (Kappa (?example ?pair)
+                               (and (newUniqueTask TestExample ?test-task)
+                                    (unifies ?pair (TheList ?example ?test-task)))))
+         ?testList))
+      
+      (localAgent ?local-agent)
+      (agendaContext ?context)
+      )
+;;; Creating a test for the agenda that goes with our testing
+;;; MapFunctionOverList, for every example and pair create a new task and create a pair that is the example and the test task
+;;; Once we have the pairs, it will grab the agent and the context for the agenda
+
+      
+ (methodForAction
+  (trainAndTestStagHunt ?trainSet ?testSet)
+  (actionSequence
+   (TheList
+    ;;; train
+    (doAnnounce "training for ~A" (?testSet))
+    ;(doRecord (ist-Information StagHuntBookKeepingMt (gpoolAssimilationThreshold ?gpool 0.5))) ;;; TODO: maybe change me?
+    (doForEach ?train ?trainMts
+               (doTell (sageSelectAndGeneralize ?train ?gpool)))
+
+;;; Then does the training
+;;; For every example in the training set, aka all training mts... it does a sageselectandgeneralize
+;;; sageselectandgeneralize makes a generalization for each case
+
+;;; If retrieved a case that is close enough, where the similarity is above the generalization threshold, it is generalizable
+;;; otherwise add another individual example to the queue... things that are infrequent fall away
+;;; gpoolAssimilationThreshold how similar they need to be in order to be generalized 0.5
+
+;;; doForEach for each training example in the training set do the sageselectandgeneralize
+;;; it takes an example and puts it in the gpool... in the kb
+
+;;; This is the plan that does all of the work, takes a training set and a test set
+;;; In the leave one out ex, the trianing set is the 9 scenarios and the testing is the one scenario to be tested on
+    
+    
+    ;;; MAC/FAC retrieve the highest similarity
+    
+    ;;; plan tests
+    (doRecord (ist-Information StagHuntBookKeepingMt (gpoolAssimilationThreshold ?gpool 0.000000000001))) ;;; retrieval shouldn't care about threshold 
+    (doForEach (TheList ?example ?task) ?pairs
+                 (doEnqueue ?local-agent ?task
+                            (testStagHunt ?example ?gpool)))))
+  ))
+  
+;;; doForEach for each test example step1, step2, and step3... going to test them by putting them on the agenda, in the queue then test
+;;; train on this set... do the testing on the fly
+;;; each game is already on file... training on the same thing but the tests/experiements are different
+
+;;; If retrieved a case that is close enough, where the similarity is above the generalization threshold, it is generalizable
+;;; otherwise add another individual example to the queue... things that are infrequent fall away
+;;; gpoolAssimilationThreshold how similar they need to be in order to be generalized
+
+
+(preconditionForMethod
+ (and
+      (reverseCIsAllowed (sageSelect ?example ?gpool ?target ?mapping))
+      (evaluate ?coopCis
+        (TheClosedRetrievalSetOf ?coopCi
+          (and
+               (reverseCandidateInferenceOf ?ci ?mapping)
+               (candidateInferenceContent ?ci ?coopCi)
+               (containsPattern (cooperatingParticipants ?coop ?agent) ?coopCi)
+               )))
+      (evaluate ?movementCis
+        (TheClosedRetrievalSetOf ?movementCi
+          (and
+               (reverseCandidateInferenceOf ?ci ?mapping)
+               (candidateInferenceContent ?ci ?movementCi)
+               (movementInference ?movementCi))))
+      
+      )
+      
+ (methodForAction
+  (testStagHunt ?example ?gpool)
+  (actionSequence
+   (TheList
+    (doAnnounce "testing ~A" (?example))
+    (doRecord (ist-Information StagHuntBookKeepingMt (coopCis ?example ?gpool ?coopCis ?mapping)))
+    (doRecord (ist-Information StagHuntBookKeepingMt (movementCis ?example ?gpool ?movementCis ?mapping)))
+    ))))
+
+;;; Takes an example... step1, or step2, or step3 in the pool we are testing against
+;;; does sageselect... takes an exmaple, takes the gpool, and returns what the most similar thing is and the sme mapping to the similar thing
+;;; returns the thing it retrieves and the mapping to the thing it retrieved
+
+;;; makes candidate inferences... agent a and agent b are cooperating
+;;; reverse candidate inference is the thing it retrieved to the example
+;;; look through all inferences and check if there is a cooperation in there
+;;; grabs ci about movement
+;;; records the inference that it made
+
+
+;;; getMts
+(<== (getMts ?prefix ?set ?mts)
+     (evaluate ?mts
+       (TheClosedRetrievalSetOf ?mt
+         (and
+              (elementOf ?example ?set)
+              (caseExists ?prefix ?example ?mt)))))
+
+;;; caseUnion
+;;; with coop
+(<== (caseUnion Train ?mt ?mtSet ?caseUnionMt)
+     (elementOf (CoopMtFn ?mt) ?mtSet)
+     (elementOf (Step1MtFn ?mt) ?mtSet)
+     (elementOf (Step2MtFn ?mt) ?mtSet)
+     (elementOf (Step3MtFn ?mt) ?mtSet)
+     (unifies ?caseUnionMt (CaseUnionFn (KBCaseFn (Step1MtFn ?mt))
+                                        (KBCaseFn (Step2MtFn ?mt))
+                                        (KBCaseFn (Step3MtFn ?mt))
+                                        (KBCaseFn (CoopMtFn ?mt)))))
+              
+             
+
+;;; train no coop
+(<== (caseUnion Train ?mt ?mtSet ?caseUnionMt)
+     (uninferredSentence (elementOf (CoopMtFn ?mt) ?mtSet))
+     (elementOf (Step1MtFn ?mt) ?mtSet)
+     (elementOf (Step2MtFn ?mt) ?mtSet)
+     (elementOf (Step3MtFn ?mt) ?mtSet)
+     (unifies ?caseUnionMt (CaseUnionFn (KBCaseFn (Step1MtFn ?mt))
+                                        (KBCaseFn (Step2MtFn ?mt))
+                                        (KBCaseFn (Step3MtFn ?mt)))))
+
+;;; step1
+(<== (caseUnion Step1 ?mt ?mtSet ?caseUnionMt)
+     (elementOf (Step1MtFn ?mt) ?mtSet)
+     (unifies ?caseUnionMt (Step1MtFn ?mt)))
+
+;;; step2
+(<== (caseUnion Step2 ?mt ?mtSet ?caseUnionMt)
+     (elementOf (Step1MtFn ?mt) ?mtSet)
+     (elementOf (Step2MtFn ?mt) ?mtSet)
+     (unifies ?caseUnionMt (CaseUnionFn (KBCaseFn (Step1MtFn ?mt))
+                                        (KBCaseFn (Step2MtFn ?mt)))))
+
+;;; step3
+(<== (caseUnion Step3 ?mt ?mtSet ?caseUnionMt)
+     (elementOf (Step1MtFn ?mt) ?mtSet)
+     (elementOf (Step2MtFn ?mt) ?mtSet)
+     (elementOf (Step3MtFn ?mt) ?mtSet)
+     (unifies ?caseUnionMt (CaseUnionFn (KBCaseFn (Step1MtFn ?mt))
+                                        (KBCaseFn (Step2MtFn ?mt))
+                                        (KBCaseFn (Step3MtFn ?mt)))))
+
+;;; caseExists
+;;; step1
+(<== (caseExists Step1 ?example ?mt)
+     (unifies ?mt (Step1MtFn ?example))
+     (ist-Information ?mt ?fact))
+
+;;; step2
+(<== (caseExists Step2 ?example ?mt)
+     (unifies ?mt (Step2MtFn ?example))
+     (ist-Information ?mt ?fact))
+
+;;; step3
+(<== (caseExists Step3 ?example ?mt)
+     (unifies ?mt (Step3MtFn ?example))
+     (ist-Information ?mt ?fact))
+
+;;; coop
+(<== (caseExists Coop ?example ?mt)
+     (unifies ?mt (CoopMtFn ?example))
+     (ist-Information ?mt ?fact))
+
+;;; correctCis
+;;;(<== (correctCis ?coopCis ?example t)
+;;;     (unifies ?example (CombinedMtFn ?step ?case))
+;;;     (evaluate ?coopAgents
+;;;       (TheClosedRetrievalSetOf ?agent
+;;;         (and (ist-Information (CoopMtFn ?case) ?fact)
+;;;              (unifies ?fact (cooperatingParticipants ?coop ?agent)))))
+;;;     (evaluate ?ciAgents
+;;;       (TheClosedRetrievalSetOf ?agent
+;;;         (and (elementOf ?ci ?coopCis)
+;;;              (unifies ?ci (cooperatingParticipants ?coop ?agent)))))
+;;;     (evaluate ?difAgentsCis
+;;;       (SetDifferenceFn ?ciAgents ?coopAgents))
+;;;     (evaluate ?difAgentsTruths
+;;;       (SetDifferenceFn ?coopAgents ?ciAgents))
+;;;     (unifies (TheSet) ?difAgentsCis)
+;;;     (unifies (TheSet) ?difAgentsTruths)
+;;;     )
+;;;
+;;;(<== (correctCis ?coopCis ?example nil)
+;;;     (unifies ?example (CombinedMtFn ?step ?case))
+;;;     (evaluate ?coopAgents
+;;;       (TheClosedRetrievalSetOf ?agent
+;;;         (and (ist-Information (CoopMtFn ?case) ?fact)
+;;;              (unifies ?fact (cooperatingParticipants ?coop ?agent)))))
+;;;     (evaluate ?ciAgents
+;;;       (TheClosedRetrievalSetOf ?agent
+;;;         (and (elementOf ?ci ?coopCis)
+;;;              (unifies ?ci (cooperatingParticipants ?coop ?agent)))))
+;;;     (evaluate ?difAgentsCis
+;;;       (SetDifferenceFn ?ciAgents ?coopAgents))
+;;;     (evaluate ?difAgentsTruths
+;;;       (SetDifferenceFn ?coopAgents ?ciAgents))
+;;;     (uninferredSentence (unifies (TheSet) ?difAgentsCis))
+;;;     )
+;;;
+;;;(<== (correctCis ?coopCis ?example nil)
+;;;    (unifies ?example (CombinedMtFn ?step ?case))
+;;;     (evaluate ?coopAgents
+;;;       (TheClosedRetrievalSetOf ?agent
+;;;         (and (ist-Information (CoopMtFn ?case) ?fact)
+;;;              (unifies ?fact (cooperatingParticipants ?coop ?agent)))))
+;;;     (evaluate ?ciAgents
+;;;       (TheClosedRetrievalSetOf ?agent
+;;;         (and (elementOf ?ci ?coopCis)
+;;;              (unifies ?ci (cooperatingParticipants ?coop ?agent)))))
+;;;     (evaluate ?difAgentsCis
+;;;       (SetDifferenceFn ?ciAgents ?coopAgents))
+;;;     (evaluate ?difAgentsTruths
+;;;       (SetDifferenceFn ?coopAgents ?ciAgents))
+;;;     (uninferredSentence (unifies (TheSet) ?difAgentsTruths))
+;;;     )
+
+
+;;; movementInference
+(<== (movementInference ?ci)
+     (containsPattern (closer ?agenta ?agentb) ?ci))
+
+(<== (movementInference ?ci)
+     (containsPattern (farther ?agenta ?agentb) ?ci))
+
+(<== (movementInference ?ci)
+     (containsPattern (sameDistance ?agenta ?agentb) ?ci))
+
+;;; movementCisCorrect
+(<== (movementCisCorrect ?case ?predictionStep ?numCorrect ?possibleCorrect)
+     (unifies ?case (CombinedMtFn ?step ?scenario))
+     (unifies ?fullCase (CombinedMtFn Train ?scenario))
+     (ist-Information StagHuntBookKeepingMt (movementCis ?case ?gpool ?cis ?mapping))
+     (evaluate ?possibleCorrect (TimesFn 2 (CardinalityFn ;; 2 because there are two predictions per ci
+                                            (TheClosedRetrievalSetOf ?ci
+                                              (and
+                                                   (elementOf ?ci ?cis)
+                                                   (unifies ?ci (causes-PropProp (and (holdsIn (AnalogySkolemFn ?predictionStep) ?fact1)
+                                                                                      (holdsIn (AnalogySkolemFn ?predictionStep) ?fact2))
+                                                                      ?effect)))))))
+
+     (evaluate ?numCorrect
+       (CardinalityFn
+        (TheClosedRetrievalSetOf (TheList ?ci ?part)
+          (and
+               (elementOf ?ci ?cis)
+               (correctPart ?ci ?fullCase ?predictionStep ?part))))))
+              
+                                                           
+    
+(<== (correctPart ?ci ?fullCase ?predictionStep ?part)
+     (unifies ?ci (causes-PropProp (and (holdsIn (AnalogySkolemFn ?predictionStep) (?pred ?agent1 ?agent2))
+                                        (holdsIn (AnalogySkolemFn ?predictionStep) ?fact2))
+                                   ?effect))
+     (ist-Information ?fullCase (causes-PropProp (and (holdsIn ?predictionStep (?pred ?agent1 ?agent2))
+                                                      (holdsIn ?predictionStep ?fact3))
+                                                 ?some-effect))
+     (unifies ?part (?pred ?agent1 ?agent2)))
+
+(<== (correctPart ?ci ?fullCase ?predictionStep ?part)
+     (unifies ?ci (causes-PropProp (and (holdsIn (AnalogySkolemFn ?predictionStep) ?fact1)
+                                        (holdsIn (AnalogySkolemFn ?predictionStep) (?pred ?agent1 ?agent2)))
+                                   ?effect))
+     (ist-Information ?fullCase (causes-PropProp (and (holdsIn ?predictionStep ?fact2)
+                                                      (holdsIn ?predictionStep (?pred ?agent1 ?agent2)))
+                                                 ?some-effect))
+     (unifies ?part (?pred ?agent1 ?agent2)))
+
+(<== (correctPart ?ci ?fullCase ?predictionStep ?part)
+     (unifies ?ci (causes-PropProp (and (holdsIn (AnalogySkolemFn ?predictionStep) ?fact1)
+                                        (holdsIn (AnalogySkolemFn ?predictionStep) (?pred ?agent1)))
+                                   ?effect))
+     (ist-Information ?fullCase (causes-PropProp (and (holdsIn ?predictionStep ?fact2)
+                                                      (holdsIn ?predictionStep (?pred ?agent1)))
+                                                 ?some-effect))
+     (unifies ?part (?pred ?agent1)))
+
+(<== (correctPart ?ci ?fullCase ?predictionStep ?part)
+     (unifies ?ci (causes-PropProp (and (holdsIn (AnalogySkolemFn ?predictionStep) (?pred ?agent1))
+                                        (holdsIn (AnalogySkolemFn ?predictionStep) ?fact2))
+                                   ?effect))
+     (ist-Information ?fullCase (causes-PropProp (and (holdsIn ?predictionStep (?pred ?agent1))
+                                                      (holdsIn ?predictionStep ?fact3))
+                                                 ?some-effect))
+     (unifies ?part (?pred ?agent1)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; End of Code
