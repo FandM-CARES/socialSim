@@ -1,0 +1,44 @@
+(in-microtheory ModifyGamesMt)
+
+;;; remove all poss agents from all games
+(preconditionForMethod
+ (and
+
+      )
+ (methodForAction
+  (modifyGame)          ;; 0 args??
+  (actionSequence
+   (TheList
+        (genlMt ?game StagHuntMt)
+        (removeAgentFromGame ?agent ?game)
+    ))))
+
+
+;;; remove ?agent from StagHuntX game
+(preconditionForMethod
+ (and
+
+      )
+ (methodForAction
+  (removeAgentFromGame ?agent ?game)
+  (actionSequence
+   (TheList
+        ;;; remove ?agent in (StepXMtFn ?game) and (CoopMtFn ?game)
+        ;;; what's going on with after ;;end of code;; in step 3? how would you find if agent i in nested arg?
+    ))))
+
+
+(preconditionForMethod
+ (and
+               
+      )
+ (methodForAction
+  (removeAgentFromStep ?agent ?step)
+  (actionSequence
+   (TheList
+    (doWriteFactToFlatFile (in-microtheory ?case) ?url)
+    (doWriteFactsToFlatFile ?relation-facts ?url)
+    (doTellAllInContext ?relation-facts ?case) ;;; necessary for next step
+
+    ))))
+
