@@ -1,44 +1,64 @@
 (in-microtheory ModifyGamesMt)
 
-;;; remove all poss agents from all games
-(preconditionForMethod
- (and
-
-      )
- (methodForAction
-  (modifyGame)          ;; 0 args??
-  (actionSequence
-   (TheList
-        (genlMt ?game StagHuntMt)
-        (removeAgentFromGame ?agent ?game)
-    ))))
-
-
 ;;; remove ?agent from StagHuntX game
 (preconditionForMethod
  (and
-
+    (genlMt ?game StagHuntMt)
+    (isHunter ?agent)
       )
  (methodForAction
   (removeAgentFromGame ?agent ?game)
   (actionSequence
    (TheList
-        ;;; remove ?agent in (StepXMtFn ?game) and (CoopMtFn ?game)
-        ;;; what's going on with after ;;end of code;; in step 3? how would you find if agent i in nested arg?
+        (makeModifiedStep ?agent (Step1MtFn ?game))
+        (makeModifiedStep ?agent (Step1MtFn ?game))
+        (makeModifiedStep ?agent (Step1MtFn ?game))
+        (makeModifiedStep ?agent (CoopMtFn ?game))      ;;; is this the most efficient way to do this?
     ))))
 
 
 (preconditionForMethod
  (and
-               
       )
  (methodForAction
-  (removeAgentFromStep ?agent ?step)
+  (makeModifiedStep ?agent ?step)
   (actionSequence
    (TheList
-    (doWriteFactToFlatFile (in-microtheory ?case) ?url)
-    (doWriteFactsToFlatFile ?relation-facts ?url)
-    (doTellAllInContext ?relation-facts ?case) ;;; necessary for next step
-
+        (ist-Information ?step ?expression)
+        (not (containsPattern ?expression ?agent))          ;;; order??
+        (unifies ?mt (AgentRemovedStepFn ?agent ?case))
+        (doRecordMembersInContext ?mt ?expression)
     ))))
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(<== (isHunter ?agent)
+    (evaluates ?agent AgentA))
+
+(<== (isHunter ?agent)
+    (evaluates ?agent AgentB))
+
+(<== (isHunter ?agent)
+    (evaluates ?agent AgentC))          ;;; is this the most efficient way to do this?
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(isa removeAgentFromGame ComplexActionPredicate)
+(arity removeAgentFromGame 2)
+(arg1Isa removeAgentFromGame Agent-Generic)
+(arg2Isa removeAgentFromGame Microtheory)
+
+(isa removeAgentFromStep ComplexActionPredicate)
+(arity removeAgentFromStep 2)
+(arg1Isa removeAgentFromStep Agent-Generic)
+(arg2Isa removeAgentFromGame Microtheory)
+
+(isa AgentRemovedStepFn Function-Denotational)
+(arity AgentRemovedStepFn 2)
+(arg1Isa AgentRemovedStepFn Agent-Generic)
+(arg2Isa AgentRemovedStepFn Microtheory)
+(resultIsa AgentRemovedStepFn Microtheory)
