@@ -4,44 +4,33 @@
 (preconditionForMethod
  (and
     (genlMt ?game StagHuntMt)
-    (isHunter ?agent)
+    (isa ?agent Agent-Generic)
       )
  (methodForAction
   (removeAgentFromGame ?agent ?game)
   (actionSequence
    (TheList
-        (makeModifiedStep ?agent (Step1MtFn ?game))
-        (makeModifiedStep ?agent (Step1MtFn ?game))
-        (makeModifiedStep ?agent (Step1MtFn ?game))
-        (makeModifiedStep ?agent (CoopMtFn ?game))      ;;; is this the most efficient way to do this?
+        (doAgentPlan (makeModifiedStep ?agent (Step1MtFn ?game)))
+        (doAgentPlan (makeModifiedStep ?agent (Step2MtFn ?game)))
+        (doAgentPlan (makeModifiedStep ?agent (Step3MtFn ?game)))
+        (doAgentPlan (makeModifiedStep ?agent (CoopMtFn ?game)))
     ))))
 
 
 (preconditionForMethod
  (and
+    (TheClosedRetrievalSetOf ?expression
+      (and
+        (ist-Information ?step ?expression)
+        (uninferredSentence (containsPattern ?expression ?agent))))
+    (unifies ?mt (AgentRemovedStepFn ?agent ?case))
       )
  (methodForAction
   (makeModifiedStep ?agent ?step)
   (actionSequence
    (TheList
-        (ist-Information ?step ?expression)
-        (not (containsPattern ?expression ?agent))          ;;; order??
-        (unifies ?mt (AgentRemovedStepFn ?agent ?case))
-        (doRecordMembersInContext ?mt ?expression)
+        (doRecord ?mt ?expression)
     ))))
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(<== (isHunter ?agent)
-    (evaluates ?agent AgentA))
-
-(<== (isHunter ?agent)
-    (evaluates ?agent AgentB))
-
-(<== (isHunter ?agent)
-    (evaluates ?agent AgentC))          ;;; is this the most efficient way to do this?
 
 
 
