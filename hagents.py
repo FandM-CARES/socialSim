@@ -40,6 +40,7 @@ class AStarAgent(Hunter):
     def __repr__(self):
         return self.name + '[A*]'
 
+    # FIXME: add actual A* reasoning
     def getGoal(self):
         best = ('', INFINITY)
         for ptarget in self.state.agents:

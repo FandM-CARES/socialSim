@@ -535,7 +535,6 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
         pt.print_plan(plan)
         state = deepcopy(state)
         for action in plan:
-            print(action[0][0])   # TODO
             fn = planner.operators[action[0][0]]
             fn(state, *action[0][1:])
         pt.print_map(state.map, state.loc)

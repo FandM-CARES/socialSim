@@ -1,7 +1,9 @@
 from companionsKQML.pythonian import Pythonian
 import companionsKQMLModule as kqml
 import run_sim
+import stag_hunt_rerep
 import logging
+
 
 logger = logging.getLogger('StagHuntAgent')
 
@@ -9,6 +11,8 @@ class StagHuntAgent(Pythonian):
 
     name = "StagHuntAgent"
     state = None
+    game = []
+    self = None
 
     def __init__(self, **kwargs):
         super(StagHuntAgent, self).__init__(**kwargs)
@@ -17,6 +21,7 @@ class StagHuntAgent(Pythonian):
         self.add_achieve(self.run_sim, 'run_sim')
         self.add_achieve(self.set_goal, 'set_goal')
         self.add_achieve(self.set_astar_goals, 'set_astar_goals')
+        self.add_achieve(self.rerep, 'rerep')
 
     @staticmethod
     def set_goal(hunter, coopWith, target):
@@ -69,6 +74,7 @@ class StagHuntAgent(Pythonian):
             if next:
                 next.goal.clear()
                 StagHuntAgent.state = next
+                StagHuntAgent.game.append(next)
                 StagHuntAgent.game_end()
 
     @staticmethod
@@ -85,12 +91,17 @@ class StagHuntAgent(Pythonian):
                 print(hunter)
             StagHuntAgent.state = None
 
+    @staticmethod
+    def rerep():
+        stag_hunt_rerep.qualify(StagHuntAgent.game, 'GameOntologyMt', StagHuntAgent.self)
+        print('rerep done')
 
 
 if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     AGENT = StagHuntAgent.parse_command_line_args()
-    AGENT.insert_to_microtheory("session-reasoner", "(distanceBetween hunter2 hunter3 2)", "GameOntologyMt")
+    StagHuntAgent.self = AGENT
+    # AGENT.insert_to_microtheory("session-reasoner", "(distanceBetween hunter2 hunter3 2)", "GameOntologyMt")
 
 
 # (achieve :receiver StagHuntAgent :content (task :action (run_sim (2 1 3) 1)))

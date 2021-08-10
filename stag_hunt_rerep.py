@@ -270,26 +270,10 @@ def test():
 
     print('done')
 
-# def add_collector():
-#     all = pickle.load(open('C:/qrg/irina/stag-hunt/aaai2020/staghunt/all.pickle', 'rb'))
-#     dir = "C:/qrg/irina/stag-hunt/aaai2020/staghunt/flat-files/qsrs/"
-#
-#     #rerep = StagHuntRerepAgent()
-#
-#     for i, cond1 in enumerate(all):
-#         for j, cond2 in enumerate(cond1):
-#             for k, cond3 in enumerate(cond2):
-#
-#                 for c, (states, plans) in enumerate(cond3):
-#                     microtheory = f'(StagHuntMt {i} {j} {k} {c})'
-#                     file = dir + f'stag-hunt-qsrs-map-{i}-{j}-{k}-{c}.krf'
-#                     with open(file, "a+") as f:
-#                         f.write(f"\n(genlMt {microtheory} StagHuntPrelimCollectorMt)")
 
 
-    print('done')
-
-
-test()
-#insert_ground_truths_to_file()
-#add_collector()
+def qualify(game, mt, agent):
+    facts = agent.convert_to_knowledge(game)
+    for fact in facts:
+        agent.insert_to_microtheory("session-reasoner", fact, mt)
+        print('inserted', fact)
