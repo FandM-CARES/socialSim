@@ -1,35 +1,50 @@
 (in-microtheory ModifyGamesMt)
+(genlMt Session-ReasonerPlanMt ModifyGamesMt)
+(genlMt StagHuntMt ModifyGamesMt)
 
-;;; remove ?agent from StagHuntX game
+
+;;; (removeAgentFromGame (TheSet agentA agentB agentC) (TheSet StagHuntA-DoubleCoop))
+;;; (ist-Information (AgentRemovedStepFn agentA (Step1MtFn StagHuntA-DoubleCoop)) ?expression)
+
+;;; for each game in ?games, for each agent in ?agents, remove agent from game
 (preconditionForMethod
  (and
-    (genlMt ?game StagHuntMt)
-    (isa ?agent Agent-Generic)
+    (evaluate ?agent-game-pairs
+      (TheClosedRetrievalSetOf ?pair
+        (and
+            (elementOf ?agent ?agents)
+            (elementOf ?game ?games)
+            (unifies ?pair (TheList ?agent ?game)))))
       )
  (methodForAction
-  (removeAgentFromGame ?agent ?game)
+  (removeAgentFromGame ?agents ?games)
   (actionSequence
    (TheList
-        (doAgentPlan (makeModifiedStep ?agent (Step1MtFn ?game)))
-        (doAgentPlan (makeModifiedStep ?agent (Step2MtFn ?game)))
-        (doAgentPlan (makeModifiedStep ?agent (Step3MtFn ?game)))
-        (doAgentPlan (makeModifiedStep ?agent (CoopMtFn ?game)))
-    ))))
+     (doForEach (TheList ?agent ?game) ?agent-game-pairs
+        (actionSequence
+         (TheList
+            (doAgentPlan (makeModifiedStep ?agent (Step1MtFn ?game)))
+            (doAgentPlan (makeModifiedStep ?agent (Step2MtFn ?game)))
+            (doAgentPlan (makeModifiedStep ?agent (Step3MtFn ?game)))
+            (doAgentPlan (makeModifiedStep ?agent (CoopMtFn ?game)))
+    )))
+))))
 
 
 (preconditionForMethod
  (and
-    (TheClosedRetrievalSetOf ?expression
+    (evaluate ?expressions
+     (TheClosedRetrievalSetOf ?expression
       (and
         (ist-Information ?step ?expression)
-        (uninferredSentence (containsPattern ?expression ?agent))))
-    (unifies ?mt (AgentRemovedStepFn ?agent ?case))
+        (uninferredSentence (containsPattern ?agent ?expression)))))
+    (unifies ?mt (AgentRemovedStepFn ?agent ?step))
       )
  (methodForAction
   (makeModifiedStep ?agent ?step)
   (actionSequence
    (TheList
-        (doRecord ?mt ?expression)
+        (doRecordMembersInContext ?mt ?expressions)
     ))))
 
 
@@ -38,16 +53,9 @@
 
 (isa removeAgentFromGame ComplexActionPredicate)
 (arity removeAgentFromGame 2)
-(arg1Isa removeAgentFromGame Agent-Generic)
-(arg2Isa removeAgentFromGame Microtheory)
 
-(isa removeAgentFromStep ComplexActionPredicate)
-(arity removeAgentFromStep 2)
-(arg1Isa removeAgentFromStep Agent-Generic)
-(arg2Isa removeAgentFromGame Microtheory)
+(isa makeModifiedStep ComplexActionPredicate)
+(arity makeModifiedStep 2)
 
 (isa AgentRemovedStepFn Function-Denotational)
 (arity AgentRemovedStepFn 2)
-(arg1Isa AgentRemovedStepFn Agent-Generic)
-(arg2Isa AgentRemovedStepFn Microtheory)
-(resultIsa AgentRemovedStepFn Microtheory)
