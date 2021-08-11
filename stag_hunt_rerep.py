@@ -272,8 +272,7 @@ def test():
 
 
 
-def qualify(game, mt, agent):
-    facts = agent.convert_to_knowledge(game)
-    for fact in facts:
-        agent.insert_to_microtheory("session-reasoner", fact, mt)
-        print('inserted', fact)
+def qualify(game, mt):
+    rerep = StagHuntRerepAgent()
+    rerep.microtheory = mt
+    return rerep.convert_to_knowledge(game)

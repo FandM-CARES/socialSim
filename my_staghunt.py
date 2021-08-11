@@ -93,7 +93,10 @@ class StagHuntAgent(Pythonian):
 
     @staticmethod
     def rerep():
-        stag_hunt_rerep.qualify(StagHuntAgent.game, 'GameOntologyMt', StagHuntAgent.self)
+        facts = stag_hunt_rerep.qualify(StagHuntAgent.game, 'GameOntologyMt')
+        for fact in facts:
+            StagHuntAgent.self.insert_to_microtheory("session-reasoner", fact, 'GameOntologyMt')
+            print('inserted', fact)
         print('rerep done')
 
 
