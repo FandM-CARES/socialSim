@@ -64,6 +64,7 @@ class StagHuntAgent(Pythonian):
     @staticmethod
     def make_game(agents):
         StagHuntAgent.state = run_sim.my_make_game(list(map(kqml.convert_to_int, agents)))
+        StagHuntAgent.game = [StagHuntAgent.state]
 
     @staticmethod
     def run_one(randGoals):

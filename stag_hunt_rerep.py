@@ -17,7 +17,7 @@ class StagHuntRerepAgent(AOC):
         self.add_to_knowledge_converters()
         #self.add_from_knowledge_converters()
 
-        self.cost_map = {'sameLocation': 1, 'close': 3}
+        self.cost_map = {'sameSquare': 1, 'closeTo': 3}
 
     def add_to_knowledge_converters(self):
         #self.add_to_knowledge_converter("intentions", self.get_intention_facts)
@@ -25,7 +25,7 @@ class StagHuntRerepAgent(AOC):
         self.add_to_knowledge_converter("mos", self.get_path_distance_mos_facts)
         self.add_to_knowledge_converter("qtc", self.get_path_distance_qtc_facts)
         self.add_to_knowledge_converter("isas", self.get_isa_facts)
-        self.add_to_knowledge_converter("goals/assumptions", self.get_2o_goals_assumptions)
+        # self.add_to_knowledge_converter("goals/assumptions", self.get_2o_goals_assumptions)
 
     def path_distance_dfs(self, stag_map, loc1, loc2, cost=0, visited=list()):
         curr_x, curr_y = loc1
@@ -64,16 +64,21 @@ class StagHuntRerepAgent(AOC):
                     loc1 = state.loc[a1]
                     loc2 = state.loc[a2]
                     path_distance = self.path_distance_dfs(stag_map, loc1, loc2, 0, [])
-                    path_pred = 'sameLocation' if path_distance < self.cost_map['sameLocation'] else 'close' if \
-                        path_distance < self.cost_map['close'] else 'far'
+                    path_pred = 'sameSquare' if path_distance < self.cost_map['sameSquare'] else 'closeTo' if \
+                        path_distance < self.cost_map['closeTo'] else 'farFrom'
                     if a1[1] == 'hunter' and a2[1] == 'hunter':
                         path_pred = path_pred + "-Agent"
-                    fact = f"(ist-Information {self.microtheory} (observesAt {self.name} ({path_pred} {a1[0]} {a2[0]}) {i}))"
+                    if i == 0:
+                        fact = f"(holdsAtStart step1 ({path_pred} {a1[0]} {a2[0]}))"
+                    else:
+                        fact = f"(holdsAtEnd step{i} ({path_pred} {a1[0]} {a2[0]}))"
                 facts.append(fact)
-
+                print(fact)
+        print(facts)
         return facts
 
     def get_path_distance_qtc_facts(self, states):
+        print('qtc')
         stag_map = states[0].map
         agent_pairs = []
         # get agent tuples
@@ -104,13 +109,15 @@ class StagHuntRerepAgent(AOC):
                         if path_pred:
                             if a1[1] == 'hunter' and a2[1] == 'hunter':
                                 path_pred = path_pred + "-Agent"
-                            fact = f"(ist-Information {self.microtheory} (observesAt {self.name} ({path_pred} {a1[0]} {a2[0]}) {i}))"
+                            fact = f"(holdsIn step{i} ({path_pred} {a1[0]} {a2[0]}))"
                             facts.append(fact)
+                            print(fact)
                 prev_state = state
-
+        print(facts)
         return facts
 
     def get_path_distance_mos_facts(self, states):
+        print('mos')
         facts = []
         for i, state in enumerate(states):
             if i == 0:
@@ -124,10 +131,10 @@ class StagHuntRerepAgent(AOC):
 
                         path_pred = 'stationary' if loc1_curr == loc1_prev else 'moving'
 
-                        fact = f"(ist-Information {self.microtheory} (observesAt {self.name} ({path_pred} {agent[0]} ) {i}))"
+                        fact = f"(holdsIn step{i} ({path_pred} {agent[0]}))"
                         facts.append(fact)
             prev_state = state
-
+        print(facts)
         return facts
 
     def get_intention_facts(self, states):
@@ -198,7 +205,7 @@ class StagHuntRerepAgent(AOC):
     def get_isa_facts(self, states):
         facts = list()
         for agent, type in states[0].agents:
-            fact = f'(ist-Information {self.microtheory} (isa {agent} {type.capitalize()}))'
+            fact = f'(isa {agent} {type.capitalize()})'
             facts.append(fact)
         return facts
 
