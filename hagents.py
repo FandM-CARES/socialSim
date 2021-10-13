@@ -9,7 +9,8 @@ class Hunter:
         self.state = state
 
     def setup(self):
-        self.state.agents.append(self.name)
+        if self.name not in self.state.agents:
+            self.state.agents.append(self.name)
         self.state.score[self.name] = 0
         self.state.hunters[self.name] = self
 
@@ -29,6 +30,16 @@ class CompanionsAgent(Hunter):
 
     def __repr__(self):
         return self.name + '[Comp]'
+
+
+class ShumAgent(Hunter):
+
+    def __init__(self, num, state):
+        Hunter.__init__(self, num, state)
+        self.type = 'Shum'
+
+    def __repr__(self):
+        return self.name + '[Shum]'
 
 
 class AStarAgent(Hunter):

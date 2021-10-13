@@ -73,12 +73,9 @@ class StagHuntRerepAgent(AOC):
                     else:
                         fact = f"(holdsAtEnd step{i} ({path_pred} {a1[0]} {a2[0]}))"
                 facts.append(fact)
-                print(fact)
-        print(facts)
         return facts
 
     def get_path_distance_qtc_facts(self, states):
-        print('qtc')
         stag_map = states[0].map
         agent_pairs = []
         # get agent tuples
@@ -111,13 +108,10 @@ class StagHuntRerepAgent(AOC):
                                 path_pred = path_pred + "-Agent"
                             fact = f"(holdsIn step{i} ({path_pred} {a1[0]} {a2[0]}))"
                             facts.append(fact)
-                            print(fact)
                 prev_state = state
-        print(facts)
         return facts
 
     def get_path_distance_mos_facts(self, states):
-        print('mos')
         facts = []
         for i, state in enumerate(states):
             if i == 0:
@@ -134,7 +128,6 @@ class StagHuntRerepAgent(AOC):
                         fact = f"(holdsIn step{i} ({path_pred} {agent[0]}))"
                         facts.append(fact)
             prev_state = state
-        print(facts)
         return facts
 
     def get_intention_facts(self, states):

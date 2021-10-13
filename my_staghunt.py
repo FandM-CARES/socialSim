@@ -13,15 +13,18 @@ class StagHuntAgent(Pythonian):
     state = None
     game = []
     self = None
+    shum = False
 
     def __init__(self, **kwargs):
         super(StagHuntAgent, self).__init__(**kwargs)
         self.add_achieve(self.make_game, 'make_game')
+        self.add_achieve(self.make_shum_game, 'make_shum_game')
         self.add_achieve(self.run_one, 'run_one')
         self.add_achieve(self.run_sim, 'run_sim')
         self.add_achieve(self.set_goal, 'set_goal')
         self.add_achieve(self.set_astar_goals, 'set_astar_goals')
         self.add_achieve(self.rerep, 'rerep')
+        # TODO: add new
 
     @staticmethod
     def set_goal(hunter, coopWith, target):
@@ -67,6 +70,11 @@ class StagHuntAgent(Pythonian):
         StagHuntAgent.game = [StagHuntAgent.state]
 
     @staticmethod
+    def make_shum_game(game, comp_agent):
+        StagHuntAgent.state = run_sim.setup_shum_game(game.to_string(), kqml.convert_to_int(comp_agent))
+        StagHuntAgent.game = [StagHuntAgent.state]
+
+    @staticmethod
     def run_one(randGoals):
         if not StagHuntAgent.state:
             logger.debug("no game made")
@@ -77,6 +85,12 @@ class StagHuntAgent(Pythonian):
                 StagHuntAgent.state = next
                 StagHuntAgent.game.append(next)
                 StagHuntAgent.game_end()
+
+    @staticmethod
+    def run_shum_one():
+        if not StagHuntAgent.state:
+            logger.debug("no game made")
+
 
     @staticmethod
     def run_sim(agents, n):
