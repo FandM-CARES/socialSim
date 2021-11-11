@@ -116,25 +116,38 @@ maps = [[map5x5x1, map5x5x3, map5x5x5],
         [map7x7x1, map7x7x3, map7x7x5],
         [map9x9x1, map9x9x3, map9x9x5]]
 
+# rotate original 90 degrees right
 mapA = [
-    [0, 1, 1, 1, 0, 1, 0],
-    [0, 1, 0, 0, 0, 1, 0],
-    [1, 1, 1, 1, 0, 1, 1],
-    [0, 1, 0, 1, 0, 1, 0],
-    [0, 1, 1, 1, 1, 1, 0]
+    [0, 0, 1, 0, 0],
+    [1, 1, 1, 1, 1],
+    [1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1],
+    [0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1],
+    [0, 0, 1, 0, 0]
 ]
 
 shum_maps = {'A': mapA}
 
-shum_locs = {
-    'A': {('r1', 'rabbit'): (2, 0),
-          ('r2', 'rabbit'): (2, 6),
-          ('s1', 'stag'): (2, 1),
+shum_locs_0 = {
+    'A': {('r1', 'rabbit'): (0, 2),
+          ('r2', 'rabbit'): (6, 2),
+          ('s1', 'stag'): (1, 0),
           ('s2', 'stag'): (3, 3),
-          ('h1', 'hunter'): (2, 1),
-          ('h2', 'hunter'): (4, 1),
-          ('h3', 'hunter'): (4, 5)}
+          ('h1', 'hunter'): (1, 2),
+          ('h2', 'hunter'): (1, 4),
+          ('h3', 'hunter'): (5, 4)}
 }
+
+shum_locs_1 = {
+    'A': {('s1', 'stag'): (1, 0),
+          ('s2', 'stag'): (3, 3),
+          ('h1', 'hunter'): (2, 2),
+          ('h2', 'hunter'): (1, 3),
+          ('h3', 'hunter'): (4, 4)}
+}
+
+shum_locs = (shum_locs_0, shum_locs_1)
 
 
 def my_assignRandomGoals(state, c=None):
@@ -190,13 +203,14 @@ def my_rand_pickMap(state):
     state.map = maps[i][j]
 
 
-# setp up state with map with letter game and hunter comp_agent controlled by Companions
+# setup up state with map with letter game and hunter comp_agent controlled by Companions
 def setup_shum_game(game, comp_agent):
+    game = game.upper().strip()
     state = staghunt_htn.get_start_state()
-    state.map = shum_maps[game.upper()]
+    state.map = shum_maps[game]
     state.agents.clear()
     state.score.clear()
-    state.loc = shum_locs[game.upper()]
+    state.loc = shum_locs_0[game]
     state.agents = [('r1', 'rabbit'), ('r2', 'rabbit'), ('s1', 'stag'), ('s2', 'stag'), ('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')]
     for i in (1, 2, 3):
         if i == comp_agent:
@@ -269,6 +283,28 @@ def my_make_game(agents):
     my_rand_pickMap(state)
     my_setupAgents(state, agents)
     return state
+
+
+def shum_run_one(game, state):
+    logger = logging.getLogger('StagHuntAgent')
+    game = game.upper().strip()
+    for hunter in state.hunters.values():
+        if isinstance(hunter, hagents.CompanionsAgent):
+            comp_agent = hunter.name
+            break
+    if comp_agent not in state.goal:
+        logger.debug(str(comp_agent) + ' has no goal assigned')
+        return False
+    # move comp agent with reasoning
+    states, plans = simulate_shum_state(state)
+    next = states[1]
+    # move all other agents, fixed
+    for agent in state.agents:
+        if agent[1] not in ('rabbit', comp_agent):
+            shum = shum_locs[state.step]
+            next.loc[agent] = shum[game][agent]
+    pt.print_map(next.map, next.loc)
+    return next
 
 
 def my_run_one(state, randGoals=True):
@@ -350,6 +386,29 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
             fn(state, *action[0][1:])
         pt.print_map(state.map, state.loc)
         states.append(state)
+    return states, plans
+
+
+# TODO: could merge with above func
+def simulate_shum_state(state):
+    planner = pyhop.Pyhop('hippity-hop')
+    staghunt_htn.load_operators(planner)
+    print('oop')
+    staghunt_htn.load_methods(planner)
+    states = [state]
+    plans = []
+    pt.print_map(state.map, state.loc)
+    state.step += 1
+    print("simulating state", state.step)
+    print('* goals *', state.goal)
+    plan = planner.pyhop(state, [('sim_one',)], verbose=0)
+    plans.append(plan)
+    pt.print_plan(plan)
+    state = deepcopy(state)
+    for action in plan:
+        fn = planner.operators[action[0][0]]
+        fn(state, *action[0][1:])
+    states.append(state)
     return states, plans
 
 

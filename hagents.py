@@ -1,5 +1,4 @@
 import sys
-
 INFINITY = sys.maxsize
 
 class Hunter:

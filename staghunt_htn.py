@@ -60,6 +60,13 @@ def has_no_hunter(state, prey, loc):
 # methods
 ###########################################
 
+def simulate_step_forone(state):
+	for hunter in state.hunters.values():
+		if hunter.type == "Companions":
+			comp_agent = hunter.name
+	tasks = ['simulate_agent', comp_agent]  # ("name", agent)
+	tasks.append(('simulate_game',))
+	return tasks
 
 def simulate_step_forall(state):
 	tasks = []		# ("name", agent)
@@ -257,6 +264,7 @@ def wait(state, agent):
 
 def load_methods(pyhop):
 	pyhop.declare_methods('sim_all', simulate_step_forall)
+	pyhop.declare_methods('sim_one', simulate_step_forone)
 	pyhop.declare_methods('move_away_from', move_away_up, move_away_down, move_away_left, move_away_right, evade_up, evade_down, evade_left, evade_right)
 	pyhop.declare_methods('move_towards', plan)
 	pyhop.declare_methods('simulate_agent', hunt, survive, wait)

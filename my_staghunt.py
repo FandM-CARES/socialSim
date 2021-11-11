@@ -13,32 +13,37 @@ class StagHuntAgent(Pythonian):
     state = None
     game = []
     self = None
-    shum = False
+    shum = None     # if shum game, set to game letter
+    comp_agent = None
 
     def __init__(self, **kwargs):
         super(StagHuntAgent, self).__init__(**kwargs)
         self.add_achieve(self.make_game, 'make_game')
         self.add_achieve(self.make_shum_game, 'make_shum_game')
         self.add_achieve(self.run_one, 'run_one')
+        self.add_achieve(self.run_shum_one, 'run_shum_one')
         self.add_achieve(self.run_sim, 'run_sim')
         self.add_achieve(self.set_goal, 'set_goal')
         self.add_achieve(self.set_astar_goals, 'set_astar_goals')
         self.add_achieve(self.rerep, 'rerep')
-        # TODO: add new
 
     @staticmethod
     def set_goal(hunter, coopWith, target):
         if not StagHuntAgent.state:
             logger.debug("no game made")
+            return
+        name = ('h' + hunter[-1], hunter)
+        if StagHuntAgent.shum and not StagHuntAgent.state.hunters[name].type == 'Companions':
+            logger.debug("passed hunter is not companions agent")
+            return
+        hunter = StagHuntAgent.get_agent(hunter)
+        target = StagHuntAgent.get_agent(target)
+        if kqml.convert_to_boolean(coopWith):
+            coopWith = StagHuntAgent.get_agent(coopWith)
         else:
-            hunter = StagHuntAgent.get_agent(hunter)
-            target = StagHuntAgent.get_agent(target)
-            if kqml.convert_to_boolean(coopWith):
-                coopWith = StagHuntAgent.get_agent(coopWith)
-            else:
-                coopWith = False
-            if hunter and target:
-                run_sim.my_assignGoals(StagHuntAgent.state, hunter, target, coopWith)
+            coopWith = False
+        if hunter and target:
+            run_sim.my_assignGoals(StagHuntAgent.state, hunter, target, coopWith)
 
     @staticmethod
     def set_astar_goals():
@@ -47,8 +52,10 @@ class StagHuntAgent(Pythonian):
         else:
             hunters = StagHuntAgent.state.hunters.values()
             for hunter in hunters:
-                if hunter.type == 'A*':
+                if (not StagHuntAgent.shum and hunter.type == 'A*') or \
+                        (StagHuntAgent.shum and hunter.type == 'Shum'):
                     hunter.getGoal()
+
 
     @staticmethod
     def get_agent(token):
@@ -68,16 +75,21 @@ class StagHuntAgent(Pythonian):
     def make_game(agents):
         StagHuntAgent.state = run_sim.my_make_game(list(map(kqml.convert_to_int, agents)))
         StagHuntAgent.game = [StagHuntAgent.state]
+        StagHuntAgent.shum = None
+        StagHuntAgent.comp_agent = None
 
     @staticmethod
     def make_shum_game(game, comp_agent):
         StagHuntAgent.state = run_sim.setup_shum_game(game.to_string(), kqml.convert_to_int(comp_agent))
         StagHuntAgent.game = [StagHuntAgent.state]
+        StagHuntAgent.shum = game.to_string()
 
     @staticmethod
     def run_one(randGoals):
         if not StagHuntAgent.state:
             logger.debug("no game made")
+        elif StagHuntAgent.shum:
+            logger.debug("made game is shum")
         else:
             next = run_sim.my_run_one(StagHuntAgent.state, kqml.convert_to_boolean(randGoals))
             if next:
@@ -90,7 +102,16 @@ class StagHuntAgent(Pythonian):
     def run_shum_one():
         if not StagHuntAgent.state:
             logger.debug("no game made")
-
+        elif not StagHuntAgent.shum:
+            logger.debug("made game is not shum")
+        else:
+            next = run_sim.shum_run_one(StagHuntAgent.shum, StagHuntAgent.state)
+            if not next:
+                logger.debug("error in running next step")
+            next.goal.clear()
+            StagHuntAgent.state = next
+            StagHuntAgent.game.append(next)
+            StagHuntAgent.game_end()
 
     @staticmethod
     def run_sim(agents, n):
@@ -98,13 +119,14 @@ class StagHuntAgent(Pythonian):
 
     @staticmethod
     def game_end():
-        if StagHuntAgent.state.captured:
-            print('GAME END')
-            print(StagHuntAgent.state.step, 'steps taken')
-            scores = StagHuntAgent.state.score.items()
-            for hunter in scores:
-                print(hunter)
-            StagHuntAgent.state = None
+        if not StagHuntAgent.state.captured:
+            return
+        print('GAME END')
+        print(StagHuntAgent.state.step, 'steps taken')
+        scores = StagHuntAgent.state.score.items()
+        for hunter in scores:
+            print(hunter)
+        StagHuntAgent.state = None
 
     @staticmethod
     def rerep():
@@ -130,3 +152,9 @@ if __name__ == "__main__":
 # (achieve :receiver StagHuntAgent :content (task :action (set_astar_goals)))
 
 # (achieve :receiver StagHuntAgent :content (task :action (run_one nil)))
+# (achieve :receiver StagHuntAgent :content (task :action (rerep)))
+
+
+# (achieve :receiver StagHuntAgent :content (task :action (make_shum_game A 1)))
+# (achieve :receiver StagHuntAgent :content (task :action (run_shum_one)))
+
