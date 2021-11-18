@@ -393,7 +393,6 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
 def simulate_shum_state(state):
     planner = pyhop.Pyhop('hippity-hop')
     staghunt_htn.load_operators(planner)
-    print('oop')
     staghunt_htn.load_methods(planner)
     states = [state]
     plans = []

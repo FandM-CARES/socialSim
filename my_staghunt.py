@@ -32,12 +32,11 @@ class StagHuntAgent(Pythonian):
         if not StagHuntAgent.state:
             logger.debug("no game made")
             return
-        name = ('h' + hunter[-1], hunter)
-        if StagHuntAgent.shum and not StagHuntAgent.state.hunters[name].type == 'Companions':
-            logger.debug("passed hunter is not companions agent")
-            return
         hunter = StagHuntAgent.get_agent(hunter)
         target = StagHuntAgent.get_agent(target)
+        if StagHuntAgent.shum and StagHuntAgent.state.hunters[hunter].type != 'Companions':
+            logger.debug("passed hunter is not companions agent")
+            return
         if kqml.convert_to_boolean(coopWith):
             coopWith = StagHuntAgent.get_agent(coopWith)
         else:

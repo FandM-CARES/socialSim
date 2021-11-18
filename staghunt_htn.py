@@ -64,7 +64,7 @@ def simulate_step_forone(state):
 	for hunter in state.hunters.values():
 		if hunter.type == "Companions":
 			comp_agent = hunter.name
-	tasks = ['simulate_agent', comp_agent]  # ("name", agent)
+	tasks = [('simulate_agent', comp_agent)]  # ("name", agent)
 	tasks.append(('simulate_game',))
 	return tasks
 
