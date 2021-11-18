@@ -117,17 +117,67 @@ maps = [[map5x5x1, map5x5x3, map5x5x5],
         [map9x9x1, map9x9x3, map9x9x5]]
 
 # rotate original 90 degrees right
-mapA = [
-    [0, 0, 1, 0, 0],
-    [1, 1, 1, 1, 1],
-    [1, 0, 1, 0, 1],
-    [1, 0, 1, 1, 1],
-    [0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1],
-    [0, 0, 1, 0, 0]
-]
+mapA = [[0, 0, 1, 0, 0],
+        [1, 1, 1, 1, 1],
+        [1, 0, 1, 0, 1],
+        [1, 0, 1, 1, 1],
+        [0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 0]]
 
-shum_maps = {'A': mapA}
+
+mapD = [[0, 0, 1, 0, 0],
+        [1, 1, 1, 1, 1],
+        [1, 0, 1, 0, 1],
+        [0, 0, 1, 0, 1],
+        [1, 0, 1, 0, 1],
+        [1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0]]
+
+mapE = [[0, 0, 1, 0, 0],
+        [1, 1, 1, 1, 1],
+        [1, 0, 1, 0, 0],
+        [1, 1, 1, 1, 1],
+        [0, 1, 1, 0, 1],
+        [1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 0]]
+
+mapF = [[1, 0, 1, 0, 0],
+        [1, 0, 1, 1, 1],
+        [1, 0, 1, 0, 1],
+        [1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 0]]
+
+mapG = [[0, 0, 1, 0, 0],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 0, 1],
+        [1, 1, 1, 0, 1],
+        [1, 1, 1, 0, 1],
+        [1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 0]]
+
+mapI = [[0, 0, 1, 0, 0],
+        [1, 1, 1, 0, 1],
+        [1, 1, 1, 0, 1],
+        [1, 1, 1, 0, 1],
+        [1, 1, 1, 0, 1],
+        [1, 1, 1, 0, 1],
+        [1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0]]
+
+shum_maps = {
+    'A': mapA,  # coop
+    'B': mapA,  # no coop
+    'C': mapA,  # coop
+    'D': mapD,  # coop
+    'E': mapE,  # no coop
+    'F': mapF,  # no coop
+    'G': mapG,  # triple coop
+    'H': mapA,  # no coop
+    'I': mapI  # triple coop
+}
 
 shum_locs_0 = {
     'A': {('r1', 'rabbit'): (0, 2),
@@ -136,18 +186,164 @@ shum_locs_0 = {
           ('s2', 'stag'): (3, 3),
           ('h1', 'hunter'): (1, 2),
           ('h2', 'hunter'): (1, 4),
-          ('h3', 'hunter'): (5, 4)}
-}
-
-shum_locs_1 = {
-    'A': {('s1', 'stag'): (1, 0),
-          ('s2', 'stag'): (3, 3),
+          ('h3', 'hunter'): (5, 4)},
+    'B': {('r1', 'rabbit'): (0, 2),
+          ('r2', 'rabbit'): (6, 2),
+          ('s1', 'stag'): (1, 4),
+          ('s2', 'stag'): (5, 4),
+          ('h1', 'hunter'): (3, 3),
+          ('h2', 'hunter'): (2, 4),
+          ('h3', 'hunter'): (5, 0)},
+    'C': {('r1', 'rabbit'): (0, 2),
+          ('r2', 'rabbit'): (6, 2),
+          ('s1', 'stag'): (1, 3),
+          ('s2', 'stag'): (5, 4),
+          ('h1', 'hunter'): (2, 0),
+          ('h2', 'hunter'): (2, 4),
+          ('h3', 'hunter'): (5, 1)},
+    'D': {('r1', 'rabbit'): (0, 2),
+          ('r2', 'rabbit'): (6, 2),
+          ('s1', 'stag'): (2, 0),
+          ('s2', 'stag'): (2, 4),
+          ('h1', 'hunter'): (1, 1),
+          ('h2', 'hunter'): (1, 2),
+          ('h3', 'hunter'): (5, 4)},
+    'E': {('r1', 'rabbit'): (0, 2),
+          ('r2', 'rabbit'): (6, 2),
+          ('s1', 'stag'): (1, 0),
+          ('s2', 'stag'): (3, 4),
+          ('h1', 'hunter'): (3, 2),
+          ('h2', 'hunter'): (4, 4),
+          ('h3', 'hunter'): (3, 1)},
+    'F': {('r1', 'rabbit'): (2, 0),
+          ('r2', 'rabbit'): (6, 2),
+          ('s1', 'stag'): (1, 2),
+          ('s2', 'stag'): (3, 2),
           ('h1', 'hunter'): (2, 2),
-          ('h2', 'hunter'): (1, 3),
-          ('h3', 'hunter'): (4, 4)}
+          ('h2', 'hunter'): (5, 0),
+          ('h3', 'hunter'): (3, 4)},
+    'G': {('r1', 'rabbit'): (0, 2),
+          ('r2', 'rabbit'): (4, 4),
+          ('s1', 'stag'): (1, 4),
+          ('s2', 'stag'): (3, 1),
+          ('h1', 'hunter'): (3, 0),
+          ('h2', 'hunter'): (2, 1),
+          ('h3', 'hunter'): (3, 2)},
+    'H': {('r1', 'rabbit'): (0, 2),
+          ('r2', 'rabbit'): (6, 2),
+          ('s1', 'stag'): (1, 0),
+          ('s2', 'stag'): (3, 3),
+          ('h1', 'hunter'): (1, 2),
+          ('h2', 'hunter'): (1, 2),
+          ('h3', 'hunter'): (3, 4)},
+    'I': {('r1', 'rabbit'): (0, 2),
+          ('r2', 'rabbit'): (6, 0),
+          ('s1', 'stag'): (3, 2),
+          ('s2', 'stag'): (5, 4),
+          ('h1', 'hunter'): (3, 0),
+          ('h2', 'hunter'): (4, 1),
+          ('h3', 'hunter'): (1, 0)},
 }
 
-shum_locs = (shum_locs_0, shum_locs_1)
+# agent only included if moved from last step
+shum_locs_1 = {
+    'A': {('h1', 'hunter'): (2, 2),
+          ('h2', 'hunter'): (1, 3),
+          ('h3', 'hunter'): (4, 4)},
+    'B': {('h1', 'hunter'): (3, 2),
+          ('h2', 'hunter'): (3, 4),
+          ('h3', 'hunter'): (5, 1)},
+    'C': {('h1', 'hunter'): (1, 0),
+          ('h2', 'hunter'): (3, 4),
+          ('h3', 'hunter'): (5, 2)},
+    'D': {('h1', 'hunter'): (1, 0),
+          ('h2', 'hunter'): (1, 1),
+          ('h3', 'hunter'): (5, 3)},
+    'E': {('h1', 'hunter'): (2, 2),
+          ('h2', 'hunter'): (5, 4),
+          ('h3', 'hunter'): (3, 2)},
+    'F': {('h1', 'hunter'): (3, 2),
+          ('h2', 'hunter'): (5, 1)},
+    'G': {('s2', 'stag'): (4, 1),
+          ('h1', 'hunter'): (4, 0),
+          ('h2', 'hunter'): (3, 1),
+          ('h3', 'hunter'): (4, 2)},
+    'H': {('s2', 'stag'): (3, 2),
+          ('h1', 'hunter'): (1, 1),
+          ('h2', 'hunter'): (1, 1),
+          ('h3', 'hunter'): (4, 4)},
+    'I': {('s1', 'stag'): (2, 1),
+          ('h1', 'hunter'): (2, 0),
+          ('h2', 'hunter'): (3, 1),
+          ('h3', 'hunter'): (1, 1)},
+
+
+}
+
+shum_locs_2 = {
+    'A': {('h1', 'hunter'): (3, 2),
+          ('h2', 'hunter'): (1, 2),
+          ('h3', 'hunter'): (3, 4)},
+    'B': {('h1', 'hunter'): (2, 2),
+          ('h2', 'hunter'): (4, 4),
+          ('h3', 'hunter'): (5, 2)},
+    'C': {('h1', 'hunter'): (1, 1),
+          ('h2', 'hunter'): (4, 4),
+          ('h3', 'hunter'): (5, 3)},
+    'D': {('h2', 'hunter'): (1, 0),
+          ('h3', 'hunter'): (5, 2)},
+    'E': {('h1', 'hunter'): (1, 2),
+          ('h2', 'hunter'): (5, 3),
+          ('h3', 'hunter'): (2, 2)},
+    'F': {('h1', 'hunter'): (3, 1),
+          ('h2', 'hunter'): (5, 2)},
+    'G': {('s2', 'stag'): (5, 1),
+          ('h1', 'hunter'): (5, 0),
+          ('h2', 'hunter'): (4, 1),
+          ('h3', 'hunter'): (5, 2)},
+    'H': {('s1', 'stag'): (2, 0),
+          ('h1', 'hunter'): (1, 2),
+          ('h2', 'hunter'): (1, 0),
+          ('h3', 'hunter'): (5, 4)},
+    'I': {('s1', 'stag'): (2, 2),
+          ('h1', 'hunter'): (2, 1),
+          ('h2', 'hunter'): (3, 2),
+          ('h3', 'hunter'): (1, 2)},
+}
+
+shum_locs_3 = {
+    'A': {('h1', 'hunter'): (3, 3),
+          ('h2', 'hunter'): (0, 2),
+          ('h3', 'hunter'): (3, 3)},
+    'B': {('s2', 'stag'): (5, 3),
+          ('h1', 'hunter'): (1, 2),
+          ('h2', 'hunter'): (5, 4),
+          ('h3', 'hunter'): (6, 2)},
+    'C': {('h1', 'hunter'): (1, 2),
+          ('h2', 'hunter'): (5, 4),
+          ('h3', 'hunter'): (5, 4)},
+    'D': {('h1', 'hunter'): (2, 0),
+          ('h2', 'hunter'): (2, 0),
+          ('h3', 'hunter'): (6, 2)},
+    'E': {('h1', 'hunter'): (0, 2),
+          ('h2', 'hunter'): (5, 2),
+          ('h3', 'hunter'): (1, 2)},
+    'F': {('h1', 'hunter'): (2, 2),
+          ('h2', 'hunter'): (6, 2)},
+    'G': {('h1', 'hunter'): (5, 1),
+          ('h2', 'hunter'): (5, 1),
+          ('h3', 'hunter'): (5, 1)},
+    'H': {('s1', 'stag'): (3, 0),
+          ('h1', 'hunter'): (0, 2),
+          ('h2', 'hunter'): (2, 0),
+          ('h3', 'hunter'): (5, 3)},
+    'I': {('h1', 'hunter'): (2, 2),
+          ('h2', 'hunter'): (2, 2),
+          ('h3', 'hunter'): (2, 2)},
+}
+
+# TODO: move all this to another file
+shum_locs = (shum_locs_0, shum_locs_1, shum_locs_2, shum_locs_3)
 
 
 def my_assignRandomGoals(state, c=None):
@@ -300,9 +496,10 @@ def shum_run_one(game, state):
     next = states[1]
     # move all other agents, fixed
     for agent in state.agents:
-        if agent[1] not in ('rabbit', comp_agent):
-            shum = shum_locs[state.step]
-            next.loc[agent] = shum[game][agent]
+        next_locs = shum_locs[state.step][game]
+        if agent is not comp_agent and agent in next_locs:
+            next.loc[agent] = next_locs[agent]
+    # FIXME: check for capture event
     pt.print_map(next.map, next.loc)
     return next
 
