@@ -5,28 +5,35 @@
     <meta charset="utf-8">
     <link rel="shortcut icon" href="#">
 
-      <!-- External Library Dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <!-- External Library Dependencies -->
+    <!-- <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"/>
-    <script src="./d3/d3.min.js"></script>
+    <script src="./d3/d3.min.js"></script> -->
 
     <!-- Data -->
-    <script type="application/json" src="data/staghunt_formatted.json"></script>
+    <!-- <script type="application/json" src="data/staghunt_formatted.json"></script> -->
 
     <!-- Create Huntspace -->
-    <script src="viz.js"></script>
-    <script src="get_simulation.js"></script>
+    <!-- <script src="viz.js"></script>
+    <script src="get_simulation.js"></script> -->
+    <!--If we keep scripts in the header they do not have access to the html elements in the page-->
 
   </head>
 
   <body>
-
   	<h1>Staghunt</h1>
 
-    <div id="huntspace"></div>
+    <%
+      if (huntspace_util === 'undefined') {
+        throw new Error('huntspace_util is not defined');
+      }
+      if (sim_data === 'undefined') {
+        throw new Error('sim_data is not defined');
+      }
+    %>
 
-    <!--<form method="GET"> <!- Was action="#!/home-page" action="/simulation"->
+    <form method="GET"> <!-- Was action="#!/home-page" action="/simulation"-->
       <p>Which simulation would you like to see?</p>
       <input type="number" id="sim_number" name="sim_id" min="0" max="10"/>
       <input type="submit" onclick="get_sim()"/>
@@ -34,7 +41,6 @@
 
     <p>Click the "Submit" button and the form-data will be sent to a page on the
     server called "backend.js".</p>
-    -->
 
   </body>
 </html>

@@ -1,14 +1,18 @@
+// const d3 = import("./d3_ex/d3.min.js")
+
 // --- CONSTANTS START ---
 var width = 500,
 height = 500;
 
 // TODO: look at staghunt file
-var cellWidth = width / 7.;
+var cellWidth = width / 7.,
 cellHeight = height / 7.;
 
 // TODO: look at staghunt file
 var stateCounter = 0,
 stateLength = 4;
+
+var huntspace;
 
 // [xOffset, yOffset, textAnchor (horizontal alignment, dominantBaseline (vertical alignment)]
 var labelOffset = {
@@ -65,6 +69,9 @@ function createStates(result){
 // --- CONSTANTS END ---
 
 // --- SVG SPACE INIT START ---
+// var huntspace = document.creatElement("div")
+function initHuntspace(){
+// huntspace.setAttribute("id", "huntspace")
 var huntspace = d3.select("#huntspace")
 	.append("svg")
 	.attr("width", width)
@@ -84,7 +91,7 @@ huntspace.append("g")
 	.attr("font-size", cellWidth/3.)
 	.attr("class", "characters");
 
-
+}
 // --- FUNCTIONS START ---
 
 // previous button behavior
@@ -184,9 +191,12 @@ function initialDraw(){
 //     console.error('There has been a problem with your fetch operation:', error);
 //   });
 
-function getStagHunt(json_file){
-	console.log("Visualizing")
+export default function getStagHunt(){ // TODO: readd the json_file param
+	initHuntspace();
 	createStates(json_file);
 	initialDraw();
-	console.log("done creating huntspace ")
 }
+
+// module.exports = {
+//   getStagHunt
+// };

@@ -1,19 +1,37 @@
 {
   "name": "visualization",
   "version": "1.0.0",
-  "description": "This is the web part of the staghunt project.",
-  "main": "server.js",
-  "directories": {
-    "example": "example"
+  "description": "Webapp for StagHunt project",
+  "engines": {
+    "node": "14.x"
   },
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"node server.js"
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ejs": "^3.1.5",
+    "express": "^4.15.2",
+    "pg": "^8.7.1",
+    "d3": "^7",
+    "jsdom": "^16.2.2",
+    "node-fetch": "^3.x"
+  },
+  "devDependencies": {
+    "got": "^11.3.0",
+    "tape": "^4.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FandM-CARES/socialSim/tree/ah-viz/visualization"
   },
   "keywords": [
-    "staghunt",
-    "heroku"
+    "node",
+    "heroku",
+    "express",
+    "StagHunt"
   ],
-  "author": "",
+  "type": "module",
   "license": "MIT"
 }
