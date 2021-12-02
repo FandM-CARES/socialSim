@@ -1,14 +1,18 @@
+// const d3 = import("./d3_ex/d3.min.js")
+
 // --- CONSTANTS START ---
 var width = 500,
 height = 500;
 
 // TODO: look at staghunt file
-var cellWidth = width / 7.;
+var cellWidth = width / 7.,
 cellHeight = height / 7.;
 
 // TODO: look at staghunt file
 var stateCounter = 0,
 stateLength = 4;
+
+var huntspace;
 
 // [xOffset, yOffset, textAnchor (horizontal alignment, dominantBaseline (vertical alignment)]
 var labelOffset = {
@@ -44,11 +48,6 @@ var dLookup = {
 var characters = [];
 var data;
 
-var getStagHunt = fetch("/staghunt.json").then(results => results.json()).then(createStates).then(initialDraw).catch(error => {
-    console.error('There has been a problem with your fetch operation:', error);
-  });
-
-
 function createStates(result){
 	result["states"].forEach(function (configFileState) {
 		var state = [];
@@ -69,6 +68,30 @@ function createStates(result){
 
 // --- CONSTANTS END ---
 
+// --- SVG SPACE INIT START ---
+// var huntspace = document.creatElement("div")
+function initHuntspace(){
+// huntspace.setAttribute("id", "huntspace")
+var huntspace = d3.select("#huntspace")
+	.append("svg")
+	.attr("width", width)
+	.attr("height", height);
+
+// TODO: look at staghunt file
+var scale = d3.scaleLinear()
+	.domain([0, 7])
+	.range([0, width]);
+
+// --- SVG SPACE INIT END ---
+
+// init character space
+huntspace.append("g")
+	.attr("stroke-width", 1.5)
+	.attr("font-family", "sans-serif")
+	.attr("font-size", cellWidth/3.)
+	.attr("class", "characters");
+
+}
 // --- FUNCTIONS START ---
 
 // previous button behavior
@@ -134,8 +157,8 @@ function drawCharacters() {
 		.transition().duration(function() {
 			return (stateCounter) ? 1000 : 0;
 		})
-		.attr("x", function(d) { 
-			return scale(d.x + labelOffset[d.id][0]); 
+		.attr("x", function(d) {
+			return scale(d.x + labelOffset[d.id][0]);
 		})
 		.attr("y", function(d) { return scale(d.y + labelOffset[d.id][1]); });
 
@@ -148,7 +171,7 @@ function drawCharacters() {
 			return (stateCounter) ? 1000 : 0;
 		})
 		.attr("transform", function (d) {
-			return "translate(" + scale(d.x + .25) + "," + scale(d.y + .25) + 
+			return "translate(" + scale(d.x + .25) + "," + scale(d.y + .25) +
 			") scale(.07)";
 		})
 		.attr("d", function (d) {
@@ -164,22 +187,16 @@ function initialDraw(){
 
 // --- FUNCTIONS END ---
 
-// --- SVG SPACE INIT START ---
-var huntspace = d3.select("#huntspace")
-	.append("svg")
-	.attr("width", width)
-	.attr("height", height);
+// var getStagHunt = fetch("/staghunt.json").then(results => results.json()).then(createStates).then(initialDraw).catch(error => {
+//     console.error('There has been a problem with your fetch operation:', error);
+//   });
 
-// TODO: look at staghunt file
-var scale = d3.scaleLinear()
-	.domain([0, 7])
-	.range([0, width]); 
+export default function getStagHunt(){ // TODO: readd the json_file param
+	initHuntspace();
+	createStates(json_file);
+	initialDraw();
+}
 
-// --- SVG SPACE INIT END ---
-
-// init character space
-huntspace.append("g")
-	.attr("stroke-width", 1.5)
-	.attr("font-family", "sans-serif")
-	.attr("font-size", cellWidth/3.)
-	.attr("class", "characters");
+// module.exports = {
+//   getStagHunt
+// };
