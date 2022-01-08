@@ -31,6 +31,9 @@
       if (sim_data === 'undefined') {
         throw new Error('sim_data is not defined');
       }
+      huntspace_util({
+        data: sim_data
+      })
     %>
 
     <form method="GET"> <!-- Was action="#!/home-page" action="/simulation"-->

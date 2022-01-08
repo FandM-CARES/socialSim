@@ -4,7 +4,7 @@ export default class Huntspace {
   // Huntspace setup
 
   // param result: the JSON file with the simulation
-  constructor(result) {
+  constructor(doc, result) {
     console.log("huntspace running...");
     // --- CONSTANTS START ---
     var width = 500;
@@ -57,7 +57,7 @@ export default class Huntspace {
     // --- STATES INIT END ---
 
     // --- SVG SPACE INIT START ---
-    this.huntspace = d3.select("#huntspace")
+    this.huntspace = d3.select(doc.body).select("#huntspaceEl")
     	.append("svg")
     	.attr("width", width)
     	.attr("height", height);
@@ -105,7 +105,7 @@ export default class Huntspace {
   		.style("fill", function(d) { return d.wall;});
 
     // Adds the characters at their initial position
-    drawCharacters();
+    // this.drawCharacters();
     // --- DRAW SPACE INIT END ---
   }
 
