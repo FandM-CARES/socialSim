@@ -41,9 +41,9 @@ class HuntspaceComponent extends React.Component {
         <div className="Huntspace">
           <Huntspace data={simData} stateData={this.state}/>
           <ul className="State-items">
-            <div className="State-item default"><a type="button" href="./HuntspaceComponent.showPrevState" disabled={this.state.stateCounter===0?true:false} onClick={this.showPrevState}>Previous</a></div>
-            <div className="State-item default"><a type="button" href="./HuntspaceComponent.showNextState" disabled={this.state.stateCounter===(this.state.stateLength-1)?true:false} onClick={this.showNextState}>Next</a></div>
-            <div className="State-item default"><a type="button" href="./HuntspaceComponent.resetState" disabled={this.state.stateCounter===0?true:false} onClick={this.resetState}>Reset</a></div>
+            <div className="State-item default"><a type="button" disabled={this.state.stateCounter===0?true:false} onClick={this.showPrevState}>Previous</a></div>
+            <div className="State-item default"><a type="button" disabled={this.state.stateCounter===(this.state.stateLength-1)?true:false} onClick={this.showNextState}>Next</a></div>
+            <div className="State-item default"><a type="button" disabled={this.state.stateCounter===0?true:false} onClick={this.resetState}>Reset</a></div>
           </ul>
         </div>
       )

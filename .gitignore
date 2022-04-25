@@ -131,3 +131,8 @@ dmypy.json
 visualization/.DS_Store
 visualization/package-lock.json
 visualization/.DS_Store
+
+# Heroku
+/node_modules
+npm-debug.log
+/*.env
