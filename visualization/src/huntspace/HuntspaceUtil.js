@@ -1,7 +1,5 @@
 /** HuntspaceUtils.js*/
 
-import * as d3 from "d3";
-
 export const getSetupData = (svgWidth, svgHeight, mapWidth, stateLength) => {
 
   const cellWidth = svgWidth / mapWidth;

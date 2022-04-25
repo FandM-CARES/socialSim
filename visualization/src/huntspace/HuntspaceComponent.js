@@ -1,7 +1,6 @@
 /** HuntspaceComponent.js */
 
 import React from 'react';
-import { Button } from 'react-bootstrap';
 import Huntspace from './Huntspace.js'
 import './Huntspace.css';
 import simData from '../assets/data/single_sim.json'
@@ -23,13 +22,13 @@ class HuntspaceComponent extends React.Component {
 
     showNextState = () => {
         if(this.state.stateCounter < this.state.stateLength - 1){
-            this.setState({ stateCounter: this.state.stateCounter += 1});
+            this.setState({ stateCounter: this.state.stateCounter + 1});
         }
     };
 
     showPrevState = () => {
         if(this.state.stateCounter >= 1){
-            this.setState({ stateCounter: this.state.stateCounter -= 1});
+            this.setState({ stateCounter: this.state.stateCounter - 1});
         }
     };
 
@@ -42,9 +41,9 @@ class HuntspaceComponent extends React.Component {
         <div className="Huntspace">
           <Huntspace data={simData} stateData={this.state}/>
           <ul className="Change-state">
-            <li className="State-item"><a type="button" disabled={this.state.stateCounter===0?true:false} onClick={this.showPrevState}>Previous</a></li>
-            <li className="State-item"><a type="button" disabled={this.state.stateCounter===(this.state.stateLength-1)?true:false} onClick={this.showNextState}>Next</a></li>
-            <li className="State-item"><a type="button" disabled={this.state.stateCounter===0?true:false} onClick={this.resetState}>Reset</a></li>
+            <li className="State-item"><a type="button" href="./HuntspaceComponent.showPrevState" disabled={this.state.stateCounter===0?true:false} onClick={this.showPrevState}>Previous</a></li>
+            <li className="State-item"><a type="button" href="./HuntspaceComponent.showNextState" disabled={this.state.stateCounter===(this.state.stateLength-1)?true:false} onClick={this.showNextState}>Next</a></li>
+            <li className="State-item"><a type="button" href="./HuntspaceComponent.resetState" disabled={this.state.stateCounter===0?true:false} onClick={this.resetState}>Reset</a></li>
           </ul>
         </div>
       )
