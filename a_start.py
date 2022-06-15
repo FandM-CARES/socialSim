@@ -4,9 +4,9 @@ from copy import deepcopy
 
 def a_star_search(start, agent, goal, steps):
     frontier = []
-    heapq.heappush(frontier, (0, (start, [])))  # (f, (current, path))
+    heapq.heappush(frontier, (0, (start, [])))
     fscores = {}
-    gscores = {start.loc[agent]: 0}             # f = g + h
+    gscores = {start.loc[agent]: 0}
 
     while len(frontier) > 0:
         n = heapq.heappop(frontier)
