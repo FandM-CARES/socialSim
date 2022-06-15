@@ -6,29 +6,24 @@ INFINITY = sys.maxsize
 
 # general start state with all the necessary fields, and some necessary values
 def get_start_state():
-	state = pyhop.State('init')
-	state.agents = [('r1', 'rabbit'), ('r2', 'rabbit'), ('s1', 'stag'), ('s2', 'stag'), ('s3', 'stag'), ('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')]	# is actually cleared at creation of game
-	state.hunters = {}	# hunter name: corresponding hunter object
-	state.loc = {}		# agent: (x,y)
-	state.map = None
-	state.target = {}
-	state.goal = {}
-	state.assumes = {}
-	state.captured = []
-	state.score = {}
-	state.ready = []
-	state.step = 0
-	return state
+    state = pyhop.State('init')
+    state.agents = [('r1', 'rabbit'), ('r2', 'rabbit'), ('s1', 'stag'), ('s2', 'stag'), ('s3', 'stag'), ('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')]
+    state.loc = {}
+    state.map = None
+    state.target = {}
+    state.goal = {}
+    state.assumes = {}
+    state.captured = []
+    state.score = {('h1', 'hunter'):0, ('h2', 'hunter'):0, ('h3', 'hunter'):0}
+    state.ready = []
+    return state
 
 
 # general rules
-# returns True if agent1 can hunt agent2
 def hunts(agent1, agent2):
 	return agent1[1] == 'hunter' and (agent2[1] == 'stag' or agent2[1] == 'rabbit')
 
 
-# returns True if agents 1 and 2 are within 1 manhattan dist away (?)
-# in other words, can capture in next move
 def nearby(state, agent1, agent2):
 	if agent1 in state.loc and agent2 in state.loc:
 		return (abs(state.loc[agent1][0] - state.loc[agent2][0]) + abs(state.loc[agent1][1] - state.loc[agent2][1])) < 2
@@ -36,15 +31,12 @@ def nearby(state, agent1, agent2):
 		return False
 
 
-# returns manhattan dist between agents 1 and 2
 def distance(state, agent1, agent2):
 	if agent1 in state.loc and agent2 in state.loc:
 		return abs(state.loc[agent1][0] - state.loc[agent2][0]) + abs(state.loc[agent1][1] - state.loc[agent2][1])
 	else:
 		return INFINITY
 
-
-# returns True if there is not a hunter at loc in state
 def has_no_hunter(state, prey, loc):
 	for other_agent in state.agents:
 		# for each hunter
@@ -60,18 +52,11 @@ def has_no_hunter(state, prey, loc):
 # methods
 ###########################################
 
-def simulate_step_forone(state):
-	for hunter in state.hunters.values():
-		if hunter.type == "Companions":
-			comp_agent = hunter.name
-	tasks = [('simulate_agent', comp_agent)]  # ("name", agent)
-	tasks.append(('simulate_game',))
-	return tasks
 
 def simulate_step_forall(state):
-	tasks = []		# ("name", agent)
+	tasks = []
 	for agent in state.agents:
-		tasks.append(('simulate_agent', agent))		# simulate all agents
+		tasks.append(('simulate_agent', agent))
 	tasks.append(('simulate_game',))
 	return tasks
 
@@ -91,7 +76,7 @@ def plan(state, hunter, goal):
 	p = a_star_search(state, hunter, goal, [step_up, step_down, step_left, step_right])
 	if p:
 		print('-plan to', p[0].__name__)
-		return [(p[0].__name__, hunter)]	# first (next) step in path
+		return [(p[0].__name__, hunter)]
 	print("no plan", hunter, goal)
 	return False
 
@@ -100,7 +85,6 @@ def mt_target(state, hunter):
 	return [('move_towards', hunter, state.loc[state.target[hunter]])]
 
 
-# stag evades if there is a hunter within 1 manhatt dist
 def survive(state, prey):
 	# if prey
 	if prey[1] == 'stag':
@@ -112,27 +96,22 @@ def survive(state, prey):
 		return False
 
 
-# check if agent has coopWith goal (stag)
+# cooperate or not
 def cooperate(state, agent):
-	if agent in state.goal and 'cooperateWith' in state.goal[agent] and state.goal[agent]['cooperateWith'][0] == agent:
+	# TODO need better logic here
+	if agent in state.goal and 'cooperateWith' in state.goal[agent]:
 		g = state.goal[agent]['cooperateWith']
-		print('cooperate with', agent, g[1])
-		state.target[agent] = g[2]
-		print('target is', state.target[agent])
-		return [('pick_coop_target', agent, g[1])]
+		if g[0] == agent:
+			return [('pick_coop_target', agent, g[1])]
+		else:
+			return False
 	else:
 		return False
 
-# check if agent has hunt goal (rabbit)
+
 def betray(state, agent):
-	if agent in state.goal and 'hunt' in state.goal[agent]:
-		print('betray', agent)
-		state.target[agent] = state.goal[agent]['hunt'][1]
-		print('target is', state.target[agent])
-		return [('pick_closest_target', agent)]
-	else:
-		print(agent, 'has no goal')
-		return False
+	print('betray', agent)
+	return [('pick_closest_target', agent)]
 
 
 # move towards
@@ -147,7 +126,7 @@ def move_towards_up(state, agent, goal):
 
 def move_towards_down(state, agent, goal):
 	if state.loc[goal][1] > state.loc[agent][1]:
-		print('move towards up', agent, goal)		# aren't these msgs wrong
+		print('move towards up', agent, goal)
 		return [('step_down', agent)]
 	else:
 		return False
@@ -264,7 +243,6 @@ def wait(state, agent):
 
 def load_methods(pyhop):
 	pyhop.declare_methods('sim_all', simulate_step_forall)
-	pyhop.declare_methods('sim_one', simulate_step_forone)
 	pyhop.declare_methods('move_away_from', move_away_up, move_away_down, move_away_left, move_away_right, evade_up, evade_down, evade_left, evade_right)
 	pyhop.declare_methods('move_towards', plan)
 	pyhop.declare_methods('simulate_agent', hunt, survive, wait)
@@ -284,24 +262,54 @@ def wait_one(state, agent):
 
 
 def pick_closest_target(state, agent):
-	if agent not in state.ready:
-		state.ready.append(agent)
-	# dist = distance(state, agent, state.target[agent])
-	# if dist == 0:
-	# 	print('****', agent, state.target[agent], '****')
-	# 	print(state.loc)
-	return state
+	best = ('', INFINITY)
+	for ptarget in state.agents:
+		if hunts(agent, ptarget) and ptarget[1] == 'rabbit' and ptarget not in state.captured and distance(state, agent, ptarget) < best[1]:
+			best = (ptarget, distance(state, agent, ptarget))
+	if best[1] < 20: # arbitrary distance
+		print('closest target', agent, best)
+		state.target[agent] = best[0]
+		if agent not in state.goal:
+			state.goal[agent] = {}
+		# else:
+		# 	state.goal[agent]= {'hunt':(agent, best[0])}
+		state.goal[agent]['hunt'] = (agent, best[0])
+		# picked a target, hunter is now locked and loaded
+		if agent not in state.ready:
+			state.ready.append(agent)
+		if best[1] == 0:
+			print('****', agent, best[0], '****')
+			print(state.loc)
+			#sys.exit(1)
+		return state
+	else:
+		return False
 
 
 def pick_coop_target(state, agent, other):
-	if agent not in state.ready:
-		state.ready.append(agent)
-	return state
+	print('PICK COOP', agent, other)
+	best = ('', INFINITY)
+	for ptarget in state.agents:
+		if hunts(agent, ptarget) and ptarget[1] == 'stag' and ptarget not in state.captured:
+			d = distance(state, agent, ptarget) + distance(state, other, ptarget)
+			if d < best[1]:
+				best = (ptarget, d)
+				print(best)
+	if best[1] < 100: # arbitrary distance
+		state.target[agent] = best[0]
+		print('target is', best)
+		state.goal[agent]['huntWith'] = (agent, best[0], other)
+		# picked a target, hunter is now locked and loaded
+		if agent not in state.ready:
+			state.ready.append(agent)
+		return state
+	else:
+		print('**** failed to pick coop target ****')
+		return False
 
 
 def step_right(state, agent):
 	# print('try: step right', agent)
-	# no wall to the right
 	if state.map[state.loc[agent][0]+1][state.loc[agent][1]] > 0:
 		state.loc[agent] = (state.loc[agent][0]+1, state.loc[agent][1])
 		return state
@@ -358,7 +366,7 @@ def capture_stag(state, hunter, target):
 			print(hunters, 'caught', target, state.loc[target])
 			state.captured.append(target)
 			del state.loc[target]
-			score = int(6 / len(hunters))		# stag = 6 pts, shared b/w all hunters that captured it
+			score = int(6 / len(hunters))
 			for h in hunters:
 				state.score[h] += score
 				state.ready.remove(h)

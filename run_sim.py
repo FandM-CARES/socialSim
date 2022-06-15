@@ -2,535 +2,320 @@ import pyhop
 from copy import deepcopy
 import random
 import pickle
-import staghunt_htn
+import models.staghunt_htn
 import print_trace as pt
-import hagents
-
-import itertools
-import logging
-
 
 MENTAL_SIM_LEN = 5
+
+# maps = [0,1,2,3,4,5,6,7,8,9,10]
+#
+# maps[0] = [[0, 0, 0, 0, 0, 0, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 0, 0, 0, 1, 0],
+#         [0, 1, 0, 1, 0, 1, 0],
+#         [0, 1, 0, 1, 0, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 0, 0, 0, 0, 0, 0]]
+#
+# # scenario from yoshida? paper
+# maps[1] = [[0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 1, 0, 0, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 0, 1, 0, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 0, 1, 0, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 0, 0, 1, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0]]
+#
+# # scenario a from paper
+# maps[2] = [[0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 1, 0, 0, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 0, 1, 0, 1, 0],
+#         [0, 1, 1, 1, 0, 1, 0],
+#         [0, 1, 0, 0, 0, 0, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 0, 0, 1, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0]]
+#
+# # secnario g from paper
+# maps[3] = [[0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 1, 0, 0, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 0, 1, 1, 1, 0],
+#         [0, 1, 0, 1, 1, 1, 0],
+#         [0, 1, 0, 1, 1, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 0, 0, 1, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0]]
+#
+# # secnario f from paper
+# maps[4] = [[0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 1, 0, 1, 0],
+#         [0, 1, 1, 1, 0, 1, 0],
+#         [0, 1, 0, 1, 0, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 0, 0, 0, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 0],
+#         [0, 0, 0, 1, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0]]
+#
+# maps[5] = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 1, 0, 0, 0, 0],
+#         [0, 0, 1, 1, 1, 1, 1, 0, 0],
+#         [0, 0, 1, 0, 0, 0, 1, 0, 0],
+#         [0, 1, 1, 0, 1, 0, 1, 1, 0],
+#         [0, 0, 1, 0, 1, 0, 1, 0, 0],
+#         [0, 0, 1, 1, 1, 1, 1, 0, 0],
+#         [0, 0, 0, 0, 1, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0, 0, 0]]
+#
+# # 27 walls
+# maps[6] = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+#         [0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0],
+#         [0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0],
+#         [0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0],
+#         [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+#         [0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0],
+#         [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+#
+#
+# # 0 walls
+# maps[8] = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+#         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+#
+#
+# # 33 walls
+# maps[9] = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#         [0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0],
+#         [0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0],
+#         [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+#         [0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0],
+#         [0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0],
+#         [0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0],
+#         [0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0],
+#         [0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0],
+#         [0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0],
+#         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+
+
+###
 
 
 # 3 walls
 map5x5x1 = [[0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 1, 1, 1, 0],
-            [0, 1, 1, 1, 0, 1, 0],
-            [0, 1, 0, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0]]
+        [0, 1, 1, 1, 1, 1, 0],
+        [0, 1, 0, 1, 1, 1, 0],
+        [0, 1, 1, 1, 0, 1, 0],
+        [0, 1, 0, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0]]
 
 # 8 walls
 map5x5x3 = [[0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 0, 1, 0],
-            [0, 1, 0, 0, 1, 1, 0],
-            [0, 1, 1, 1, 1, 0, 0],
-            [0, 0, 0, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0]]
+        [0, 1, 1, 1, 1, 1, 0],
+        [0, 1, 0, 0, 0, 1, 0],
+        [0, 1, 0, 0, 1, 1, 0],
+        [0, 1, 1, 1, 1, 0, 0],
+        [0, 0, 0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0]]
+
 
 # 13 walls
 map5x5x5 = [[0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 1, 1, 0, 0],
-            [0, 0, 1, 0, 1, 0, 0],
-            [0, 1, 1, 1, 1, 0, 0],
-            [0, 0, 0, 0, 1, 1, 0],
-            [0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0]]
+        [0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 1, 0, 1, 0, 0],
+        [0, 1, 1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0],
+        [0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0]]
+
 
 # 5 walls
 map7x7x1 = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 0, 1, 0, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 0, 1, 0, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 0, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        [0, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 0, 1, 0, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 0, 1, 0, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 # 15 walls
 map7x7x3 = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 1, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 0, 0, 0, 0, 1, 0],
-            [0, 1, 0, 0, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 0, 0],
-            [0, 1, 0, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 1, 0, 1, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        [0, 0, 1, 0, 0, 1, 0, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 0, 0, 0, 0, 1, 0],
+        [0, 1, 0, 0, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 1, 0, 1, 1, 1, 1, 1, 0],
+        [0, 1, 0, 1, 0, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
 
 # 25 walls
 map7x7x5 = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 0, 0, 0, 1, 0],
-            [0, 1, 0, 0, 0, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 0, 0, 0],
-            [0, 0, 0, 1, 0, 1, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        [0, 0, 1, 0, 0, 0, 0, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 0, 0, 0, 0, 0, 1, 0],
+        [0, 1, 0, 0, 0, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 # 8 walls
 map9x9x1 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
 
 # 24 walls
 map9x9x3 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0],
-            [0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0],
-            [0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0],
-            [0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-            [0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0],
-            [0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        [0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0],
+        [0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0],
+        [0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0],
+        [0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0],
+        [0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
 
 # 40 walls
 map9x9x5 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0],
-            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0],
-            [0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0],
-            [0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0],
+        [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0],
+        [0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0],
+        [0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 maps = [[map5x5x1, map5x5x3, map5x5x5],
         [map7x7x1, map7x7x3, map7x7x5],
         [map9x9x1, map9x9x3, map9x9x5]]
 
-# rotate original 90 degrees right
-mapA = [[0, 0, 1, 0, 0],
-        [1, 1, 1, 1, 1],
-        [1, 0, 1, 0, 1],
-        [1, 0, 1, 1, 1],
-        [0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1],
-        [0, 0, 1, 0, 0]]
 
-
-mapD = [[0, 0, 1, 0, 0],
-        [1, 1, 1, 1, 1],
-        [1, 0, 1, 0, 1],
-        [0, 0, 1, 0, 1],
-        [1, 0, 1, 0, 1],
-        [1, 1, 1, 1, 1],
-        [0, 0, 0, 0, 0]]
-
-mapE = [[0, 0, 1, 0, 0],
-        [1, 1, 1, 1, 1],
-        [1, 0, 1, 0, 0],
-        [1, 1, 1, 1, 1],
-        [0, 1, 1, 0, 1],
-        [1, 1, 1, 1, 1],
-        [0, 0, 1, 0, 0]]
-
-mapF = [[1, 0, 1, 0, 0],
-        [1, 0, 1, 1, 1],
-        [1, 0, 1, 0, 1],
-        [1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1],
-        [0, 0, 1, 0, 0]]
-
-mapG = [[0, 0, 1, 0, 0],
-        [1, 1, 1, 1, 1],
-        [1, 1, 1, 0, 1],
-        [1, 1, 1, 0, 1],
-        [1, 1, 1, 0, 1],
-        [1, 1, 1, 1, 1],
-        [0, 0, 1, 0, 0]]
-
-mapI = [[0, 0, 1, 0, 0],
-        [1, 1, 1, 0, 1],
-        [1, 1, 1, 0, 1],
-        [1, 1, 1, 0, 1],
-        [1, 1, 1, 0, 1],
-        [1, 1, 1, 0, 1],
-        [1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0]]
-
-shum_maps = {
-    'A': mapA,  # coop
-    'B': mapA,  # no coop
-    'C': mapA,  # coop
-    'D': mapD,  # coop
-    'E': mapE,  # no coop
-    'F': mapF,  # no coop
-    'G': mapG,  # triple coop
-    'H': mapA,  # no coop
-    'I': mapI  # triple coop
-}
-
-shum_locs_0 = {
-    'A': {('r1', 'rabbit'): (0, 2),
-          ('r2', 'rabbit'): (6, 2),
-          ('s1', 'stag'): (1, 0),
-          ('s2', 'stag'): (3, 3),
-          ('h1', 'hunter'): (1, 2),
-          ('h2', 'hunter'): (1, 4),
-          ('h3', 'hunter'): (5, 4)},
-    'B': {('r1', 'rabbit'): (0, 2),
-          ('r2', 'rabbit'): (6, 2),
-          ('s1', 'stag'): (1, 4),
-          ('s2', 'stag'): (5, 4),
-          ('h1', 'hunter'): (3, 3),
-          ('h2', 'hunter'): (2, 4),
-          ('h3', 'hunter'): (5, 0)},
-    'C': {('r1', 'rabbit'): (0, 2),
-          ('r2', 'rabbit'): (6, 2),
-          ('s1', 'stag'): (1, 3),
-          ('s2', 'stag'): (5, 4),
-          ('h1', 'hunter'): (2, 0),
-          ('h2', 'hunter'): (2, 4),
-          ('h3', 'hunter'): (5, 1)},
-    'D': {('r1', 'rabbit'): (0, 2),
-          ('r2', 'rabbit'): (6, 2),
-          ('s1', 'stag'): (2, 0),
-          ('s2', 'stag'): (2, 4),
-          ('h1', 'hunter'): (1, 1),
-          ('h2', 'hunter'): (1, 2),
-          ('h3', 'hunter'): (5, 4)},
-    'E': {('r1', 'rabbit'): (0, 2),
-          ('r2', 'rabbit'): (6, 2),
-          ('s1', 'stag'): (1, 0),
-          ('s2', 'stag'): (3, 4),
-          ('h1', 'hunter'): (3, 2),
-          ('h2', 'hunter'): (4, 4),
-          ('h3', 'hunter'): (3, 1)},
-    'F': {('r1', 'rabbit'): (2, 0),
-          ('r2', 'rabbit'): (6, 2),
-          ('s1', 'stag'): (1, 2),
-          ('s2', 'stag'): (3, 2),
-          ('h1', 'hunter'): (2, 2),
-          ('h2', 'hunter'): (5, 0),
-          ('h3', 'hunter'): (3, 4)},
-    'G': {('r1', 'rabbit'): (0, 2),
-          ('r2', 'rabbit'): (4, 4),
-          ('s1', 'stag'): (1, 4),
-          ('s2', 'stag'): (3, 1),
-          ('h1', 'hunter'): (3, 0),
-          ('h2', 'hunter'): (2, 1),
-          ('h3', 'hunter'): (3, 2)},
-    'H': {('r1', 'rabbit'): (0, 2),
-          ('r2', 'rabbit'): (6, 2),
-          ('s1', 'stag'): (1, 0),
-          ('s2', 'stag'): (3, 3),
-          ('h1', 'hunter'): (1, 2),
-          ('h2', 'hunter'): (1, 2),
-          ('h3', 'hunter'): (3, 4)},
-    'I': {('r1', 'rabbit'): (0, 2),
-          ('r2', 'rabbit'): (6, 0),
-          ('s1', 'stag'): (3, 2),
-          ('s2', 'stag'): (5, 4),
-          ('h1', 'hunter'): (3, 0),
-          ('h2', 'hunter'): (4, 1),
-          ('h3', 'hunter'): (1, 0)},
-}
-
-# agent only included if moved from last step
-shum_locs_1 = {
-    'A': {('h1', 'hunter'): (2, 2),
-          ('h2', 'hunter'): (1, 3),
-          ('h3', 'hunter'): (4, 4)},
-    'B': {('h1', 'hunter'): (3, 2),
-          ('h2', 'hunter'): (3, 4),
-          ('h3', 'hunter'): (5, 1)},
-    'C': {('h1', 'hunter'): (1, 0),
-          ('h2', 'hunter'): (3, 4),
-          ('h3', 'hunter'): (5, 2)},
-    'D': {('h1', 'hunter'): (1, 0),
-          ('h2', 'hunter'): (1, 1),
-          ('h3', 'hunter'): (5, 3)},
-    'E': {('h1', 'hunter'): (2, 2),
-          ('h2', 'hunter'): (5, 4),
-          ('h3', 'hunter'): (3, 2)},
-    'F': {('h1', 'hunter'): (3, 2),
-          ('h2', 'hunter'): (5, 1)},
-    'G': {('s2', 'stag'): (4, 1),
-          ('h1', 'hunter'): (4, 0),
-          ('h2', 'hunter'): (3, 1),
-          ('h3', 'hunter'): (4, 2)},
-    'H': {('s2', 'stag'): (3, 2),
-          ('h1', 'hunter'): (1, 1),
-          ('h2', 'hunter'): (1, 1),
-          ('h3', 'hunter'): (4, 4)},
-    'I': {('s1', 'stag'): (2, 1),
-          ('h1', 'hunter'): (2, 0),
-          ('h2', 'hunter'): (3, 1),
-          ('h3', 'hunter'): (1, 1)},
-
-
-}
-
-shum_locs_2 = {
-    'A': {('h1', 'hunter'): (3, 2),
-          ('h2', 'hunter'): (1, 2),
-          ('h3', 'hunter'): (3, 4)},
-    'B': {('h1', 'hunter'): (2, 2),
-          ('h2', 'hunter'): (4, 4),
-          ('h3', 'hunter'): (5, 2)},
-    'C': {('h1', 'hunter'): (1, 1),
-          ('h2', 'hunter'): (4, 4),
-          ('h3', 'hunter'): (5, 3)},
-    'D': {('h2', 'hunter'): (1, 0),
-          ('h3', 'hunter'): (5, 2)},
-    'E': {('h1', 'hunter'): (1, 2),
-          ('h2', 'hunter'): (5, 3),
-          ('h3', 'hunter'): (2, 2)},
-    'F': {('h1', 'hunter'): (3, 1),
-          ('h2', 'hunter'): (5, 2)},
-    'G': {('s2', 'stag'): (5, 1),
-          ('h1', 'hunter'): (5, 0),
-          ('h2', 'hunter'): (4, 1),
-          ('h3', 'hunter'): (5, 2)},
-    'H': {('s1', 'stag'): (2, 0),
-          ('h1', 'hunter'): (1, 2),
-          ('h2', 'hunter'): (1, 0),
-          ('h3', 'hunter'): (5, 4)},
-    'I': {('s1', 'stag'): (2, 2),
-          ('h1', 'hunter'): (2, 1),
-          ('h2', 'hunter'): (3, 2),
-          ('h3', 'hunter'): (1, 2)},
-}
-
-shum_locs_3 = {
-    'A': {('h1', 'hunter'): (3, 3),
-          ('h2', 'hunter'): (0, 2),
-          ('h3', 'hunter'): (3, 3)},
-    'B': {('s2', 'stag'): (5, 3),
-          ('h1', 'hunter'): (1, 2),
-          ('h2', 'hunter'): (5, 4),
-          ('h3', 'hunter'): (6, 2)},
-    'C': {('h1', 'hunter'): (1, 2),
-          ('h2', 'hunter'): (5, 4),
-          ('h3', 'hunter'): (5, 4)},
-    'D': {('h1', 'hunter'): (2, 0),
-          ('h2', 'hunter'): (2, 0),
-          ('h3', 'hunter'): (6, 2)},
-    'E': {('h1', 'hunter'): (0, 2),
-          ('h2', 'hunter'): (5, 2),
-          ('h3', 'hunter'): (1, 2)},
-    'F': {('h1', 'hunter'): (2, 2),
-          ('h2', 'hunter'): (6, 2)},
-    'G': {('h1', 'hunter'): (5, 1),
-          ('h2', 'hunter'): (5, 1),
-          ('h3', 'hunter'): (5, 1)},
-    'H': {('s1', 'stag'): (3, 0),
-          ('h1', 'hunter'): (0, 2),
-          ('h2', 'hunter'): (2, 0),
-          ('h3', 'hunter'): (5, 3)},
-    'I': {('h1', 'hunter'): (2, 2),
-          ('h2', 'hunter'): (2, 2),
-          ('h3', 'hunter'): (2, 2)},
-}
-
-# TODO: move all this to another file
-shum_locs = (shum_locs_0, shum_locs_1, shum_locs_2, shum_locs_3)
-
-
-def my_assignRandomGoals(state, c=None):
-    hunters = []
-    for agent in state.agents:
-        if agent[1] == 'hunter':
-            hunters.append(agent)
-    poss_goals = []
-    # find all possible combinations of hunters of all possible lengths >= 2
-    for length in range(2, len(hunters) + 1):
-        for combo in itertools.combinations(hunters, length):
-            goal = {}
-            # if mult hunters coop, each hunter coop with the next, the last hunter cooperates with the first
-            for i in range(len(combo)):
-               if i == len(combo) - 1:
-                   goal[combo[i]] = {'cooperateWith': (combo[i], combo[0])}
-               else:
-                   goal[combo[i]] = {'cooperateWith': (combo[i], combo[i + 1])}
-            poss_goals.append(goal)
-    if not c:
-        c = random.randint(0, len(poss_goals))
-    if c == len(poss_goals): # no cooperation
-        return len(poss_goals)
-    for hunter in poss_goals[c]:
-        state.goal[hunter] = poss_goals[c][hunter]
-        return len(poss_goals)
-
-
-# assigns goal, either coopWith or hunt, to agent. can only assign goal to a CompanionsAgent
-def my_assignGoals(state, agent, target, other=None):
-    logger = logging.getLogger('StagHuntAgent')
-    error = False
-    if not isinstance(state.hunters[agent], hagents.CompanionsAgent):
-        logger.debug("cannot assign goal to this agent")
-        error = True
-    for this_agent in (agent, target, other):
-        if this_agent and this_agent not in state.agents:
-            logger.debug(str(this_agent), "not in state")
-            error = True
-    if not error:
-        if other:
-            state.goal[agent] = {'cooperateWith': (agent, other, target)}
-            print('assign coop goal', agent, 'with', other, 'on', target)
-        else:
-            state.goal[agent] = {'hunt': (agent, target)}
-            print('assign hunt goal', agent, 'on', target)
-
-
-# returns a random map
-def my_rand_pickMap(state):
-    i = random.randint(0, 2)
-    j = random.randint(0, 2)
-    state.map = maps[i][j]
-
-
-# setup up state with map with letter game and hunter comp_agent controlled by Companions
-def setup_shum_game(game, comp_agent):
-    game = game.upper().strip()
-    state = staghunt_htn.get_start_state()
-    state.map = shum_maps[game]
-    state.agents.clear()
-    state.score.clear()
-    state.loc = shum_locs_0[game]
-    state.agents = [('r1', 'rabbit'), ('r2', 'rabbit'), ('s1', 'stag'), ('s2', 'stag'), ('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')]
-    for i in (1, 2, 3):
-        if i == comp_agent:
-            hunter = hagents.CompanionsAgent(i, state)
-        else:
-            hunter = hagents.ShumAgent(i, state)
-        hunter.setup()
-    pt.print_map(state.map, state.loc)
+# conditions
+# map size
+# map density
+# stag quantity
+def get_start_state_rand(condition):
+    state = models.staghunt_htn.get_start_state()
+    pickMap(state, condition)
+    setupAgents(state, condition)
+    pickRandomGoals(state)
     return state
 
+def pickRandomGoals(state):
+    c = random.randint(0, 4)
+    assignGoals(state, c)
 
-# assigns number of each agent to state according to amounts in agents
-# agents is (rabbits, stags, companions hunters, A* hunter),
-def my_setupAgents(state, agents):
-    logger = logging.getLogger('StagHuntAgent')
-    if agents[0] < 1 or agents[1] < 1 or (agents[2] + agents[3]) < 1:
-        logger.debug("invalid number of agents")
-        raise ValueError
-    state.agents.clear()
-    state.score.clear()
-    for i in range(0, agents[0]):
-        state.agents.append((f'r{i + 1}', 'rabbit'))
-    for i in range(0, agents[1]):
-        state.agents.append((f's{i + 1}', 'stag'))
-    for i in range(0, agents[2]):   # companions "normal" hunter
-        hunter = hagents.CompanionsAgent(i + 1, state)
-        hunter.setup()
-    for j in range(0, agents[3]):   # A* hunter
-        hunter = hagents.AStarAgent(j + i + 2, state)
-        hunter.setup()
-    # place all agents in random locations
+def assignGoals(state, c):
+    state.goal = {}
+    if c == 0:
+        return
+    elif c == 1:
+        state.goal[('h1', 'hunter')] = {'cooperateWith': (('h1', 'hunter'), ('h2', 'hunter'))}
+        state.goal[('h2', 'hunter')] = {'cooperateWith': (('h2', 'hunter'), ('h1', 'hunter'))}
+    elif c == 2:
+        state.goal[('h1', 'hunter')] = {'cooperateWith': (('h1', 'hunter'), ('h3', 'hunter'))}
+        state.goal[('h3', 'hunter')] = {'cooperateWith': (('h3', 'hunter'), ('h1', 'hunter'))}
+    elif c == 3:
+        state.goal[('h3', 'hunter')] = {'cooperateWith': (('h3', 'hunter'), ('h2', 'hunter'))}
+        state.goal[('h2', 'hunter')] = {'cooperateWith': (('h2', 'hunter'), ('h3', 'hunter'))}
+    else:
+        # 1 working with 2 who is working with 3
+        # iow, they are all working together
+        state.goal[('h1', 'hunter')] = {'cooperateWith': (('h1', 'hunter'), ('h2', 'hunter'))}
+        state.goal[('h2', 'hunter')] = {'cooperateWith': (('h2', 'hunter'), ('h3', 'hunter'))}
+        state.goal[('h3', 'hunter')] = {'cooperateWith': (('h3', 'hunter'), ('h1', 'hunter'))}
+
+
+def pickMap(state, condition):
+    #c = random.randint(0, 4)
+    #state.map = maps[c]
+    state.map = maps[condition[0]][condition[1]]
+
+def setupAgents(state, condition):
+    state.agents = [('r1', 'rabbit'), ('r2', 'rabbit')]
+    for i in range(0,condition[2]+1):
+        state.agents.append((f's{i+1}', 'stag'))
+    state.agents.extend([('h1', 'hunter'), ('h2', 'hunter'), ('h3', 'hunter')])
+
     state.loc = {}
     for agent in state.agents:
         print(agent)
         done = False
         while not done:
-            x = random.randint(0, len(state.map) - 1)
-            y = random.randint(0, len(state.map[0]) - 1)
-            if state.map[x][y] > 0:         # space is empty
+            x = random.randint(0,len(state.map)-1)
+            y = random.randint(0,len(state.map[0])-1)
+            print(x,y)
+            if state.map[x][y] > 0:
                 done = True
-                for other in state.loc:     # other agent not occupying
-                    if state.loc[other] == (x, y):
+                for other in state.loc:
+                    if state.loc[other] == (x,y):
                         done = False
                         break
                 if done:
-                    state.loc[agent] = (x, y)
-                    print(x, y)
-    pt.print_map(state.map, state.loc)
+                    state.loc[agent] = (x,y)
+
+def run_all():
+    all_sims = [[[None for i in range(3)] for j in range(3)] for k in range(3)]
+    for i in range(0, 3): # map size
+        for j in range(0, 3): # map density
+            for k in range(0, 3):
+                runs_for_cond = []
+                for c in range(0, 30):
+                    states_plans = run_one((i,j,k))
+                    runs_for_cond.append(states_plans)
+                all_sims[i][j][k] = runs_for_cond
+    pickle.dump(all_sims, open('all.pickle', 'wb'))
 
 
-def my_run_sim(agents, n, sim=False):
-    logger = logging.getLogger('StagHuntAgent')
-    for i in range(n):
-        print("\n****** NEW GAME ******\n")
-        state = staghunt_htn.get_start_state()
-        my_rand_pickMap(state)
-        my_setupAgents(state, agents)
-        num_poss_goals = my_assignRandomGoals(state)
-        logger.debug("simulating state")
-        if sim:
-            simulate_state(state, 3, my_decide, num_poss_goals)
-        else:
-            simulate_state(state, 3)
-        logger.debug("finished\n\n")
 
-
-def my_make_game(agents):
-    print("\n****** NEW GAME ******\n")
-    state = staghunt_htn.get_start_state()
-    my_rand_pickMap(state)
-    my_setupAgents(state, agents)
-    return state
-
-
-def shum_run_one(game, state):
-    logger = logging.getLogger('StagHuntAgent')
-    game = game.upper().strip()
-    for hunter in state.hunters.values():
-        if isinstance(hunter, hagents.CompanionsAgent):
-            comp_agent = hunter.name
-            break
-    if comp_agent not in state.goal:
-        logger.debug(str(comp_agent) + ' has no goal assigned')
-        return False
-    # move comp agent with reasoning
-    states, plans = simulate_shum_state(state)
-    next = states[1]
-    # move all other agents, fixed
-    for agent in state.agents:
-        next_locs = shum_locs[state.step][game]
-        if agent is not comp_agent and agent in next_locs:
-            next.loc[agent] = next_locs[agent]
-    # FIXME: check for capture event
-    pt.print_map(next.map, next.loc)
-    return next
-
-
-def my_run_one(state, randGoals=True):
-    logger = logging.getLogger('StagHuntAgent')
-    noGoal = False
-    if randGoals:
-        my_assignRandomGoals(state)
-    for hunter in state.hunters:
-        if hunter not in state.goal:
-            logger.debug(str(hunter) + ' has no goal assigned')
-            noGoal = True
-    if noGoal:
-        return False
-    states, plans = simulate_state(state, 1)
-    return states[1]    # next state
-
-
-def my_decide(state, num_poss_goals):
+def decide(state):
     # sim each set of goals
     sims = []
-    for c in range(num_poss_goals):
+    for c in range(5):
         print('goal set', c)
         sims.append(deepcopy(state))
         # reset scores for each mental sim
         for agent in sims[c].score:
             sims[c].score[agent] = 0
-        my_assignRandomGoals(sims[c], c)
+        assignGoals(sims[c], c)
         print('**** goals ****', sims[c].goal)
-        states, _ = simulate_state(sims[c], MENTAL_SIM_LEN) # simulate each goal with 5 steps each?
+        states,_ = simulate_state(sims[c], MENTAL_SIM_LEN)
         sims[c] = states
         print('**** scores ****', sims[c][-1].score)
     # reset goals
@@ -538,8 +323,7 @@ def my_decide(state, num_poss_goals):
     # for each agent, pick best result
     for agent in state.agents:
         if agent[1] == 'hunter':
-            # what is 4?
-            s = argmax(range(4), lambda x: sims[x][-1].score[agent])    # score of this agent at this state?
+            s = argmax(range(4), lambda x: sims[x][-1].score[agent])
             print('argmax', s, agent)
             print('-sims score', sims[s][-1].score)
             print('-sims goal', sims[s][0].goal)
@@ -559,20 +343,21 @@ def argmax(args, fn):
             max_arg = arg
     return max_arg
 
+def run_one(condition):
+    state = get_start_state_rand(condition)
+    return simulate_state(state, 3, decide)
 
-def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
+def simulate_state(state, sim_steps, goal_manager = None):
     planner = pyhop.Pyhop('hippity-hop')
-    staghunt_htn.load_operators(planner)
-    staghunt_htn.load_methods(planner)
+    models.staghunt_htn.load_operators(planner)
+    models.staghunt_htn.load_methods(planner)
     states = [state]
     plans = []
     pt.print_map(state.map, state.loc)
     for i in range(0, sim_steps):
-        state.step += 1
-        print("simulating state", state.step)
         # decisions, decisions.  to decide or not to decide
         if goal_manager:
-            goal_manager(state, num_poss_goals)  # side-effects goals
+            goal_manager(state) # side-effects goals
         print('* goals *', state.goal)
         plan = planner.pyhop(state, [('sim_all',)], verbose=0)
         plans.append(plan)
@@ -585,38 +370,6 @@ def simulate_state(state, sim_steps, goal_manager=None, num_poss_goals=None):
         states.append(state)
     return states, plans
 
-
-# TODO: could merge with above func
-def simulate_shum_state(state):
-    planner = pyhop.Pyhop('hippity-hop')
-    staghunt_htn.load_operators(planner)
-    staghunt_htn.load_methods(planner)
-    states = [state]
-    plans = []
-    pt.print_map(state.map, state.loc)
-    state.step += 1
-    print("simulating state", state.step)
-    print('* goals *', state.goal)
-    plan = planner.pyhop(state, [('sim_one',)], verbose=0)
-    plans.append(plan)
-    pt.print_plan(plan)
-    state = deepcopy(state)
-    for action in plan:
-        fn = planner.operators[action[0][0]]
-        fn(state, *action[0][1:])
-    states.append(state)
-    return states, plans
-
-
 if __name__ == '__main__':
-
-    agents = (2, 1, 3)  # rabbits, stags, hunters
-    n = 1
-    my_run_sim(agents, n)
-
-    # agents = (2, 2, 3)
-    # state = my_make_game(agents)
-    # pt.print_map(state.map, state.loc)
-
-
-
+    run_all()
+    
