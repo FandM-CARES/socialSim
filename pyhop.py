@@ -231,23 +231,27 @@ class Pyhop(object):
         if task1[0] in self.operators:
             if verbose>2: print('depth {} action {}'.format(len(depth),task1))
             operator = self.operators[task1[0]]
-            newstate = operator(copy.deepcopy(state),*task1[1:])
+            # newstate is this state after operator called with objects in task as arguments
+            newstate = operator(copy.deepcopy(state),*task1[1:])    
             if verbose>2:
                 print('depth {} new state:'.format(len(depth)))
                 print_state(newstate)
             if newstate:
+                # recursive
                 solution = self.seek_plan(newstate,tasks[1:],plan+[(task1,depth)],depth+[task1[0]],verbose)
                 if solution != False:
                     return solution
         if task1[0] in self.methods:
             if verbose>2: print('depth {} method instance {}'.format(len(depth),task1))
             relevant = self.methods[task1[0]]
+            # methods are series of functions (subtasks)
             for method in relevant:
                 subtasks = method(state,*task1[1:])
                 # Can't just say "if subtasks:", because that's wrong if subtasks == []
                 if verbose>2:
                     print('depth {} new tasks: {}'.format(len(depth),subtasks))
                 if subtasks != False:
+                    # subtasks at top of tasks stack
                     solution = self.seek_plan(state,subtasks+tasks[1:],plan,depth+[task1[0]],verbose)
                     if solution != False:
                         return solution
