@@ -1,108 +1,94 @@
 /* Huntspace.js */
 
 import React from 'react';
-import * as d3 from 'd3';
+import RenderHuntspace from './RenderHuntspace.js'
 import './Huntspace.css';
-import { useD3 } from './useD3.js';
-import {getWallCoordinates, getSetupData} from "./HuntspaceUtil.js";
+import simData from '../assets/data/single_sim.json'
+import {createCharacterStates} from "./HuntspaceUtil.js";
 
-function Huntspace({ characters, map }) {
-  // data is going to be the character states and map
+class Huntspace extends React.Component {
 
-  const svgWidth = 500;
-  const svgHeight = 500;
+  constructor(props){
+      super(props)
+      const {id, map, states} = simData;
+      const stateLength = states.length;
+      const characters = createCharacterStates(states);
 
-  const ref = useD3(
-    (svg) => {
-      const mapWidth = map.length;
-      const stateCounter = 1;
+      this.state = {
+          stateCounter: 0,
+          stateLength: stateLength,
+          mapWidth: 1,
+          characters: characters,
+          currCharacters: characters[0],
+          id: id,
+          map: map,
+      }
+  }
 
-      const setupData = getSetupData(svgWidth, svgHeight, mapWidth);
-      const {cellWidth, cellHeight, labelOffset, dLookup} = setupData;
+  updateCharacterPositions = (ctr) => {
+    const currChars = this.state.currCharacters.slice();
+    const nextChars = this.state.characters[ctr].slice(); // not the next swequential state of characters but the next state, can be the previous state
 
-      const scale = d3.scaleLinear()
-          .domain([0, 7])
-          .range([0, svgWidth]);
+    // update moving characters
+    const charObj = {};
+    currChars.forEach(
+      element => {
+        charObj[element.id] = element;
+      }
+    )
+    nextChars.forEach(
+      element => {
+        charObj[element.id] = element;
+      }
+    )
 
-      // init character space
-      svg.select(".characters")
-          .attr("stroke-width", 1.5)
-          .attr("font-family", "sans-serif")
-          .attr("font-size", cellWidth/3.);
+    var values = Object.keys(charObj).map(function(key){
+      return charObj[key];
+    });
 
-      const wallsCoord = getWallCoordinates(map);
+    this.setState({
+      currCharacters: values,
+    });
+  }
 
-      // draw walls
-      svg.select(".walls")
-            .selectAll("wall")
-            .data(wallsCoord)
-            .enter()
-            .append("rect")
-            .attr("x", function(d) { return scale(d.x); })
-            .attr("y", function(d) { return scale(d.y); })
-            .attr("width", cellWidth)
-            .attr("height", cellHeight)
-            .style("stroke-width", "1px")
-            .style("stroke", "#ebebeb")
-            .style("fill", function(d) { return d.wall;});
+  showNextState = () => {
+      if(this.state.stateCounter < this.state.stateLength - 1){
+          this.setState({
+            stateCounter: (this.state.stateCounter + 1),
+          });
+          this.updateCharacterPositions(this.state.stateCounter + 1);
+      }
+  };
 
-      // draw character text
-        svg.select(".characters")
-            .selectAll("text")
-            .data(characters, d => d.id)
-            .join("text")
-            .text(d => d.id)
-            .style("fill", "red")
-            .style("font-size", "12px")
-            .style("dominant-baseline", function(d) {
-                return labelOffset[d.id][3];
-            })
-            .style("text-anchor", function(d) {
-                return labelOffset[d.id][2];
-            })
-            .transition().duration(function() {
-                return (stateCounter) ? 1000 : 0;
-            })
-            .attr("x", function(d) {
-                return scale(d.x + labelOffset[d.id][0]);
-            })
-            .attr("y", function(d) { return scale(d.y + labelOffset[d.id][1]); });
+  showPrevState = () => {
+      if(this.state.stateCounter >= 1){
+          this.setState({
+            stateCounter: (this.state.stateCounter - 1),
+            currCharacters: this.state.characters[this.state.stateCounter - 1]
+          });
+          this.updateCharacterPositions(this.state.stateCounter - 1);
+      }
+  };
 
-        // draw character icons
-        svg.select(".characters")
-            .selectAll("path")
-            .data(characters, d => d.id)
-            .join(
-          enter => enter.append("path"),
-          update => update
-            .call(update => update
-              .transition().duration(function() {
-                      return (stateCounter) ? 1000 : 0;
-                  })
-              .attr("transform", function (d) {
-                      return "translate(" + scale(d.x + .25) + "," + scale(d.y + .25) +
-                      ") scale(.07)";
-                  })
-              .attr("d", function (d) {
-                      return dLookup[d.type];
-                  })
-            ),
-          exit => exit.remove()
-        );
+  resetState = () => {
+    this.setState({
+      stateCounter: 0,
+      currCharacters: this.state.characters[0]
+    });
+  };
 
-    }, [characters]
-  );
-
-  return (
-    <svg
-      ref={ref}
-      height={svgHeight}
-      width={svgWidth}
-    >
-      <g className="walls"></g>
-      <g className="characters"></g>
-    </svg>
-  )
+  render(){
+    return(
+      <div className="Huntspace">
+        <RenderHuntspace characters={this.state.currCharacters} map={this.state.map}/>
+        <ul className="State-items">
+          <div className="State-item default"><button disabled={this.state.stateCounter===0?true:false} onClick={this.showPrevState}>Previous</button></div>
+          <div className="State-item default"><button disabled={this.state.stateCounter===(this.state.stateLength-1)?true:false} onClick={this.showNextState}>Next</button></div>
+          <div className="State-item default"><button disabled={this.state.stateCounter===0?true:false} onClick={this.resetState}>Reset</button></div>
+        </ul>
+      </div>
+    )
+  };
 }
 
 export default Huntspace

@@ -2,14 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import HuntspaceComponent from './huntspace/HuntspaceComponent.js'
-import HeaderComponent from './header/HeaderComponent.js';
+import Huntspace from './huntspace/Huntspace.js'
+import Header from './header/Header.js';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <HeaderComponent />
-    <HuntspaceComponent />
+    <Header />
+    <Huntspace />
   </React.StrictMode>
 );
 
