@@ -34,31 +34,31 @@ export const getSetupData = (svgWidth, svgHeight, mapWidth) => {
 
 export const createCharacterStates = (states) => {
   const characters = [];
-	states.forEach(function (configFileState) {
-		const state = [];
-		for (const [configFileCharId, configFileLoc] of Object.entries(configFileState)) {
-			state.push({
-				id: configFileCharId,
-				type: configFileCharId[0],
-				x: configFileLoc[0],
-				y: configFileLoc[1]
-			});
-		}
-		characters.push(state);
-	});
-	return characters;
+    states.forEach(function (configFileState) {
+        const state = [];
+        for (const [configFileCharId, configFileLoc] of Object.entries(configFileState)) {
+            state.push({
+                id: configFileCharId,
+                type: configFileCharId[0],
+                x: configFileLoc[0],
+                y: configFileLoc[1]
+            });
+        }
+        characters.push(state);
+    });
+    return characters;
 };
 
 export const getWallCoordinates = (mapData) => {
-	const wallsCoord = mapData.map(function (row, i) {
-		return row.map(function(col, j) {
-			var fill = col ? "none" : "#000";
-			return {
-				x: i,
-				y: j,
-				wall: fill
-			};
-		});
-	}).flat();
+    const wallsCoord = mapData.map(function (row, i) {
+        return row.map(function(col, j) {
+            var fill = col ? "none" : "#000";
+            return {
+                x: i,
+                y: j,
+                wall: fill
+            };
+        });
+    }).flat();
   return wallsCoord;
 };
