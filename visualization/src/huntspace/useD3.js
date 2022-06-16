@@ -9,6 +9,6 @@ export const useD3 = (renderCanvasFn, dependencies) => {
   React.useEffect(() => {
     renderCanvasFn(d3.select(ref.current));
     return () => {};
-  }, dependencies);
+}, [renderCanvasFn, dependencies]);
   return ref;
 }

@@ -2,9 +2,9 @@
 
 import React from 'react';
 import * as d3 from 'd3';
-import { useD3 } from './useD3.js';
 import './Huntspace.css';
-import {createCharacterStates, getWallCoordinates, getSetupData} from "./HuntspaceUtil.js";
+import { useD3 } from './useD3.js';
+import {getWallCoordinates, getSetupData} from "./HuntspaceUtil.js";
 
 function Huntspace({ characters, map }) {
   // data is going to be the character states and map
@@ -16,7 +16,6 @@ function Huntspace({ characters, map }) {
     (svg) => {
       const mapWidth = map.length;
       const stateCounter = 1;
-      const stateLength = 4;
 
       const setupData = getSetupData(svgWidth, svgHeight, mapWidth);
       const {cellWidth, cellHeight, labelOffset, dLookup} = setupData;

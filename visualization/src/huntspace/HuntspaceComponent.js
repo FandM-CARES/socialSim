@@ -4,7 +4,7 @@ import React from 'react';
 import Huntspace from './Huntspace.js'
 import './Huntspace.css';
 import simData from '../assets/data/single_sim.json'
-import {createCharacterStates, getWallCoordinates, getSetupData, mergeCharArray} from "./HuntspaceUtil.js";
+import {createCharacterStates} from "./HuntspaceUtil.js";
 
 class HuntspaceComponent extends React.Component {
 
@@ -82,9 +82,9 @@ class HuntspaceComponent extends React.Component {
       <div className="Huntspace">
         <Huntspace characters={this.state.currCharacters} map={this.state.map}/>
         <ul className="State-items">
-          <div className="State-item default"><a type="button" disabled={this.state.stateCounter===0?true:false} onClick={this.showPrevState}>Previous</a></div>
-          <div className="State-item default"><a type="button" disabled={this.state.stateCounter===(this.state.stateLength-1)?true:false} onClick={this.showNextState}>Next</a></div>
-          <div className="State-item default"><a type="button" disabled={this.state.stateCounter===0?true:false} onClick={this.resetState}>Reset</a></div>
+          <div className="State-item default"><button disabled={this.state.stateCounter===0?true:false} onClick={this.showPrevState}>Previous</button></div>
+          <div className="State-item default"><button disabled={this.state.stateCounter===(this.state.stateLength-1)?true:false} onClick={this.showNextState}>Next</button></div>
+          <div className="State-item default"><button disabled={this.state.stateCounter===0?true:false} onClick={this.resetState}>Reset</button></div>
         </ul>
       </div>
     )
