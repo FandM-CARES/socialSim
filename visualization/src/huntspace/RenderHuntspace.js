@@ -18,7 +18,7 @@ function RenderHuntspace({ characters, map }) {
       const stateCounter = 1;
 
       const setupData = getSetupData(svgWidth, svgHeight, mapWidth);
-      const {cellWidth, cellHeight, labelOffset, dLookup} = setupData;
+      const {cellWidth, cellHeight, labelOffset, labelOffsetGroups, dLookup} = setupData;
 
       const scale = d3.scaleLinear()
           .domain([0, 7])
@@ -55,18 +55,18 @@ function RenderHuntspace({ characters, map }) {
             .style("fill", "red")
             .style("font-size", "12px")
             .style("dominant-baseline", function(d) {
-                return labelOffset[d.id][3];
+                return ((d.displayData.groupSize > 1) ? labelOffsetGroups[d.displayData.groupId][3] : labelOffset[d.id][3]);
             })
             .style("text-anchor", function(d) {
-                return labelOffset[d.id][2];
+                return ((d.displayData.groupSize > 1) ? labelOffsetGroups[d.displayData.groupId][2] : labelOffset[d.id][2]);
             })
             .transition().duration(function() {
                 return (stateCounter) ? 1000 : 0;
             })
             .attr("x", function(d) {
-                return scale(d.x + labelOffset[d.id][0]);
+                return scale(d.x + ((d.displayData.groupSize > 1) ? labelOffsetGroups[d.displayData.groupId][0] : labelOffset[d.id][0]));
             })
-            .attr("y", function(d) { return scale(d.y + labelOffset[d.id][1]); });
+            .attr("y", function(d) { return scale(d.y + ((d.displayData.groupSize > 1) ? labelOffsetGroups[d.displayData.groupId][1] : labelOffset[d.id][1])); });
 
         // draw character icons
         svg.select(".characters")
@@ -80,13 +80,22 @@ function RenderHuntspace({ characters, map }) {
                       return (stateCounter) ? 1000 : 0;
                   })
               .attr("transform", function (d) {
-                      return "translate(" + scale(d.x + .25) + "," + scale(d.y + .25) +
-                      ") scale(.07)";
+                      return "translate(" +
+                      scale(((d.displayData.groupSize > 1) ? d.displayData.x : d.x) + .25)
+                      + "," +
+                      scale(((d.displayData.groupSize > 1) ? d.displayData.y : d.y) + .25)
+                      + ") scale("+ d.displayData.size +")";
                   })
               .attr("d", function (d) {
                       return dLookup[d.type];
                   })
-            ),
+            ).style("fill", function(d) {
+                if(d.points < 0){
+                    return "red";
+                }else{
+                    return "black";
+                }
+            }),
           exit => exit.remove()
         );
 

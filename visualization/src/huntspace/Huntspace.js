@@ -4,7 +4,7 @@ import React from 'react';
 import RenderHuntspace from './RenderHuntspace.js'
 import './Huntspace.css';
 import simData from '../assets/data/single_sim.json'
-import {createCharacterStates} from "./HuntspaceUtil.js";
+import {createCharacterStates, enforceGameRules, revertBoardState} from './HuntspaceUtil.js';
 
 class Huntspace extends React.Component {
 
@@ -20,6 +20,7 @@ class Huntspace extends React.Component {
           mapWidth: 1,
           characters: characters,
           currCharacters: characters[0],
+          lastCharacters: null,
           id: id,
           map: map,
       }
@@ -42,12 +43,16 @@ class Huntspace extends React.Component {
       }
     )
 
-    var values = Object.keys(charObj).map(function(key){
+    // merge current and next character states
+    const values = Object.keys(charObj).map(function(key){
       return charObj[key];
     });
 
+    // enforceGameRules
+    const newChars = enforceGameRules(values);
+
     this.setState({
-      currCharacters: values,
+      currCharacters: newChars,
     });
   }
 
@@ -64,7 +69,6 @@ class Huntspace extends React.Component {
       if(this.state.stateCounter >= 1){
           this.setState({
             stateCounter: (this.state.stateCounter - 1),
-            currCharacters: this.state.characters[this.state.stateCounter - 1]
           });
           this.updateCharacterPositions(this.state.stateCounter - 1);
       }
@@ -73,7 +77,7 @@ class Huntspace extends React.Component {
   resetState = () => {
     this.setState({
       stateCounter: 0,
-      currCharacters: this.state.characters[0]
+      currCharacters: revertBoardState(this.state.characters[0]),
     });
   };
 

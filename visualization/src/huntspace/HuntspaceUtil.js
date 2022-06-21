@@ -1,4 +1,4 @@
-/* HuntspaceUtils.js*/
+/* HuntspaceUtil.js*/
 
 export const getSetupData = (svgWidth, svgHeight, mapWidth) => {
 
@@ -16,6 +16,15 @@ export const getSetupData = (svgWidth, svgHeight, mapWidth) => {
     s2: [.95, .5, "end", "baseline"]
   };
 
+  const labelOffsetGroups = [
+      [.05, .05, "start", "hanging"],
+      [.5, .05, "middle", "hanging"],
+      [.95, .05, "end", "hanging"],
+      [.05, .5, "start", "middle"],
+      [.5, .5, "middle", "middle"],
+      [.95, .5, "end", "middle"],
+  ];
+
   // rabbit
   // Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
   // deer
@@ -29,7 +38,22 @@ export const getSetupData = (svgWidth, svgHeight, mapWidth) => {
     h: "M68.169,447.023C71.835,449.023,159.075,496,256,496c105.008,0,184.772-47.134,188.116-49.14A8,8,0,0,0,448,440c0-64.593-19.807-123.7-55.771-166.442-25.158-29.9-56.724-50.28-91.539-59.662a104,104,0,1,0-89.38,0c-34.815,9.382-66.381,29.765-91.539,59.662C83.807,316.3,64,375.407,64,440A8,8,0,0,0,68.169,447.023ZM168,120a88,88,0,1,1,88,88A88.1,88.1,0,0,1,168,120ZM132.013,283.859C164.5,245.258,208.528,224,256,224s91.5,21.258,123.987,59.859c32.681,38.838,51.056,92.48,51.977,151.474C414.845,444.6,343.708,480,256,480c-81.11,0-157.5-35.609-175.96-44.856C81,376.223,99.367,322.656,132.013,283.859Z"
   };
 
-  return {cellWidth, cellHeight, labelOffset, dLookup};
+  return {cellWidth, cellHeight, labelOffset, labelOffsetGroups, dLookup};
+}
+
+function initializePoints(charType) {
+    // takes the type of character and assigns them points
+    switch(charType){
+        case "r":
+            return 1;
+        case "s":
+            return 10;
+        case "h":
+            return 0;
+        default:
+            console.log("Could not set an initial point value for character type: ", charType);
+            return 0;
+    }
 }
 
 export const createCharacterStates = (states) => {
@@ -41,7 +65,15 @@ export const createCharacterStates = (states) => {
                 id: configFileCharId,
                 type: configFileCharId[0],
                 x: configFileLoc[0],
-                y: configFileLoc[1]
+                y: configFileLoc[1],
+                points: initializePoints(configFileCharId[0]),
+                displayData : {
+                    groupSize: 1,
+                    groupId: 0,
+                    size: 0.07,
+                    x: configFileLoc[0],
+                    y: configFileLoc[1]
+                }
             });
         }
         characters.push(state);
@@ -62,3 +94,145 @@ export const getWallCoordinates = (mapData) => {
     }).flat();
   return wallsCoord;
 };
+
+export const updatePoints = (group) => {
+    // update the points earned by each character
+    const characterDict = {
+        'r': [],
+        's': [],
+        'h': []
+    };
+    group.forEach((character) => {
+        characterDict[character.type].push(character);
+    });
+
+    let numHares = characterDict['r'].length;
+    let numStags = characterDict['s'].length;
+    let numHunters = characterDict['h'].length;
+
+    // only a single hunter can claim a hare
+    for (let i = 0; i < numHares && numHunters > 0; i++) {
+        characterDict['h'][i%numHunters].points += 1;
+        characterDict['r'][i].points -= 2;
+    }
+
+    // only two hunters can claim a stag
+    for (let i = 0; numHunters > 1 && i < numStags; i++) {
+        characterDict['h'][i%numHunters].points += 5;
+        characterDict['h'][(i+1)%numHunters].points += 5;
+        characterDict['s'][i].points -= 11;
+    }
+
+    const updatedSubGroups = Object.keys(characterDict).map(function(key){
+        return characterDict[key];
+    });
+
+    const updatedGroup = [].concat.apply([], updatedSubGroups);
+
+    return updatedGroup;
+}
+
+export const scaleDisplay = (group) => {
+    // scale the way characters are displayed so there is no overlap
+    // given group reassing x, y, and s to scale characters
+
+    let x = group[0].x;
+    let numCharacters = group.length;
+    let interval = 1 / numCharacters;
+
+    for(let i = 0; i < numCharacters; i++){
+        if(i !== group[i].displayData.groupId){
+            console.log("Warning: Order of group has changed!");
+        }
+        group[i].displayData.x = (x - 0.25) + (interval * i);
+        group[i].displayData.size = 0.07 * 2 * (interval); // 2 = scaling constant
+    }
+
+    return group;
+}
+
+function intakeGroup(group) {
+    let groupSize = group.length;
+    for(let i=0; i < groupSize; i++){
+        group[i].displayData.groupSize = groupSize;
+        group[i].displayData.groupId = i;
+    }
+    return group;
+}
+
+function handleInteraction(group){
+    // function to handle the interaction of a group of characters
+    let updatedGroup = intakeGroup(group);
+    updatedGroup = updatePoints(group);
+    updatedGroup = scaleDisplay(group);
+    return updatedGroup
+}
+
+export const revertBoardState = (characters) => {
+    // reverts all the display variables and points
+    characters.forEach((character) => {
+        revertCharacterState(character);
+    })
+
+    return characters;
+}
+
+function revertCharacterState(character){
+    let revertedCharacter = cleanCharacterPointState(character);
+    revertedCharacter = cleanCharacterDisplayState(character);
+    return revertedCharacter;
+}
+
+function cleanCharacterPointState(character){
+    character.points = initializePoints(character.type);
+    return character;
+}
+
+function cleanCharacterDisplayState(character){
+    let cleanDisplayState = {
+        groupSize: 1,
+        groupId: 0,
+        size: 0.07,
+        x: character.x,
+        y: character.y
+    }
+    character.displayData = cleanDisplayState;
+    return character;
+}
+
+export const getCharacterGroups = (characters) => {
+    // Get the groups of characters at the same position
+    const groups = {};
+    characters.forEach((character) => {
+        let pos = String([character.x, character.y]);
+        if(groups.hasOwnProperty(pos)){
+            groups[pos].characters.push(character);
+        }else{
+            groups[pos] = {"characters": [character]};
+        }
+    });
+    return groups;
+}
+
+export const enforceGameRules = (characters) => {
+    const newChars = characters.slice();
+
+    // get the number of characters at each character position
+    const groups = getCharacterGroups(newChars);
+
+    // handle group interaction
+    const updatedCharacters = [];
+    for (const [key, value] of Object.entries(groups)) {
+        if(value.characters.length > 1){
+            let updatedGroup = handleInteraction(value.characters.slice());
+            updatedGroup.forEach((character) => {
+                updatedCharacters.push(character);
+            })
+        }else{
+            let cleanCharacter = cleanCharacterDisplayState(value.characters.slice()[0]);
+            updatedCharacters.push(cleanCharacter);
+        }
+    }
+
+    return updatedCharacters;
+}
