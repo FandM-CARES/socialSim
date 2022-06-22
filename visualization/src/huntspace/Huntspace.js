@@ -6,13 +6,16 @@ import './Huntspace.css';
 import simData from '../assets/data/single_sim.json'
 import {createCharacterStates, enforceGameRules, revertBoardState} from './HuntspaceUtil.js';
 
+/* Objective: Render huntspace SVG when character positions are initialized
+    or updated. */
+
 class Huntspace extends React.Component {
 
   constructor(props){
-      super(props)
       const {id, map, states} = simData;
       const stateLength = states.length;
       const characters = createCharacterStates(states);
+      super(props);
 
       this.state = {
           stateCounter: 0,
@@ -50,6 +53,7 @@ class Huntspace extends React.Component {
 
     // enforceGameRules
     const newChars = enforceGameRules(values);
+  // H-A-1 TODO: Fix parameters to take in the character state and map
 
     this.setState({
       currCharacters: newChars,
