@@ -236,3 +236,21 @@ export const enforceGameRules = (characters) => {
 
     return updatedCharacters;
 }
+
+export const getNextCharacterPositions = (player, move) => {
+    const moveRef = [
+        [0, -1],
+        [1, 0],
+        [0, 1],
+        [-1, 0]
+    ]
+    // Up, Right, Down, Left
+
+    let x = player.x + moveRef[move][0];
+    let y = player.y + moveRef[move][1];
+
+    player.x = x;
+    player.y = y;
+
+    return player; // updated move
+}
