@@ -90,6 +90,9 @@ function RenderHuntspace({ characters, map }) {
                       return dLookup[d.type];
                   })
             ).style("fill", function(d) {
+                if(!d.inPlay && d.points >= 0){
+                    return "blue";
+                }
                 if(d.points < 0){
                     return "red";
                 }else{

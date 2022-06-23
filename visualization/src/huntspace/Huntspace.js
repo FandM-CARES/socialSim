@@ -19,8 +19,6 @@ class Huntspace extends React.Component {
       };
   }
 
-  // H-A-1 TODO: Fix parameters to take in the character state and map
-
   updateCharacterPositions = (characters) => {
     this.setState({
       characters: characters,
