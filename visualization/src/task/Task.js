@@ -39,39 +39,9 @@ class Task extends React.Component {
        TODO: Add variables for questionnaire data
     */
 
-    // componentDidMount() {
-    //     // this.createGameSequence();
-    //     // T-A-3 TODO: Conduct game for each start state
-    //     console.log("beginning task...");
-    //     const seeds = this.state.seeds;
-    //     let games = [];
-    //     for(let i=0; i < seeds.length; i++){
-    //         // T-A-3 TODO: Conduct game for each start state
-    //         let seed = seeds[i];
-    //         let gameId = this.state.taskId + "-" + (i < 10 ? "0" + i : i);
-    //         let game = {
-    //             "id": gameId,
-    //             "initialCharacterState": seed.state,
-    //             "map": seed.map
-    //         };
-    //         console.log("subgame",game);
-    //         games.push(game);
-    //         // <Huntspace id={gameId} map={seed.map} initialCharacterState={seed.state} />
-    //         // T-A-4 TODO: Save necessary game data
-    //     }
-    //
-    //     console.log("games", games);
-    //
-    //     this.setState({
-    //       gameCtr: 0,
-    //       games: games,
-    //     });
-    // }
-
     createGameSequence = (taskId, seeds) => {
         // T-A-3 TODO: Conduct game for each start state
         console.log("beginning task...");
-        // const seeds = this.state.seeds;
         let games = [];
         for(let i=0; i < seeds.length; i++){
             // T-A-3 TODO: Conduct game for each start state
@@ -83,7 +53,6 @@ class Task extends React.Component {
                 "map": seed.map
             };
             games.push(game);
-            // <Huntspace id={gameId} map={seed.map} initialCharacterState={seed.state} />
             // T-A-4 TODO: Save necessary game data
         }
         return games;
@@ -100,8 +69,9 @@ class Task extends React.Component {
     }
 
     // TODO: Define a callback function for when transitioning between games
-    nextGame = () => {
+    nextGame = (gameData) => {
         // update the playing and game ctr
+        console.log("finished game ", gameData);
         console.log("going to game " + this.state.gameCtr + 1);
     }
 
@@ -127,7 +97,7 @@ class Task extends React.Component {
 
         let gameContainer;
         if(this.state.gameCtr > -1){
-            gameContainer = <Game id={game.id} map={game.map} initialCharacterState={game.initialCharacterState} />;
+            gameContainer = <Game id={game.id} map={game.map} initialCharacterState={game.initialCharacterState} endGame={this.nextGame}/>;
         }else{
             gameContainer = <div/>;
         }

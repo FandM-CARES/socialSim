@@ -1,5 +1,7 @@
 /* GameUtil.js */
 
+// GAME SETUP METHODS
+
 function initializePoints(charType) {
     // takes the type of character and assigns them points
     switch(charType){
@@ -40,6 +42,8 @@ export const createCharacterStates = (states) => {
     });
     return characters;
 };
+
+// GAME LOGIC METHODS
 
 export const updatePoints = (group) => {
     // update the points earned by each character
@@ -189,9 +193,16 @@ function endGame(characters){
     return characters;
 }
 
+export const getCharacter = (characters, id) => {
+    // get a character from a list of characters by id
+    let characterIndx = characters.slice().findIndex(character => character.id === id);
+    let character = characters[characterIndx];
+    return character;
+}
+
 function checkGameOver(timesteps, originalCharacters){
     let characters = originalCharacters.slice();
-    // let gameOver = false;
+    let gameOver = false;
 
     // stag is caught
     let stag = getCharacter(characters, "s1");
@@ -211,19 +222,26 @@ function checkGameOver(timesteps, originalCharacters){
 
     if(scenario1 || scenario2 || scenario3 || scenario4){
         characters = endGame(characters);
+        gameOver = true;
     }
 
-    return characters;
+    return {gameOver, characters};
 }
 
 export const enforceGameRules = (timesteps, map, characters) => {
     const newChars = characters.slice();
 
+    let gameStatus = {
+        gameOver: true,
+        validMoves: true
+    };
+
     // check to see if all characters are at legal positions
     const {validMoves, charactersWithInvalidMoves} = checkMoves(map, newChars);
     if(!validMoves){
         console.log("invalid move made by ", charactersWithInvalidMoves);
-        return {validMoves, newChars};
+        gameStatus.validMoves = false;
+        return {gameStatus, newChars};
     }
 
     // get the number of characters at each character position
@@ -244,10 +262,14 @@ export const enforceGameRules = (timesteps, map, characters) => {
     }
 
     // check if the game is over
-    updatedCharacters = checkGameOver(timesteps, updatedCharacters);
+    let gameState = checkGameOver(timesteps, updatedCharacters);
+    gameStatus.gameOver = gameState.gameOver;
+    updatedCharacters = gameState.characters;
 
-    return {validMoves, updatedCharacters};
+    return {gameStatus, updatedCharacters};
 }
+
+// UPDATING CHARACTER POSITIONS
 
 export const getNextCharacterPosition = (originalCharacter, move) => {
     let character = {};
@@ -287,12 +309,7 @@ export const updateCharacters = (characterArr, characters) => {
     return updatedCharacters;
 }
 
-export const getCharacter = (characters, id) => {
-    // get a character from a list of characters by id
-    let characterIndx = characters.slice().findIndex(character => character.id === id);
-    let character = characters[characterIndx];
-    return character;
-}
+// DEBUGGING METHODS
 
 function directCompareStates(state1, state2){
     return (JSON.stringify(state1) === JSON.stringify(state2));
