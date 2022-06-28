@@ -19,12 +19,6 @@ class Huntspace extends React.Component {
       };
   }
 
-  updateCharacterPositions = (characters) => {
-    this.setState({
-      characters: characters,
-    });
-  }
-
   render(){
     return(
       <div className="Huntspace">

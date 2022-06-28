@@ -12,12 +12,13 @@ function initializePoints(charType) {
         case "h":
             return 0;
         default:
-            console.log("Could not set an initial point value for character type: ", charType);
+            console.warn("Could not set an initial point value for character type: ", charType);
             return 0;
     }
 }
 
-export const createCharacterStates = (states) => {
+export const createCharacterStates = (stateData) => {
+  const states = stateData.slice();
   const characters = [];
     states.forEach(function (configFileState) {
         const state = [];
@@ -120,17 +121,16 @@ function intakeGroup(group) {
 function handleInteraction(group){
     // function to handle the interaction of a group of characters
     let updatedGroup = intakeGroup(group);
-    updatedGroup = updatePoints(group);
-    updatedGroup = scaleDisplay(group);
-    return updatedGroup
+    updatedGroup = updatePoints(updatedGroup);
+    updatedGroup = scaleDisplay(updatedGroup);
+    return updatedGroup;
 }
 
 export const revertBoardState = (characters) => {
     // reverts all the display variables and points
     characters.forEach((character) => {
         revertCharacterState(character);
-    })
-
+    });
     return characters;
 }
 
@@ -195,8 +195,8 @@ function endGame(characters){
 
 export const getCharacter = (characters, id) => {
     // get a character from a list of characters by id
-    let characterIndx = characters.slice().findIndex(character => character.id === id);
-    let character = characters[characterIndx];
+    let characterIndx = characters.findIndex(character => character.id === id);
+    let character = characters.slice()[characterIndx];
     return character;
 }
 
@@ -252,9 +252,7 @@ export const enforceGameRules = (timesteps, map, characters) => {
     for (const [key, value] of Object.entries(groups)) {
         if(value.characters.length > 1){
             let updatedGroup = handleInteraction(value.characters.slice());
-            updatedGroup.forEach((character) => {
-                updatedCharacters.push(character);
-            })
+            updatedCharacters = updatedCharacters.concat(updatedGroup);
         }else{
             let cleanCharacter = cleanCharacterDisplayState(value.characters.slice()[0]);
             updatedCharacters.push(cleanCharacter);
@@ -272,15 +270,14 @@ export const enforceGameRules = (timesteps, map, characters) => {
 // UPDATING CHARACTER POSITIONS
 
 export const getNextCharacterPosition = (originalCharacter, move) => {
-    let character = {};
-    Object.assign(character, originalCharacter);
+    let character = JSON.parse(JSON.stringify(originalCharacter));
 
     const moveRef = [
         [0, -1],
         [1, 0],
         [0, 1],
         [-1, 0]
-    ]
+    ];
     // Up, Right, Down, Left
 
     character.x = originalCharacter.x + moveRef[move][0];
@@ -294,10 +291,10 @@ export const getNextCharacterPosition = (originalCharacter, move) => {
 
 function updateCharacter(characters, character){
     // update a character in a list of character objects
-    let updatedCharacter = characters.slice();
-    let characterIndx = updatedCharacter.findIndex(c => c.id === character.id);
-    updatedCharacter[characterIndx] = character;
-    return updatedCharacter;
+    let updatedCharacters = characters.slice();
+    let characterIndx = updatedCharacters.findIndex(c => c.id === character.id);
+    updatedCharacters[characterIndx] = character;
+    return updatedCharacters;
 }
 
 export const updateCharacters = (characterArr, characters) => {
@@ -327,4 +324,30 @@ export const compareStates = (state1, state2) => {
     }
     return equal;
 
+}
+
+function checkCharacterPosition(character){
+    let checkX = (Math.abs(character.displayData.x - character.x) < 0.5);
+    let checkY = character.y === character.displayData.y;
+    return {checkX, checkY};
+}
+
+export const checkPositions = (characters) => {
+    // check to see if the character's position matches the position in their display data
+    let numFail = 0;
+    characters.forEach((character) => {
+        let samePos = checkCharacterPosition(character);
+        if(!(samePos.checkX && samePos.checkY)){
+            console.log(character.id + " is inconsistent for x and y.", character);
+            numFail += 1;
+        }else if(!samePos.checkX){
+            console.log(character.id + " is inconsistent for x.", character);
+            numFail += 1;
+        }else if(!samePos.checkY){
+            console.log(character.id + " is inconsistent for y.", character);
+            numFail += 1;
+        }
+    })
+    console.log(numFail + " characters failed position consistency check.");
+    return numFail;
 }

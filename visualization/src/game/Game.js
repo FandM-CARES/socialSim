@@ -3,7 +3,7 @@ import debounce from 'lodash.debounce';
 import ArrowKeysReact from 'arrow-keys-react';
 import Huntspace from '../huntspace/Huntspace.js';
 import MockGame from './MockGame.js';
-import {createCharacterStates, getNextCharacterPosition, enforceGameRules, updateCharacters} from './GameUtil.js';
+import { createCharacterStates, getNextCharacterPosition, enforceGameRules, updateCharacters, checkPositions } from './GameUtil.js';
 
 /* Objective: Create playable game environment give unique game id and start
     state. */
@@ -21,6 +21,7 @@ class Game extends React.Component {
             characters: characters.slice()[0], // current character state
             history: [this.props.initialCharacterState], // history of character states
             startTime: new Date().toString(),
+            playing: false,
             endTime: "0",
             participatingCharacter: "None"
         };
@@ -41,8 +42,13 @@ class Game extends React.Component {
         });
     }
 
+    startGame = () => {
+        this.setState({
+            playing: true
+        });
+    }
+
     updateCharacterPositions = (direction) => {
-        // G-A-2 TODO: Get moves of hunter (from participant) and stag (from A-star alg.)
         let player = getNextCharacterPosition(this.state.player, direction);
         let npcMoves = MockGame.getNPCMoves(this.state.characters);
         let nextState = updateCharacters(npcMoves,[player]);
@@ -50,23 +56,21 @@ class Game extends React.Component {
         // Enforce game rules and stop the game
         let {gameStatus, updatedCharacters} = enforceGameRules(this.state.history.length, this.state.map, nextState);
 
-        let newHistory = this.state.history.slice();
-        newHistory.push(updatedCharacters);
-
-        if(!gameStatus.validMoves){
-            console.log("Make a legal move.");
-        }else if (!gameStatus.gameOver){
-            this.setState({
+        // If the move is valid
+        if(gameStatus.validMoves){
+            this.setState(prevState => ({
               player: player,
               characters: updatedCharacters,
-              history: newHistory,
+              history: prevState.history.concat([updatedCharacters]),
               getPlayerInput: true
-            });
-        }else{
+          }));
+        }
+
+        // If the move ends the game
+        if(gameStatus.gameOver){
             this.setState({
                 endTime: new Date().toString()
-            },
-           this.compileGameData);
+            });
         }
     }
 
@@ -79,28 +83,34 @@ class Game extends React.Component {
         this.debouncedUpdateHandler.cancel();
     }
 
-    compileGameData = () => {
-        // G-A-5 TODO: Post game questionnaire
-            // TODO: CREATE QUESTION METHOD
-        alert("who were you trying to participate with?");
-        let questionnaireAnswer = "h1";
-
-        this.setState({
-            participatingCharacter: questionnaireAnswer
-        },
-        this.exportGame);
+    runQuestion = () => {
+        return "h2";
     }
 
     exportGame = () => {
-        let finishedGame = {};
-        Object.assign(finishedGame, this.state);
+        let finishedGame = JSON.parse(JSON.stringify(this.state));
+        finishedGame.participatingCharacter = this.runQuestion();
         this.props.endGame(finishedGame);
     }
 
+    checkStatus = () => {
+        if(this.state.endTime !== "0" && this.state.playing){
+            setTimeout(this.exportGame, 1000);
+        }
+    }
+
     render(){
+        this.checkStatus();
+
+        let display;
+        if(this.state.playing){
+            display = <Huntspace id={this.state.id} characters={this.state.characters} map={this.state.map}/>;
+        }else{
+            display = <button onClick={this.startGame}>Play Game</button>;
+        }
       return(
         <div className="Game" {...ArrowKeysReact.events} tabIndex="1">
-            <Huntspace id={this.state.id} characters={this.state.characters} map={this.state.map}/>
+            {display}
         </div>
       )
     }

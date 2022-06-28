@@ -8,10 +8,11 @@ class MockGame {
         let newChars = [];
         let characters = characterState.slice();
         this.nonPlayerCharacters.forEach((characterId) => {
-            let c = getCharacter(characters, characterId)
+            let c = getCharacter(characters, characterId);
             let move = (c.inPlay ? this.getMove(c) : c);
             newChars.push(move);
         })
+
         return updateCharacters(characters, newChars);
     }
 
@@ -22,8 +23,9 @@ class MockGame {
     static getRandomMove(character) {
         // generates a random move for a character
         let move = this.getRandomInt();
-        let newCharacter = getNextCharacterPosition(character, move);
+        let newCharacter = getNextCharacterPosition(character, move); // return copy
         let validMoves = checkMoves(simData.map, [newCharacter]).validMoves;
+
         return {validMoves, newCharacter};
     }
 
