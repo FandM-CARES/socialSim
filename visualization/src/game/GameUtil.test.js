@@ -1,8 +1,10 @@
-import {scaleDisplay, updatePoints, getCharacterGroups, enforceGameRules} from "./HuntspaceUtil.js";
+import {scaleDisplay, updatePoints, getCharacterGroups, enforceGameRules, checkPositions} from "./GameUtil.js";
+import MockGame from './MockGame.js';
 import util from 'util';
 
 // TESTING DATA
 
+// data without an interaction
 const dataWithNoInteraction = [
     {
         "id": "r1",
@@ -147,9 +149,6 @@ const testGroup1Interaction = {
 
 // TEST CASES
 
-console.log("prime dataWithNoInteraction:", dataWithNoInteraction);
-console.log("prime dataWith1Interaction:", dataWith1Interaction);
-
 function print(object) {
     console.log(util.inspect(object, false, null, true /* enable colors */))
 }
@@ -193,7 +192,7 @@ test('testUpdatePointsGroups', () => {
 
 // tests for scaleDisplay
 
-test('testscaleDisplaySingles', () => {
+test('testScaleDisplaySingles', () => {
     // testing the scale display method when no interactions are happening
     let group = testGroupSingles['1,4'].characters.slice();
     let updatedGroup = scaleDisplay(group);
@@ -207,4 +206,19 @@ test('testscaleDisplayGroups', () => {
     let updatedGroup = scaleDisplay(group);
     let expectedGroup = [];
     expect(updatedGroup).toStrictEqual(expectedGroup);
+});
+
+test('testGetNPCMoves', () => {
+    // testing the scale display method when no interactions are happening
+    let npcMoves = MockGame.getNPCMoves(dataWithNoInteraction);
+
+    let numFail = checkPositions(npcMoves);
+    let totalFailures = numFail;
+    for(let i=0; i < 20 || numFail > 1; i++){
+        npcMoves = MockGame.getNPCMoves(exCharState);
+        numFail = checkPositions(npcMoves);
+        totalFailures += numFail;
+    }
+
+    expect(totalFailures).toBe(0);
 });
