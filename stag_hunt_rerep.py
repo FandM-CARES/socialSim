@@ -4,7 +4,7 @@ import math
 import pickle
 import sys
 # sys.path.append('~/Desktop/Research/staghunt-agent/socialSim/qsr')
-sys.path.append('C:\\Users\\kliu4\\Desktop\\socialSim>\\qsr')
+sys.path.append('C:\\Users\\kliu4\\Desktop\\socialSim\\qsr')
 # sys.path.append('/app/companions/pythonian')
 from aoc import AOC
 
