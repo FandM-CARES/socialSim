@@ -1,8 +1,14 @@
+/* Game.js */
+
 import React from 'react';
+import Button from 'react-bootstrap/Button';
+
 import debounce from 'lodash.debounce';
 import ArrowKeysReact from 'arrow-keys-react';
+
 import Huntspace from '../huntspace/Huntspace.js';
-import MockGame from './MockGame.js';
+import Survey from '../survey/Survey.js';
+import MockGame from '../companions/MockGame.js';
 import { createCharacterStates, getNextCharacterPosition, enforceGameRules, updateCharacters, checkPositions } from './GameUtil.js';
 
 /* Objective: Create playable game environment give unique game id and start
@@ -23,7 +29,7 @@ class Game extends React.Component {
             startTime: new Date().toString(),
             playing: false,
             endTime: "0",
-            participatingCharacter: "None"
+            participatingCharacter: "Undetermined"
         };
 
         ArrowKeysReact.config({
@@ -43,6 +49,10 @@ class Game extends React.Component {
     }
 
     startGame = () => {
+        // check if this is first game by looking at last two characters of game id
+        if(this.state.id.slice(-2) === "00"){
+            this.props.toggleInstr();
+        }
         this.setState({
             playing: true
         });
@@ -56,7 +66,7 @@ class Game extends React.Component {
         // Enforce game rules and stop the game
         let {gameStatus, updatedCharacters} = enforceGameRules(this.state.history.length, this.state.map, nextState);
 
-        // If the move is valid
+        // if the move is valid update game positions
         if(gameStatus.validMoves){
             this.setState(prevState => ({
               player: player,
@@ -83,33 +93,30 @@ class Game extends React.Component {
         this.debouncedUpdateHandler.cancel();
     }
 
-    runQuestion = () => {
-        return "h2";
-    }
-
-    exportGame = () => {
+    exportGame = (data) => {
         let finishedGame = JSON.parse(JSON.stringify(this.state));
-        finishedGame.participatingCharacter = this.runQuestion();
+        finishedGame.participatingCharacter = data;
         this.props.endGame(finishedGame);
     }
 
-    checkStatus = () => {
-        if(this.state.endTime !== "0" && this.state.playing){
-            setTimeout(this.exportGame, 1000);
-        }
-    }
-
     render(){
-        this.checkStatus();
+
+        let survey;
+        if(this.state.endTime !== "0" && this.state.participatingCharacter === "Undetermined"){
+           survey = <Survey handleSubmit={this.exportGame}/>;
+        }
 
         let display;
         if(this.state.playing){
             display = <Huntspace id={this.state.id} characters={this.state.characters} map={this.state.map}/>;
+        }else if(this.state.id.slice(-2) === "00"){
+            display = <Button variant="primary" onClick={this.startGame}>Play Game</Button>;
         }else{
-            display = <button onClick={this.startGame}>Play Game</button>;
+            this.startGame();
         }
       return(
         <div className="Game" {...ArrowKeysReact.events} tabIndex="1">
+            {survey}
             {display}
         </div>
       )

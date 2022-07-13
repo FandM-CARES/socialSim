@@ -22,7 +22,7 @@ class Huntspace extends React.Component {
   render(){
     return(
       <div className="Huntspace">
-        <h2>Game Id: {this.state.id}</h2>
+        <h2>Your Game ID: {this.state.id}</h2>
         <RenderHuntspace characters={this.props.characters} map={this.props.map}/>
       </div>
     )

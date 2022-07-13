@@ -1,13 +1,23 @@
 import React from 'react';
+import { ArrowRight } from 'react-bootstrap-icons';
+
 import './Header.css';
+
+// 'layout-text-sidebar-reverse'
+// Plug in the menu icon
 
 class Header extends React.Component {
     render(){
       return(
         <div>
           <div className="header">
-            <a href="#default" className="logo">Staghunt</a>
+            <div className="header-left">
+                <a href="#default" className="logo">Staghunt</a>
+            </div>
             <div className="header-right">
+                <p className="oxyHeader">
+                Occidental College Undergraduate Research
+                </p>
             </div>
           </div>
         </div>

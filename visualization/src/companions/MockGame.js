@@ -1,5 +1,5 @@
 import simData from '../assets/data/single_sim.json';
-import {getNextCharacterPosition, checkMoves, updateCharacters, getCharacter} from './GameUtil.js';
+import {getNextCharacterPosition, checkMoves, updateCharacters, getCharacter} from '../game/GameUtil.js';
 
 class MockGame {
     static nonPlayerCharacters = ["h2", "h3", "s1"];

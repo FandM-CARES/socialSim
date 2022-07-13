@@ -241,6 +241,7 @@ export const enforceGameRules = (timesteps, map, characters) => {
     if(!validMoves){
         console.log("invalid move made by ", charactersWithInvalidMoves);
         gameStatus.validMoves = false;
+        gameStatus.gameOver = false;
         return {gameStatus, newChars};
     }
 

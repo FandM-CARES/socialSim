@@ -1,0 +1,10 @@
+.taskDisplay {
+    text-align: center;
+    padding: 25px 100px;
+}
+
+.progressBar {
+    margin: 25px 25px 25px 25px;
+    text-align: center;
+    font-size: 10px;
+}

@@ -1,9 +1,21 @@
+/* Task.js */
+
 import React from 'react';
+import Button from 'react-bootstrap/Button';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
 import Game from '../game/Game.js';
-import { getTaskId, updateGameData } from './TaskUtil.js';
+import Sidebar from '../sidebar/Sidebar.js';
+// import Database from '../database/Database.js';
+import './Task.css';
+import Prompts from '../prompts/Prompts.js';
+import Payment from '../payments/Payment.js';
+import { getTaskId, updateGameData, getProgress } from './TaskUtil.js';
 import starterStates from '../assets/data/starter_states.json';
 // TODO: Update starter_states.json with real starting states
+
+import task from '../assets/data/example_task.json';
+
 
 
 /* Objective: Set up task for participants and game sequence to be completed.
@@ -13,21 +25,22 @@ import starterStates from '../assets/data/starter_states.json';
 class Task extends React.Component {
     constructor(props){
         super(props);
-        // T-A-1 TODO: Create unique task id
-        const taskId = getTaskId();
 
         // T-A-2 TODO: Call/create sequence of games (list of start states w/ maps)
         const seeds = starterStates; // seeds to create games, consist of a map and starter state pair
 
-        const games = this.createGameSequence(taskId, seeds);
+        const games = this.createGameSequence("p-xx", seeds);
 
         this.state = {
-            id: taskId,
+            id: "p-xx",
             seeds: seeds,
             games: games,
+            startTime: new Date().toString(),
             gameCtr: 0,
             playing: false, // whether currently playing a game
-            complete: false
+            complete: false,
+            endTime: "0",
+            displayInstructions: true
         }
 
     }
@@ -56,9 +69,34 @@ class Task extends React.Component {
         });
     }
 
+    testData = () => {
+        // let database = new Database();
+        // database.createTask(task);
+    }
+
+    toggleDisplayInstructions = () => {
+        this.setState({
+            displayInstructions: !this.state.displayInstructions
+        });
+    }
+
     // T-A-5 TODO: Export and save task data (JSON -> MongoDB)
     saveGame = () => {
         console.log("saving game...");
+        // let database = new Database();
+        // make them redo game if they went too quickly
+        let task = {
+            id: "p-xx",
+            startTime: this.state.startTime,
+            endTime: new Date().toString(),
+            games: this.state.games.slice()
+        };
+
+        console.log("task",task);
+
+        // database.createTask(task);
+
+        this.giveCodePayment();
     }
 
     // T-A-6 TODO: Give player redeemable code from pre-made list of codes
@@ -67,6 +105,9 @@ class Task extends React.Component {
     }
 
     nextGame = (gameData) => {
+
+        console.log("ctr", this.state.gameCtr);
+        console.log(this.state.seeds.length);
 
         let finished = (this.state.gameCtr === this.state.seeds.length - 1);
 
@@ -79,44 +120,75 @@ class Task extends React.Component {
         });
     }
 
-    // T-B-1 TODO: Create UI for pre-start app layout
-
-    // T-C-1 TODO: Redeemable code isn't working
-        // Backup code, if issued code hasn't been redeemed
-    // T-C-2 TODO: Game won't start/Game issues
-
     // T-D-1 TODO: Send notification when new task is created (i.e. when a participant logs on)
-    // T-D-2 TODO: Log time taken for completing the task
 
     render(){
         const ctr = this.state.gameCtr;
         const game = this.state.games[ctr];
-        // conditionally render next button
-        let button;
-        if(!this.state.playing && this.state.gameCtr === 0){
-            button = <button onClick={this.startGame}>START NEW GAME</button>;
-        }else if(!this.state.playing && this.state.gameCtr > 0 && !this.state.complete){
-            button = <button onClick={this.startGame}>NEXT GAME</button>;
-        }else{
-            button = <div/>;
-        }
 
-        let gameContainer;
-        if(this.state.playing && this.state.gameCtr > -1){
-            gameContainer = <Game id={game.id} map={game.map} initialCharacterState={game.initialCharacterState} endGame={this.nextGame}/>;
-        }else if(!this.state.playing && this.state.gameCtr === 0){
-            gameContainer = <div>Let's Begin!</div>;
-        }else if(this.state.complete){
-            gameContainer = <div>Finished!</div>;
+        // conditionally render progress bar after first game is complete
+        let now = getProgress(ctr, this.state.seeds.length);
+        const progressInstance = <ProgressBar now={now} label={`${now}%`} />;
+        let progressDisplay = <div/>;
+
+        if(this.state.gameCtr > 0 && !this.state.displayInstructions){
+            progressDisplay = <div className="progressBar">Task Progress{progressInstance}</div>;
+         }
+
+        // conditionally render information about the study before task is begun
+        let prompt = <div/>;
+
+        // conditionally render the sidebar instructions when game instructions aren't displayed
+        let sidebar = <div/>;
+
+        // conditionally render next game button or game space
+        let display = <div/>;
+
+        if(this.state.playing){
+            // display game
+            display = <Game id={game.id} map={game.map} initialCharacterState={game.initialCharacterState} toggleInstr={this.toggleDisplayInstructions} endGame={this.nextGame}/>;
+
+            if(this.state.displayInstructions && this.state.gameCtr === 0){
+                // display game prompt
+                prompt = <Prompts promptLabel="gamePrompt"/>;
+            }else{
+                // display sidebar
+                sidebar = <Sidebar />;
+            }
         }else{
-            gameContainer = <div/>;
+            if(this.state.gameCtr === 0){
+                // display study info prompt
+                prompt = <Prompts promptLabel="studyInfoPrompt" />;
+                // display begin task button
+                display = <Button variant="primary" size="lg" className="beginTaskButton" onClick={this.startGame}>Begin Study</Button>;
+            }else if(this.state.gameCtr > 0){
+                if(!this.state.complete){
+                    // display next game
+                    display = <Button variant="primary"  className="nextGameButton" onClick={this.startGame}>NEXT GAME</Button>;
+                }else{
+                    prompt = <Prompts promptLabel="finishedPrompt" />;
+                    display = <div className="submitTask"><Payment /><Button variant="primary" onClick={this.saveGame}>Submit Task</Button></div>;
+                }
+            }
         }
 
         return(
             <div className="Task">
-                <h2>Task</h2>
-                {gameContainer}
-                {button}
+                <Button onClick={this.testData}></Button>
+                <div className="display">
+                    <div className="progressBarContainer">
+                        {progressDisplay}
+                    </div>
+
+                    <div className="sidebarContainer">
+                        {sidebar}
+                    </div>
+
+                    <div className="taskDisplay">
+                        {prompt}
+                        {display}
+                    </div>
+                </div>
             </div>
         )
     }
