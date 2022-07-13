@@ -9,6 +9,7 @@ import ArrowKeysReact from 'arrow-keys-react';
 import Huntspace from '../huntspace/Huntspace.js';
 import Survey from '../survey/Survey.js';
 import MockGame from '../companions/MockGame.js';
+import Companions from '../companions/Companions.js';
 import { createCharacterStates, getNextCharacterPosition, enforceGameRules, updateCharacters, checkPositions } from './GameUtil.js';
 
 /* Objective: Create playable game environment give unique game id and start
@@ -60,6 +61,7 @@ class Game extends React.Component {
 
     updateCharacterPositions = (direction) => {
         let player = getNextCharacterPosition(this.state.player, direction);
+        // Companions.getNPCMoves(this.state.characters);
         let npcMoves = MockGame.getNPCMoves(this.state.characters);
         let nextState = updateCharacters(npcMoves,[player]);
 
@@ -94,6 +96,7 @@ class Game extends React.Component {
     }
 
     exportGame = (data) => {
+        console.log("handle submit", data);
         let finishedGame = JSON.parse(JSON.stringify(this.state));
         finishedGame.participatingCharacter = data;
         this.props.endGame(finishedGame);
