@@ -4,9 +4,9 @@ import React from 'react';
 import * as d3 from 'd3';
 import './Huntspace.css';
 import { useD3 } from './useD3.js';
-import {getWallCoordinates, getSetupData} from "./HuntspaceUtil.js";
+import {getWallCoordinates, getSetupData, getCharacterColor} from "./HuntspaceUtil.js";
 
-function RenderHuntspace({ characters, map }) {
+function RenderHuntspace({ characters, map, stateCounter }) {
   // data is going to be the character states and map
 
   const svgWidth = 500;
@@ -15,7 +15,7 @@ function RenderHuntspace({ characters, map }) {
   const ref = useD3(
     (svg) => {
       const mapWidth = map.length;
-      const stateCounter = 1;
+      // const stateCounter = 1;
 
       const setupData = getSetupData(svgWidth, svgHeight, mapWidth);
       const {cellWidth, cellHeight, labelOffset, labelOffsetGroups, dLookup} = setupData;
@@ -91,12 +91,13 @@ function RenderHuntspace({ characters, map }) {
                   })
             ).style("fill", function(d) {
                 if(!d.inPlay && d.points >= 0){
-                    return "blue";
+                    return "black";
                 }
                 if(d.points < 0){
                     return "red";
                 }else{
-                    return "black";
+                    // return "black";
+                    return getCharacterColor(d);
                 }
             }),
           exit => exit.remove()

@@ -54,3 +54,20 @@ export const getWallCoordinates = (mapData) => {
     }).flat();
   return wallsCoord;
 };
+
+export const getCharacterColor = (character) => {
+    if(character.type === "h"){
+        switch(character.id){
+            case "h1":
+                return "blue";
+            case "h2":
+                return "green";
+            case "h3":
+                return "#D5573B"; // orange
+            default:
+                return "yellow";
+        }
+    }else{
+        return "brown";
+    }
+}

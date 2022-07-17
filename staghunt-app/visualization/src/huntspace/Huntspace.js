@@ -22,8 +22,8 @@ class Huntspace extends React.Component {
   render(){
     return(
       <div className="Huntspace">
-        <h2>Your Game ID: {this.state.id}</h2>
-        <RenderHuntspace characters={this.props.characters} map={this.props.map}/>
+        <h2>Game #{this.state.id.slice(-2)}</h2>
+        <RenderHuntspace characters={this.props.characters} map={this.props.map} stateCounter={this.props.stateCounter - 1}/>
       </div>
     )
   };

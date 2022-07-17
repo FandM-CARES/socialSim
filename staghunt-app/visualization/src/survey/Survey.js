@@ -9,19 +9,19 @@ function Survey({ handleSubmit }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const [participatingCharacter, setParticipatingCharacter] = useState("");
+  const [participatingCharacter, setParticipatingCharacter] = useState("Undetermined");
 
   const handleChange = (e) => {
-      console.log("pc: ", e.target.value);
       setParticipatingCharacter(e.target.value);
   }
 
   const checkValid = () => {
-      if(participatingCharacter === "Select a Character"){
-          alert("Please pick one of the 3 options.");
-          return false;
+      if(['h1', 'h2', 'h3'].includes(participatingCharacter)){
+          return true;
       }
-      return true;
+      alert("Please pick one of the 3 options.")
+
+      return false;
   }
 
   const handleSubmitForm = () => {
@@ -41,7 +41,7 @@ function Survey({ handleSubmit }) {
         keyboard={false}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Modal title</Modal.Title>
+          <Modal.Title>Game Survey</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group>

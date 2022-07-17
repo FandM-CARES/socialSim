@@ -1,33 +1,37 @@
-/* Task.js */
+/**
+ * Class to set up task for participants and game sequence to be completed.
+ * Calls the Game component to play each game in the sequence.
+ * @class Task
+ */
 
+/* React Modules & Components */
 import React from 'react';
 import Button from 'react-bootstrap/Button';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 
+/* Custom Components */
 import Game from '../game/Game.js';
 import Sidebar from '../sidebar/Sidebar.js';
-// import Database from '../database/Database.js';
-import './Task.css';
 import Prompts from '../prompts/Prompts.js';
 import Payment from '../payments/Payment.js';
-import { getTaskId, updateGameData, getProgress } from './TaskUtil.js';
+
+/* Custom Modules */
+import DatabaseService from '../database/DatabaseService.js';
+/** @TODO: Update starter_states.json with real starting states */
 import starterStates from '../assets/data/starter_states.json';
-// TODO: Update starter_states.json with real starting states
+import { updateGameData, getProgress } from './TaskUtil.js';
 
-import task from '../assets/data/example_task.json';
-
-
-
-/* Objective: Set up task for participants and game sequence to be completed.
-    Additionally, calling the Game component to play each game in the sequence.
-*/
+/* Styling */
+import './Task.css';
 
 class Task extends React.Component {
+
     constructor(props){
         super(props);
 
-        // T-A-2 TODO: Call/create sequence of games (list of start states w/ maps)
-        const seeds = starterStates; // seeds to create games, consist of a map and starter state pair
+        /* The starter states are the seeds needed to create games.
+        They consist of a map and starter state. */
+        const seeds = starterStates;
 
         const games = this.createGameSequence("p-xx", seeds);
 
@@ -37,16 +41,23 @@ class Task extends React.Component {
             games: games,
             startTime: new Date().toString(),
             gameCtr: 0,
-            playing: false, // whether currently playing a game
+            playing: false,
             complete: false,
             endTime: "0",
-            displayInstructions: true
+            displayInstructions: true,
+            showPayment: false,
+            paymentCode: "0000-0000-0000"
         }
-
     }
 
+    /**
+     * Creates an array of each game to be played.
+     * @param {number} taskId - A temporary holder id for this task.
+     * @param {array} seeds - The starting states for the task.
+     * @return {array} An array of games with unique id, a map, an initial state,
+     * and other parameters for the Game component.
+     */
     createGameSequence = (taskId, seeds) => {
-        console.log("beginning task...");
         let games = [];
         for(let i=0; i < seeds.length; i++){
             let seed = seeds[i];
@@ -63,28 +74,29 @@ class Task extends React.Component {
         return games;
     }
 
+    /**
+     * Starts the game by setting the playing parameter to true.
+     */
     startGame = () => {
         this.setState({
             playing: true
         });
     }
 
-    testData = () => {
-        // let database = new Database();
-        // database.createTask(task);
-    }
-
+    /**
+     * Changes whether the game instructions prompt is supposed to be shown.
+     * Called by the Game component.
+     */
     toggleDisplayInstructions = () => {
         this.setState({
             displayInstructions: !this.state.displayInstructions
         });
     }
 
-    // T-A-5 TODO: Export and save task data (JSON -> MongoDB)
-    saveGame = () => {
-        console.log("saving game...");
-        // let database = new Database();
-        // make them redo game if they went too quickly
+    /**
+     * Exports the game to the database and initiates the payment process.
+     */
+    saveGame = async () => {
         let task = {
             id: "p-xx",
             startTime: this.state.startTime,
@@ -92,41 +104,55 @@ class Task extends React.Component {
             games: this.state.games.slice()
         };
 
-        console.log("task",task);
+        console.log("task",task); // DELETE
 
-        // database.createTask(task);
-
-        this.giveCodePayment();
+        /** @TODO: Save to database */
+        let res = await DatabaseService.uploadTask(task); // return status and payment codes
+        console.log("Upload Task response: ", res);
+        // on successful upload
+        this.setState({
+            showPayment: true,
+            paymentCode: (res === null || res.payment ? res.payment : "\\\\-\\\\")
+        });
     }
 
-    // T-A-6 TODO: Give player redeemable code from pre-made list of codes
-    giveCodePayment = () => {
-        console.log("giving payment code...");
+    componentDidMount(){
+        this.testFetchNPCMoves();
     }
 
-    nextGame = (gameData) => {
+    // going to be in the game component
+    testFetchNPCMoves = () => {
+        console.log("testing fetch... ");
+        let response = fetch("http://localhost:9000/testAPI") // Is this going to cause an issue in production?
+        .then(res => res.text())
+        .then(out => console.log("response: ", out))
+        .catch(error => error);
+        console.log("res: ", response);
+    }
 
-        console.log("ctr", this.state.gameCtr);
-        console.log(this.state.seeds.length);
-
+    /**
+     * Saves data collected during one game and then goes to the next games
+     * in the set or ends the task by setting complete to true.
+     * @param {object} gameData - All the data collected from one game.
+     */
+    nextGame = async (gameData) => {
         let finished = (this.state.gameCtr === this.state.seeds.length - 1);
 
         this.setState({
             playing: false,
             games: updateGameData(this.state.games, gameData),
-            gameCtr: (!finished ? this.state.gameCtr + 1 : this.state.gameCtr),
+            gameCtr: this.state.gameCtr + 1,
             complete: finished
-
         });
     }
 
-    // T-D-1 TODO: Send notification when new task is created (i.e. when a participant logs on)
+    /** @TODO: Send notification when new task is created (i.e. when a participant logs on) */
 
     render(){
         const ctr = this.state.gameCtr;
         const game = this.state.games[ctr];
 
-        // conditionally render progress bar after first game is complete
+        /** Conditionally render progress bar after first game is complete */
         let now = getProgress(ctr, this.state.seeds.length);
         const progressInstance = <ProgressBar now={now} label={`${now}%`} />;
         let progressDisplay = <div/>;
@@ -135,13 +161,13 @@ class Task extends React.Component {
             progressDisplay = <div className="progressBar">Task Progress{progressInstance}</div>;
          }
 
-        // conditionally render information about the study before task is begun
+        /** Conditionally render information about the study before task is begun */
         let prompt = <div/>;
 
-        // conditionally render the sidebar instructions when game instructions aren't displayed
+        /** Conditionally render the sidebar instructions when game instructions aren't displayed */
         let sidebar = <div/>;
 
-        // conditionally render next game button or game space
+        /** Conditionally render next game button or game space */
         let display = <div/>;
 
         if(this.state.playing){
@@ -167,14 +193,17 @@ class Task extends React.Component {
                     display = <Button variant="primary"  className="nextGameButton" onClick={this.startGame}>NEXT GAME</Button>;
                 }else{
                     prompt = <Prompts promptLabel="finishedPrompt" />;
-                    display = <div className="submitTask"><Payment /><Button variant="primary" onClick={this.saveGame}>Submit Task</Button></div>;
+                    display = <div className="submitTask"><Button variant="primary" onClick={this.saveGame}>Submit Task</Button></div>;
                 }
             }
         }
 
+        if(this.state.showPayment){
+            display = <div className="paymentCode">Payment Code:<Payment paymentCode={this.state.paymentCode}/></div>;
+        }
+
         return(
             <div className="Task">
-                <Button onClick={this.testData}></Button>
                 <div className="display">
                     <div className="progressBarContainer">
                         {progressDisplay}
@@ -195,4 +224,4 @@ class Task extends React.Component {
 
 }
 
-export default Task
+export default Task;

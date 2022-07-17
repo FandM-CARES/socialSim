@@ -4,7 +4,6 @@ import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import reportWebVitals from './reportWebVitals';
 import Task from './task/Task.js';
-import Huntspace from './huntspace/Huntspace.js'
 import Header from './header/Header.js';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

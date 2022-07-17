@@ -11,7 +11,7 @@ function Prompts({ promptLabel }) {
     // Prompt for when participants need to start a new game for the first time
     const loremText2 = "Sed nec iaculis libero, eget ornare dolor. Phasellus vitae rutrum felis. Curabitur sed purus enim. In sit amet convallis orci. Mauris mauris lectus, ullamcorper eu lectus nec, tincidunt vehicula ante. Proin sapien diam, ornare sit amet egestas et, cursus in massa. Donec eu posuere augue. Maecenas sed lobortis nunc. Integer a nulla fermentum, aliquam augue vel, venenatis ligula. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nulla vehicula nibh libero, sed sagittis erat molestie in. Vestibulum id tellus eu neque euismod ornare eu ac ipsum.\n";
 
-    const gamePrompt = <div className="gamePrompt">{loremText2}</div>;
+    const gamePrompt = <div className="gamePrompt"><h2>Instructions</h2>{loremText2}</div>;
 
     // Prompt for when participants finish the game
     const loremText3 = "Sed tempus lacus sem, non dapibus velit aliquam eu. Curabitur id ultricies risus, non elementum magna. Nunc tincidunt leo eget est pretium aliquam. Vestibulum sed suscipit nibh, quis scelerisque ipsum. Nullam venenatis nibh vitae scelerisque aliquam. Nulla in arcu tempus, finibus metus at, lobortis mauris. Quisque blandit nec lorem eu blandit. Nam ut turpis in mi finibus varius.\n";

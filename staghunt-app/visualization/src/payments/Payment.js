@@ -1,8 +1,8 @@
 import React from 'react';
 
-function Payment() {
+function Payment({ paymentCode }) {
 
-    let display = <p>XXXX-XXXX-XXXX-XXXX</p>;
+    let display = <p> {paymentCode} </p>;
 
     return (
         <div className="payment">

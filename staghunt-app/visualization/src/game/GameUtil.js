@@ -218,7 +218,8 @@ function checkGameOver(timesteps, originalCharacters){
     let scenario3 = (!hare1.inPlay && !hare2.inPlay && player.points === 0);
 
     // x amount of turns has passed
-    let scenario4 = timesteps > 5;
+    const MAX_GAME_LENGTH = 10;
+    let scenario4 = timesteps > MAX_GAME_LENGTH;
 
     if(scenario1 || scenario2 || scenario3 || scenario4){
         characters = endGame(characters);
@@ -305,6 +306,41 @@ export const updateCharacters = (characterArr, characters) => {
         updatedCharacters = updateCharacter(updatedCharacters, character);
     });
     return updatedCharacters;
+}
+
+export const getCharacterNameDisplay = (character) => {
+    // return character type and id number for charType
+    let type;
+    switch(character.type){
+        case "r":
+            type = "Rabbit";
+            break;
+        case "h":
+            type = "Hunter";
+            break;
+        case "s":
+            type = "Stag";
+            break;
+        default:
+            type = character.type;
+            console.log("Could not get display for this character.");
+    }
+
+    return (type + " " + character.id.charAt(1));
+}
+
+export const getPointDisplay = (character) => {
+    return (character.points < 0 ? 0 : character.points);
+}
+
+export const getStatusDisplay = (character) => {
+    const prey = ["s", "r"];
+
+    if(prey.includes(character.id)){
+        return (character.inPlay ? "playing" : "captured");
+    }else{
+        return (character.inPlay ? "playing" : "finished");
+    }
 }
 
 // DEBUGGING METHODS

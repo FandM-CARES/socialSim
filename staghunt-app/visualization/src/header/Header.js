@@ -1,5 +1,4 @@
 import React from 'react';
-import { ArrowRight } from 'react-bootstrap-icons';
 
 import './Header.css';
 
