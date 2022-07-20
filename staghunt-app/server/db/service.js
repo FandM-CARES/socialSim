@@ -42,6 +42,7 @@ async function uploadTask(data) {
             /** @TODO: Get a usable payment code. */
             const payment = await getPaymentCode(client);
 
+            result.taskID = id;
             result.wasSuccessful = successfulUpload;
             result.payment = payment;
         });

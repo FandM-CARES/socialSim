@@ -9,6 +9,7 @@ class DatabaseService {
 
     /**
      * Uploads completed task to database.
+     * @param {object} task - The task object to be uploaded.
      * @return {object} A status boolean from the upload and a payment code.
      */
     async uploadTask(task){

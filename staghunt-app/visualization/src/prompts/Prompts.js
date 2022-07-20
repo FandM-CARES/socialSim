@@ -3,6 +3,8 @@ import './Prompts.css';
 
 function Prompts({ promptLabel }) {
 
+    const userPrompt = <div className="userPrompt">test</div>;
+
     const loremText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed luctus, mi mattis tempor pretium, leo metus laoreet risus, quis molestie arcu massa nec orci. Vivamus tincidunt purus sit amet dolor ullamcorper molestie. Phasellus felis ex, bibendum non consequat in, convallis ut lacus. Ut congue, mauris at bibendum imperdiet, odio odio volutpat lacus, aliquet laoreet elit mauris vel arcu. Ut egestas neque et feugiat ornare. Sed eu magna ut dolor aliquam consequat. Vestibulum pulvinar non nunc in fringilla. Morbi et dictum ligula.\n Ut gravida consequat risus id eleifend. Etiam ullamcorper turpis ac vestibulum congue. Fusce dignissim consectetur volutpat. Sed mattis sem nec velit dignissim mollis. Donec a mauris mi. Phasellus et orci ultricies, porttitor lectus quis, faucibus massa. Maecenas diam nibh, hendrerit at magna quis, consequat egestas turpis. Ut tempus bibendum accumsan. Duis nec posuere sapien, ac pharetra magna. Morbi congue, metus sit amet euismod malesuada, erat odio consequat turpis, at porttitor nisi orci pretium ipsum. Nulla facilisi. Sed vehicula enim sed volutpat malesuada. Maecenas vel nulla commodo, scelerisque nulla eget, fringilla nisl. Quisque malesuada augue ac congue laoreet.\n";
 
     const informationHeader = <h2 className="informationHeader">Our Study</h2>;
@@ -29,6 +31,9 @@ function Prompts({ promptLabel }) {
             break;
         case "finishedPrompt":
             displayPrompt = finishedPrompt;
+            break;
+        case "userPrompt":
+            displayPrompt = userPrompt;
             break;
         default:
             displayPrompt = <div/>;

@@ -14,8 +14,11 @@ import Game from '../game/Game.js';
 import Sidebar from '../sidebar/Sidebar.js';
 import Prompts from '../prompts/Prompts.js';
 import Payment from '../payments/Payment.js';
+import UserSelection from '../users/UserSelection.js';
+import Authorize from '../authorization/Authorization.js';
 
 /* Custom Modules */
+import SlackService from '../notifications/Notify.js';
 import DatabaseService from '../database/DatabaseService.js';
 /** @TODO: Update starter_states.json with real starting states */
 import starterStates from '../assets/data/starter_states.json';
@@ -39,6 +42,7 @@ class Task extends React.Component {
             id: "p-xx",
             seeds: seeds,
             games: games,
+            userType: "Empty",
             startTime: new Date().toString(),
             gameCtr: 0,
             playing: false,
@@ -75,9 +79,32 @@ class Task extends React.Component {
     }
 
     /**
+     * Set the user's origin (i.e. Amazon Mechanical Turk, Oxy, or Other)
+     * @param {string} type - The type of user
+     */
+    setUser = (type) => {
+        this.setState({
+            userType: type
+        });
+    }
+
+    /**
+     * Authorize the user to take the survey.
+     */
+    setAuthorize = () => {
+        this.setState({
+            authorized: true
+        });
+    }
+
+    /**
      * Starts the game by setting the playing parameter to true.
      */
     startGame = () => {
+        /** @TODO: Send notification when new task is created (i.e. when a participant logs on) */
+        if(this.state.gameCtr === 0){
+            SlackService.sendStart(this.state.userType);
+        }
         this.setState({
             playing: true
         });
@@ -91,43 +118,6 @@ class Task extends React.Component {
         this.setState({
             displayInstructions: !this.state.displayInstructions
         });
-    }
-
-    /**
-     * Exports the game to the database and initiates the payment process.
-     */
-    saveGame = async () => {
-        let task = {
-            id: "p-xx",
-            startTime: this.state.startTime,
-            endTime: new Date().toString(),
-            games: this.state.games.slice()
-        };
-
-        console.log("task",task); // DELETE
-
-        /** @TODO: Save to database */
-        let res = await DatabaseService.uploadTask(task); // return status and payment codes
-        console.log("Upload Task response: ", res);
-        // on successful upload
-        this.setState({
-            showPayment: true,
-            paymentCode: (res === null || res.payment ? res.payment : "\\\\-\\\\")
-        });
-    }
-
-    componentDidMount(){
-        this.testFetchNPCMoves();
-    }
-
-    // going to be in the game component
-    testFetchNPCMoves = () => {
-        console.log("testing fetch... ");
-        let response = fetch("http://localhost:9000/testAPI") // Is this going to cause an issue in production?
-        .then(res => res.text())
-        .then(out => console.log("response: ", out))
-        .catch(error => error);
-        console.log("res: ", response);
     }
 
     /**
@@ -146,7 +136,27 @@ class Task extends React.Component {
         });
     }
 
-    /** @TODO: Send notification when new task is created (i.e. when a participant logs on) */
+    /**
+     * Exports the game to the database and initiates the payment process.
+     */
+    saveGame = async () => {
+        let task = {
+            id: "p-xx",
+            startTime: this.state.startTime,
+            endTime: new Date().toString(),
+            games: this.state.games.slice()
+        };
+
+        let res = await DatabaseService.uploadTask(task);
+        console.log("Upload Task response: ", res);
+        // on successful upload
+        this.setState({
+            showPayment: true,
+            paymentCode: (res === null || res.payment ? res.payment : "\\\\-\\\\")
+        });
+
+        SlackService.sendComplete(res.taskID);
+    }
 
     render(){
         const ctr = this.state.gameCtr;
@@ -183,10 +193,24 @@ class Task extends React.Component {
             }
         }else{
             if(this.state.gameCtr === 0){
-                // display study info prompt
-                prompt = <Prompts promptLabel="studyInfoPrompt" />;
-                // display begin task button
-                display = <Button variant="primary" size="lg" className="beginTaskButton" onClick={this.startGame}>Begin Study</Button>;
+                if(this.state.userType !== "Empty"){
+                    if(this.state.authorized){
+                        // display study info prompt
+                        prompt = <Prompts promptLabel="studyInfoPrompt" />;
+                        // display begin task button
+                        display = <Button variant="primary" size="lg" className="beginTaskButton" onClick={this.startGame}>Begin Study</Button>;
+                    }else{
+                        // display authorization code input prompt
+                        prompt = <Prompts prompLabel="authorizationPrompt" />;
+                        // display authorization code input
+                        display = <Authorize handleSubmit={this.setAuthorize}/>;
+                    }
+                }else{
+                    // display user selection prompt
+                    prompt = <Prompts prompLabel="userPrompt" />;
+                    // have user select which user type they are
+                    display = <UserSelection handleSubmit={this.setUser}/>;
+                }
             }else if(this.state.gameCtr > 0){
                 if(!this.state.complete){
                     // display next game
