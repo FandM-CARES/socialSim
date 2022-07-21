@@ -1,5 +1,5 @@
 /**
- * Class to initiate all companions related operations
+ * Class to initiate all companions related operations.
  * @class CompanionsService
  */
 
@@ -9,7 +9,8 @@ class CompanionsService {
 
     /**
      * Get's NPC moves from Companions.
-     * @return {object} A status boolean from the retrieval and the NPC Moves.
+     * @param {array} characters - Current position data for each character.
+     * @return {boolean} A status boolean from the retrieval and the NPC Moves.
      */
     async getNPCMoves(characters){
         let res = fetch(SERVER_API,{

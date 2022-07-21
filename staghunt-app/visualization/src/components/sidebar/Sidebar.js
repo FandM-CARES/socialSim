@@ -1,10 +1,17 @@
-/* Sidebar.js */
+/** Sidebar */
+
+/* React Modules & Components */
 import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 
+/* Styling */
 import './Sidebar.css';
 
+/**
+ * React functional component to show a sidebar with gameplay instructions.
+ * @return {JSX} The sidebar.
+ */
 function Sidebar() {
   const [show, setShow] = useState(false);
 
@@ -33,4 +40,4 @@ function Sidebar() {
   );
 }
 
-export default Sidebar
+export default Sidebar;

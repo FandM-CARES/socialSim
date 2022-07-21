@@ -1,9 +1,19 @@
+/** Authorization */
+
+/* React Modules & Components */
 import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
+/* Styling */
 import './Authorization.css';
 
+/**
+ * React functional component to get the user's authorization code.
+ * @param {callback} handleSubmit - A function in Task.js to set the
+ * authorization code.
+ * @return {JSX} An input for the authorization code
+ */
 function Authorize({ handleSubmit }) {
 
   const [authCode, setAuthCode] = useState("");

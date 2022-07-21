@@ -1,6 +1,16 @@
+/** Prompts */
+
+/* React Modules & Components */
 import React from 'react';
+
+/* Styling */
 import './Prompts.css';
 
+/**
+ * React functional component to display a prompt.
+ * @param {string} prompLabel - A label of which prompt to display.
+ * @return {JSX} The prompt.
+ */
 function Prompts({ promptLabel }) {
 
     const userPrompt = <div className="userPrompt">test</div>;
@@ -46,4 +56,4 @@ function Prompts({ promptLabel }) {
     );
 }
 
-export default Prompts
+export default Prompts;

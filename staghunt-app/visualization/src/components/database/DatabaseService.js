@@ -1,5 +1,5 @@
 /**
- * Class to initiate all database related operations
+ * Class to initiate all database related operations.
  * @class DatabaseService
  */
 

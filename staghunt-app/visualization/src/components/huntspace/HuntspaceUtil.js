@@ -1,5 +1,15 @@
-/* HuntspaceUtil.js*/
+/**
+ * Set of helper functions for the huntspace visualization related operations.
+ * @utility HuntspaceUtil
+ */
 
+/**
+ * Defines constants for setting up the visualization.
+ * @param {number} svgWidth - The width of the SVG.
+ * @param {number} svgHeight - The height of the SVG.
+ * @param {number} mapWidth - The width of the map.
+ * @return {object} A set of constants.
+ */
 export const getSetupData = (svgWidth, svgHeight, mapWidth) => {
 
   const cellWidth = svgWidth / mapWidth;
@@ -41,6 +51,12 @@ export const getSetupData = (svgWidth, svgHeight, mapWidth) => {
   return {cellWidth, cellHeight, labelOffset, labelOffsetGroups, dLookup};
 }
 
+/**
+ * Defines the coordinates of the walls given a map.
+ * @param {array} mapData - A binary matrix that represently playable positions.
+ * @return {array} A matrix that represently playable positions and the styling
+ * of the wall.
+ */
 export const getWallCoordinates = (mapData) => {
     const wallsCoord = mapData.map(function (row, i) {
         return row.map(function(col, j) {
@@ -55,6 +71,11 @@ export const getWallCoordinates = (mapData) => {
   return wallsCoord;
 };
 
+/**
+ * Returns the color of a character given using their type and id.
+ * @param {object} character - A single character.
+ * @return {string} A color for the character.
+ */
 export const getCharacterColor = (character) => {
     if(character.type === "h"){
         switch(character.id){

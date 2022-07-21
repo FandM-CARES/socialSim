@@ -1,21 +1,32 @@
-/* RenderHuntspace.js */
+/** RenderHuntspace */
 
+/* React Modules & Components */
 import React from 'react';
+
+/* External Modules */
 import * as d3 from 'd3';
-import './Huntspace.css';
+
+/* Custom Modules */
 import { useD3 } from './useD3.js';
 import {getWallCoordinates, getSetupData, getCharacterColor} from "./HuntspaceUtil.js";
 
-function RenderHuntspace({ characters, map, stateCounter }) {
-  // data is going to be the character states and map
+/* Styling */
+import './Huntspace.css';
 
+/**
+ * React functional component to visualize the huntspace.
+ * @param {array} map - A binary matrix that represently playable positions.
+ * @param {array} characters - A set of character objects.
+ * @param {number} stateCounter - The current timestep.
+ * @return {JSX} The huntspace SVG.
+ */
+function RenderHuntspace({ characters, map, stateCounter }) {
   const svgWidth = 500;
   const svgHeight = 500;
 
   const ref = useD3(
     (svg) => {
       const mapWidth = map.length;
-      // const stateCounter = 1;
 
       const setupData = getSetupData(svgWidth, svgHeight, mapWidth);
       const {cellWidth, cellHeight, labelOffset, labelOffsetGroups, dLookup} = setupData;
@@ -118,4 +129,4 @@ function RenderHuntspace({ characters, map, stateCounter }) {
   )
 }
 
-export default RenderHuntspace
+export default RenderHuntspace;

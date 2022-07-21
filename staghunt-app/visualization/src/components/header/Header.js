@@ -1,15 +1,18 @@
+/** Header */
+
+/* React Modules & Components */
 import React from 'react';
 
+/* Styling */
 import './Header.css';
 
-// 'layout-text-sidebar-reverse'
-// Plug in the menu icon
-
-class Header extends React.Component {
-    render(){
-      return(
-        <div>
-          <div className="header">
+/**
+ * React functional component to generate a header.
+ * @return {JSX} A header for the page.
+ */
+function Header() {
+    return (
+        <div className="header">
             <div className="header-left">
                 <a href="#default" className="logo">Staghunt</a>
             </div>
@@ -18,11 +21,8 @@ class Header extends React.Component {
                 Occidental College Undergraduate Research
                 </p>
             </div>
-          </div>
         </div>
-      )
-    }
-
+    )
 }
 
 export default Header

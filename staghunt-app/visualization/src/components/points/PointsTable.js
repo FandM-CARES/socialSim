@@ -1,8 +1,21 @@
+/** PointsTable */
+
+/* React Modules & Components */
 import React from 'react';
 import Table from 'react-bootstrap/Table';
-import './PointsTable.css';
+
+/* Custom Modules */
 import { getCharacterNameDisplay, getPointDisplay, getStatusDisplay } from '../game/GameUtil.js';
 
+/* Styling */
+import './PointsTable.css';
+
+/**
+ * React functional component to render a table with data on each character's
+ * current points.
+ * @param {array} characters - A set of character objects.
+ * @return {JSX} A table with each character's points and playing status.
+ */
 function PointsTable({ characters }) {
 
     return (
@@ -31,4 +44,4 @@ function PointsTable({ characters }) {
     );
 }
 
-export default PointsTable
+export default PointsTable;

@@ -1,9 +1,18 @@
-/* GameUtil.js */
+/**
+ * Set of helper functions for the game related operations.
+ * @utility GameUtil
+ */
 
-// GAME SETUP METHODS
+/** GAME SETUP METHODS */
 
+/**
+ * Gives the starting  points for a character.
+ * Helper method for createCharacterStates.
+ * @param {string} charType - The type of character.
+ * @return {number} The number of points a character should beging the game with,
+ * corresponding to their character type.
+ */
 function initializePoints(charType) {
-    // takes the type of character and assigns them points
     switch(charType){
         case "r":
             return 1;
@@ -17,6 +26,14 @@ function initializePoints(charType) {
     }
 }
 
+
+/**
+ * Creates a list of characters from starting game data.
+ * Uses a copy of the stateData object.
+ * @param {object} stateData - A JSON object that initializes characters given
+ * the starting state, map, and beginning character positions.
+ * @return {array} Instantiated list of characters.
+ */
 export const createCharacterStates = (stateData) => {
   const states = stateData.slice();
   const characters = [];
@@ -44,8 +61,16 @@ export const createCharacterStates = (stateData) => {
     return characters;
 };
 
-// GAME LOGIC METHODS
 
+/** GAME LOGIC METHODS */
+
+/**
+ * Updates the points of a group depending on which characters are present.
+ * Helper method for handleInteraction.
+ * Uses a copy of the group object.
+ * @param {array} group - A subset of characters that are at the same position.
+ * @return {array} A group with updated points.
+ */
 export const updatePoints = (group) => {
     // update the points earned by each character
     const characterDict = {
@@ -90,10 +115,15 @@ export const updatePoints = (group) => {
     return updatedGroup;
 }
 
+/**
+ * Scale the way characters are displayed so there is no overlap; given group,
+ * reassign x, y, and s to scale characters.
+ * Helper method for handleInteraction.
+ * Mutates group object directly.
+ * @param {array} group - A subset of characters that are at the same position.
+ * @return {array} A group with updated scale factors.
+ */
 export const scaleDisplay = (group) => {
-    // scale the way characters are displayed so there is no overlap
-    // given group reassing x, y, and s to scale characters
-
     let x = group[0].x;
     let numCharacters = group.length;
     let interval = 1 / numCharacters;
@@ -109,7 +139,15 @@ export const scaleDisplay = (group) => {
     return group;
 }
 
-function intakeGroup(group) {
+/**
+ * Takes a group and assigns them a size and id.
+ * Helper method for handleInteraction.
+ * Uses a copy of the groupArr object.
+ * @param {array} groupArr - A subset of characters that are at the same position.
+ * @return {array} A group with updated group data.
+ */
+ function intakeGroup(groupArr) {
+    let group = groupArr.slice();
     let groupSize = group.length;
     for(let i=0; i < groupSize; i++){
         group[i].displayData.groupSize = groupSize;
@@ -118,33 +156,64 @@ function intakeGroup(group) {
     return group;
 }
 
+/**
+ * Handles the interaction of a group of characters.
+ * Uses a copy of the group object from intakeGroup().
+ * @param {array} groupArr - A subset of characters that are at the same position.
+ * @return {array} A group with updated group data, points, and scale factors.
+ */
 function handleInteraction(group){
-    // function to handle the interaction of a group of characters
     let updatedGroup = intakeGroup(group);
     updatedGroup = updatePoints(updatedGroup);
     updatedGroup = scaleDisplay(updatedGroup);
     return updatedGroup;
 }
 
+/**
+ * Reverts all the display variables and points for a set of characters.
+ * Mutates the characters array directly.
+ * @param {array} characters - A set of characters.
+ * @return {array} Characters with their original scaling factors and points.
+ */
 export const revertBoardState = (characters) => {
-    // reverts all the display variables and points
     characters.forEach((character) => {
         revertCharacterState(character);
     });
     return characters;
 }
 
+/**
+ * Reverts all the display variables and points for a single character.
+ * Helper method for revertBoardState.
+ * Mutates the characters array directly.
+ * @param {object} character - A character object.
+ * @return {object} Character with their original scaling factors and points.
+ */
 function revertCharacterState(character){
     let revertedCharacter = cleanCharacterPointState(character);
     revertedCharacter = cleanCharacterDisplayState(character);
     return revertedCharacter;
 }
 
+/**
+ * Reverts all the points for a single character.
+ * Helper method for revertCharacterState.
+ * Mutates the character directly.
+ * @param {object} character - A character object.
+ * @return {object} Character with their original points.
+ */
 function cleanCharacterPointState(character){
     character.points = initializePoints(character.type);
     return character;
 }
 
+/**
+ * Reverts all the display variables for a single character.
+ * Helper method for revertCharacterState.
+ * Mutates the character directly.
+ * @param {object} character - A character object.
+ * @return {object} Character with their original scaling factors.
+ */
 function cleanCharacterDisplayState(character){
     let cleanDisplayState = {
         groupSize: 1,
@@ -157,8 +226,13 @@ function cleanCharacterDisplayState(character){
     return character;
 }
 
+/**
+ * Puts characters in groups based on their position.
+ * Helper method for enforceGameRules.
+ * @param {array} characters - A set of character objects.
+ * @return {array} A list of groups of characters.
+ */
 export const getCharacterGroups = (characters) => {
-    // Get the groups of characters at the same position
     const groups = {};
     characters.forEach((character) => {
         let pos = String([character.x, character.y]);
@@ -171,9 +245,16 @@ export const getCharacterGroups = (characters) => {
     return groups;
 }
 
+/**
+ * Given a list of characters check to see if their positions are allowed on
+ * the given map.
+ * Helper method for enforceGameRules.
+ * @param {array} map - A binary matrix that represently playable positions.
+ * @param {array} characters - A set of character objects.
+ * @return {object} A boolean telling if the characters moves are valid and
+ * a list of characters with invalid moves, if any.
+ */
 export const checkMoves = (map, characters) => {
-    // given a list of characters check to see if their positions are allowed on
-    // the given map
     let validMoves = true;
     let charactersWithInvalidMoves = [];
 
@@ -186,38 +267,62 @@ export const checkMoves = (map, characters) => {
     return {validMoves, charactersWithInvalidMoves};
 }
 
-function endGame(characters){
+/**
+ * Ends the game by taking all characters out of play.
+ * Helper method for checkGameOver.
+ * Uses a copy of characterStates.
+ * @param {array} characters - A set of character objects.
+ * @return {object} A boolean telling if the characters moves are valid and
+ * a list of characters with invalid moves, if any.
+ */
+function endGame(characterStates){
+    let characters = characterStates.slice();
     characters.forEach((character) => {
         character.inPlay = false;
     })
     return characters;
 }
 
+/**
+ * Get a character from a list of characters by id.
+ * Helper method for checkGameOver.
+ * @param {string} id - The id of the desired character (e.g. "h1").
+ * @param {array} characters - A set of character objects.
+ * @return {object} A character with a matching id.
+ */
 export const getCharacter = (characters, id) => {
-    // get a character from a list of characters by id
     let characterIndx = characters.findIndex(character => character.id === id);
     let character = characters.slice()[characterIndx];
     return character;
 }
 
+/**
+ * Check if the game is over.
+ * Helper method for enforceGameRules.
+ * Uses a copy of originalCharacters.
+ * @param {number} timesteps - The amount of timesteps currently in the game.
+ * @param {array} originalCharacters - A set of character objects.
+ * @return {object} A boolean representing whether the game is over and an
+ * array of characters, possibly with updated "inPlay" values.
+ */
 function checkGameOver(timesteps, originalCharacters){
     let characters = originalCharacters.slice();
     let gameOver = false;
 
-    // stag is caught
+    // scenario 1: stag is caught
     let stag = getCharacter(characters, "s1");
     let scenario1 = !stag.inPlay;
 
-    // player has caught a stag or a rabbit
+    // scenario 2: player has caught a stag or a rabbit
     let player = getCharacter(characters, "h1");
     let scenario2 = player.points > 0;
 
-    // no more hares to catch and player hasn't caught anything
+    // scenario 3: no more hares to catch and player hasn't caught anything
     let hare1 = getCharacter(characters, "r1");
     let hare2 = getCharacter(characters, "r2");
     let scenario3 = (!hare1.inPlay && !hare2.inPlay && player.points === 0);
 
-    // x amount of turns has passed
+    // scenario 4: x amount of turns has passed
     const MAX_GAME_LENGTH = 10;
     let scenario4 = timesteps > MAX_GAME_LENGTH;
 
@@ -229,6 +334,16 @@ function checkGameOver(timesteps, originalCharacters){
     return {gameOver, characters};
 }
 
+/**
+ * Enforces the game rules and checks to make sure each character has valid
+ * moves and if the game is over, as well as starts handles character interactions.
+ * Uses a copy of characters.
+ * @param {number} timesteps - The amount of timesteps currently in the game.
+ * @param {array} map - A binary matrix that represently playable positions.
+ * @param {array} characters - A set of character objects.
+ * @return {object} A boolean representing whether the game is over and an
+ * array of updated characters.
+ */
 export const enforceGameRules = (timesteps, map, characters) => {
     const newChars = characters.slice();
 
@@ -269,18 +384,24 @@ export const enforceGameRules = (timesteps, map, characters) => {
     return {gameStatus, updatedCharacters};
 }
 
-// UPDATING CHARACTER POSITIONS
+/** UPDATING CHARACTER POSITIONS */
 
+/**
+ * Update a character's position based on a given move.
+ * @param {object} originalCharacter - The amount of timesteps currently in the game.
+ * @param {number} move - A number representing the direction of movement.
+ * @return {object} A character with an updated position.
+ */
 export const getNextCharacterPosition = (originalCharacter, move) => {
     let character = JSON.parse(JSON.stringify(originalCharacter));
 
+    /** Up, Right, Down, Left */
     const moveRef = [
         [0, -1],
         [1, 0],
         [0, 1],
         [-1, 0]
     ];
-    // Up, Right, Down, Left
 
     character.x = originalCharacter.x + moveRef[move][0];
     character.y = originalCharacter.y + moveRef[move][1];
@@ -288,19 +409,29 @@ export const getNextCharacterPosition = (originalCharacter, move) => {
     character.displayData.x = originalCharacter.displayData.x + moveRef[move][0];
     character.displayData.y = originalCharacter.displayData.y + moveRef[move][1];
 
-    return character; // updated move
+    return character;
 }
 
+/**
+ * Update a character within a set of characters.
+ * @param {array} characters - A set of characters.
+ * @param {object} character - A single character.
+ * @return {array} An updated set of characters.
+ */
 function updateCharacter(characters, character){
-    // update a character in a list of character objects
     let updatedCharacters = characters.slice();
     let characterIndx = updatedCharacters.findIndex(c => c.id === character.id);
     updatedCharacters[characterIndx] = character;
     return updatedCharacters;
 }
 
+/**
+ * Update a subset of characters within a set of characters.
+ * @param {array} characterArr - A set of characters.
+ * @param {array} characters - A subset of characters.
+ * @return {array} An updated set of characters.
+ */
 export const updateCharacters = (characterArr, characters) => {
-    // update a character in a list of character objects
     let updatedCharacters = characterArr.slice();
     characters.slice().forEach((character) => {
         updatedCharacters = updateCharacter(updatedCharacters, character);
@@ -308,8 +439,12 @@ export const updateCharacters = (characterArr, characters) => {
     return updatedCharacters;
 }
 
+/**
+ * Gives the full name of a character given type abbrevation.
+ * @param {object} character - A single character.
+ * @return {string} The character's full name.
+ */
 export const getCharacterNameDisplay = (character) => {
-    // return character type and id number for charType
     let type;
     switch(character.type){
         case "r":
@@ -329,10 +464,20 @@ export const getCharacterNameDisplay = (character) => {
     return (type + " " + character.id.charAt(1));
 }
 
+/**
+ * Returns a character's points or 0, if thier points are less than zero.
+ * @param {object} character - A single character.
+ * @return {number} The character's formatted points.
+ */
 export const getPointDisplay = (character) => {
     return (character.points < 0 ? 0 : character.points);
 }
 
+/**
+ * Returns a string corresponding to the character's "inPlay" status.
+ * @param {object} character - A single character.
+ * @return {string} The character's formatted points.
+ */
 export const getStatusDisplay = (character) => {
     const prey = ["s", "r"];
 
@@ -345,10 +490,24 @@ export const getStatusDisplay = (character) => {
 
 // DEBUGGING METHODS
 
+
+/**
+ * Checks if two character states are the same.
+ * @param {array} state1 - A list of characters.
+ * @param {array} state2 - A list of characters.
+ * @return {boolean} If the two states are the same.
+ */
 function directCompareStates(state1, state2){
     return (JSON.stringify(state1) === JSON.stringify(state2));
 }
 
+/**
+ * Checks if two character states are the same and prints the character which
+ * is different in the states.
+ * @param {array} state1 - A list of characters.
+ * @param {array} state2 - A list of characters.
+ * @return {boolean} If the two states are the same.
+ */
 export const compareStates = (state1, state2) => {
     let equal = directCompareStates(state1, state2);
     if(!equal){
@@ -363,14 +522,25 @@ export const compareStates = (state1, state2) => {
 
 }
 
+/**
+ * Checks if a character has a consistent position.
+ * @param {object} character - A single character.
+ * @return {object} A pair of booleans showing whether the x and y's in the
+ * position and displayData are the same.
+ */
 function checkCharacterPosition(character){
     let checkX = (Math.abs(character.displayData.x - character.x) < 0.5);
     let checkY = character.y === character.displayData.y;
     return {checkX, checkY};
 }
 
+/**
+ * Check to see if the character's position matches the position in their
+ * display data.
+ * @param {array} characters - A set of characters.
+ * @return {number} The number of characters with inconsistent positions.
+ */
 export const checkPositions = (characters) => {
-    // check to see if the character's position matches the position in their display data
     let numFail = 0;
     characters.forEach((character) => {
         let samePos = checkCharacterPosition(character);

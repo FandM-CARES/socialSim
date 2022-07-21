@@ -1,9 +1,19 @@
+/** UserSelection */
+
+/* React Modules & Components */
 import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
+/* Styling */
 import './UserSelection.css';
 
+/**
+ * React functional component to get the user's type.
+ * @param {callback} handleSubmit - A function in Task.js to set the
+ * user's type.
+ * @return {JSX} The input for the user type.
+ */
 function UserSelection({ handleSubmit }) {
   const [userType, setUserType] = useState("Undetermined");
 
@@ -43,4 +53,4 @@ function UserSelection({ handleSubmit }) {
   );
 }
 
-export default UserSelection
+export default UserSelection;

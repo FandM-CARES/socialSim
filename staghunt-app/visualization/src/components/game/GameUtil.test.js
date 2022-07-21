@@ -4,7 +4,6 @@ import util from 'util';
 
 // TESTING DATA
 
-// data without an interaction
 const dataWithNoInteraction = [
     {
         "id": "r1",
@@ -155,15 +154,15 @@ function print(object) {
 
 // tests for getCharacterGroups
 
+/** testing the get character groups method when no interactions are happening */
 test('testGettingCharacterGroupsSingles', () => {
-    // testing the get character groups method when no interactions are happening
     let characters = dataWithNoInteraction.slice();
     let groups = getCharacterGroups(characters);
     expect(groups).toStrictEqual(testGroupSingles);
 });
 
+/** testing the get character groups method when 1 interaction is happening */
 test('testGettingCharacterGroupsWithInteraction', () => {
-    // testing the get character groups method when 1 interaction is happening
     let characters = dataWith1Interaction.slice();
     let groups = getCharacterGroups(characters);
     expect(groups).toStrictEqual(testGroup1Interaction);
@@ -171,15 +170,15 @@ test('testGettingCharacterGroupsWithInteraction', () => {
 
 // tests for updatePoints
 
+/** testing the update points method when no interactions are happening */
 test('testUpdatePointsSingles', () => {
-    // testing the update points method when no interactions are happening
     let group = testGroupSingles['1,4'].characters.slice();
     let updatedGroup = updatePoints(group);
     expect(group).toStrictEqual(updatedGroup); // should not change
 });
 
+/** testing the update points method when 1 interaction is happening */
 test('testUpdatePointsGroups', () => {
-    // testing the update points method when 1 interaction is happening
     let group = testGroup1Interaction['1,4'].characters.slice();
     let updatedGroup = updatePoints(group);
     let expectedGroup = [
@@ -192,24 +191,23 @@ test('testUpdatePointsGroups', () => {
 
 // tests for scaleDisplay
 
+/** testing the scale display method when no interactions are happening */
 test('testScaleDisplaySingles', () => {
-    // testing the scale display method when no interactions are happening
     let group = testGroupSingles['1,4'].characters.slice();
     let updatedGroup = scaleDisplay(group);
     expect(group).toStrictEqual(updatedGroup); // should not change
 });
 
+/** testing the scale display method when 1 interaction is happening */
 test('testscaleDisplayGroups', () => {
-    // testing the scale display method when 1 interaction is happening
     let group = testGroup1Interaction['1,4'].characters.slice();
-
     let updatedGroup = scaleDisplay(group);
     let expectedGroup = [];
     expect(updatedGroup).toStrictEqual(expectedGroup);
 });
 
+/** testing the scale display method when no interactions are happening */
 test('testGetNPCMoves', () => {
-    // testing the scale display method when no interactions are happening
     let npcMoves = MockGame.getNPCMoves(dataWithNoInteraction);
 
     let numFail = checkPositions(npcMoves);

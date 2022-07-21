@@ -1,10 +1,19 @@
+/**
+ * The main React component of the app.
+ */
+
+ /* React Modules & Components */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import reportWebVitals from './reportWebVitals';
+
+/* Custom Components */
 import Task from './components/task/Task.js';
 import Header from './components/header/Header.js';
+
+/* Styling */
+import './index.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

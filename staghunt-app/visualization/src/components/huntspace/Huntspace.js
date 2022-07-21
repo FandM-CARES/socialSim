@@ -1,11 +1,17 @@
-/* Huntspace.js */
+/**
+ * Wrapper class to render huntspace SVG when character positions are initialized
+ * or updated.
+ * @class Huntspace
+ */
 
+ /* React Modules & Components */
 import React from 'react';
-import RenderHuntspace from './RenderHuntspace.js'
-import './Huntspace.css';
 
-/* Objective: Render huntspace SVG when character positions are initialized
-    or updated. */
+/* Custom Components */
+import RenderHuntspace from './RenderHuntspace.js'
+
+/* Styling */
+import './Huntspace.css';
 
 class Huntspace extends React.Component {
 
@@ -29,4 +35,4 @@ class Huntspace extends React.Component {
   };
 }
 
-export default Huntspace
+export default Huntspace;

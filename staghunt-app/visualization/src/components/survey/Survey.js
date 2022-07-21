@@ -1,8 +1,17 @@
+/** Survey */
+
+/* React Modules & Components */
 import React, { useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
+/**
+ * React functional component to display survey on modal.
+ * @param {callback} handleSubmit - A function in Task.js to set the
+ * survey response.
+ * @return {JSX} The survey.
+ */
 function Survey({ handleSubmit }) {
   const [show, setShow] = useState(true);
 
@@ -32,7 +41,7 @@ function Survey({ handleSubmit }) {
   }
 
   return (
-    <div>
+    <div className="surveyContainer">
       <Modal
         show={show}
         onHide={handleClose}
@@ -61,4 +70,4 @@ function Survey({ handleSubmit }) {
   );
 }
 
-export default Survey
+export default Survey;

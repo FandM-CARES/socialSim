@@ -1,5 +1,9 @@
-/* databse-service.js */
+/**
+ * Class to handle calls to backend for character moves.
+ * @class GameService
+ */
 
+ /* Custom Modules */
 import MockGame from '../companions/MockGame';
 
 // const SERVER_API = '/http://localhost:9000';

@@ -8,7 +8,8 @@ const SERVER_API = 'http://localhost:9000/notify';
 class SlackService {
 
     /**
-     * Notify a task has been started.
+     * Notify that a task has been started.
+     * @param {string} userType - The type of user (e.g. AMT, OXY, GUEST).
      */
     async sendStart(userType){
         let message = {"text":"New task started by "+ userType +": " + new Date().toString()};
@@ -16,7 +17,8 @@ class SlackService {
     }
 
     /**
-     * Notify a task has been completed.
+     * Notify that a task has been completed.
+     * @param {string} taskId - The id of a task.
      */
     async sendComplete(taskId){
         let message = {"text":"Task " + taskId + " completed: " + new Date().toString()};

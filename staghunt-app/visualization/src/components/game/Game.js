@@ -7,7 +7,7 @@
 import React from 'react';
 import Button from 'react-bootstrap/Button';
 
-/* Imported Node Modules */
+/* External Modules */
 import debounce from 'lodash.debounce';
 import ArrowKeysReact from 'arrow-keys-react';
 
