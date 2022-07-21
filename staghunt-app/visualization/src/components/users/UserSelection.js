@@ -5,11 +5,6 @@ import Form from 'react-bootstrap/Form';
 import './UserSelection.css';
 
 function UserSelection({ handleSubmit }) {
-  const [show, setShow] = useState(true);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
   const [userType, setUserType] = useState("Undetermined");
 
   const handleChange = (e) => {
@@ -28,7 +23,6 @@ function UserSelection({ handleSubmit }) {
   const handleSubmitForm = () => {
       let valid = checkValid();
       if(valid){
-          handleClose();
           handleSubmit(userType);
       }
   }

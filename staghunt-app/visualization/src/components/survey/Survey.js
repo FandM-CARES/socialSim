@@ -7,7 +7,6 @@ function Survey({ handleSubmit }) {
   const [show, setShow] = useState(true);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
 
   const [participatingCharacter, setParticipatingCharacter] = useState("Undetermined");
 

@@ -30,7 +30,7 @@ class SlackService {
      * @return {boolean} A status boolean of the post request.
      */
     async sendNotification(message){
-        let res = await fetch(SERVER_API,{
+        await fetch(SERVER_API,{
             method: 'post',
             headers: {
                 'Accept': 'application/json',

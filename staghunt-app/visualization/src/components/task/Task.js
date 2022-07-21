@@ -21,7 +21,7 @@ import Authorize from '../authorization/Authorization.js';
 import SlackService from '../notifications/Notify.js';
 import DatabaseService from '../database/DatabaseService.js';
 /** @TODO: Update starter_states.json with real starting states */
-import starterStates from '../assets/data/starter_states.json';
+import starterStates from '../../assets/data/starter_states.json';
 import { updateGameData, getProgress } from './TaskUtil.js';
 
 /* Styling */

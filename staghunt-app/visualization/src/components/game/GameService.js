@@ -2,7 +2,7 @@
 
 import MockGame from '../companions/MockGame';
 
-const SERVER_API = '/tweets';
+// const SERVER_API = '/http://localhost:9000';
 
 class GameService {
 

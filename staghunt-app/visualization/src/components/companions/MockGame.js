@@ -1,4 +1,4 @@
-import simData from '../assets/data/single_sim.json';
+import simData from '../../assets/data/single_sim.json';
 import {getNextCharacterPosition, checkMoves, updateCharacters, getCharacter} from '../game/GameUtil.js';
 
 class MockGame {

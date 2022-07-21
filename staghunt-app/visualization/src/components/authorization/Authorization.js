@@ -5,10 +5,6 @@ import Form from 'react-bootstrap/Form';
 import './Authorization.css';
 
 function Authorize({ handleSubmit }) {
-  const [show, setShow] = useState(true);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
 
   const [authCode, setAuthCode] = useState("");
 
@@ -28,7 +24,6 @@ function Authorize({ handleSubmit }) {
   const handleSubmitForm = () => {
       let valid = checkValid();
       if(valid){
-          handleClose();
           handleSubmit();
       }
   }
