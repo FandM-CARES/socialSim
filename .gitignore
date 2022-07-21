@@ -137,3 +137,5 @@ visualization/.DS_Store
 npm-debug.log
 /*.env
 *.icloud
+staghunt-app/visualization/package-lock.json
+staghunt-app/server/package-lock.json

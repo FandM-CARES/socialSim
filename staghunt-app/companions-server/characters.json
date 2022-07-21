@@ -1,0 +1,92 @@
+[
+    {
+        "id": "r1",
+        "type": "r",
+        "x": 1,
+        "y": 4,
+        "points": 1,
+        "inPlay": true,
+        "displayData": {
+            "groupSize": 1,
+            "groupId": 0,
+            "size": 0.07,
+            "x": 1,
+            "y": 4
+        }
+    },
+    {
+        "id": "r2",
+        "type": "r",
+        "x": 5,
+        "y": 1,
+        "points": 1,
+        "inPlay": true,
+        "displayData": {
+            "groupSize": 1,
+            "groupId": 0,
+            "size": 0.07,
+            "x": 5,
+            "y": 1
+        }
+    },
+    {
+        "id": "s1",
+        "type": "s",
+        "x": 2,
+        "y": 5,
+        "points": 10,
+        "inPlay": true,
+        "displayData": {
+            "groupSize": 1,
+            "groupId": 0,
+            "size": 0.07,
+            "x": 2,
+            "y": 5
+        }
+    },
+    {
+        "id": "h1",
+        "type": "h",
+        "x": 2,
+        "y": 1,
+        "points": 0,
+        "inPlay": true,
+        "displayData": {
+            "groupSize": 1,
+            "groupId": 0,
+            "size": 0.07,
+            "x": 2,
+            "y": 1
+        }
+    },
+    {
+        "id": "h2",
+        "type": "h",
+        "x": 1,
+        "y": 3,
+        "points": 0,
+        "inPlay": true,
+        "displayData": {
+            "groupSize": 1,
+            "groupId": 0,
+            "size": 0.07,
+            "x": 1,
+            "y": 3
+        }
+    },
+    {
+        "id": "h3",
+        "type": "h",
+        "x": 1,
+        "y": 5,
+        "points": 0,
+        "inPlay": true,
+        "displayData": {
+            "groupSize": 1,
+            "groupId": 0,
+            "size": 0.07,
+            "x": 1,
+            "y": 5
+        }
+    }
+]

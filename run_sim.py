@@ -617,6 +617,3 @@ if __name__ == '__main__':
     # agents = (2, 2, 3)
     # state = my_make_game(agents)
     # pt.print_map(state.map, state.loc)
-
-
-
