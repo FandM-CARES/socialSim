@@ -5,7 +5,10 @@ async function getNextTaskId(client){
     const collection = client.db("staghunt").collection("meta_data");
     const result = await collection.findOne({ "name":"nextTaskIdContainer"});
     const id = result.nextTaskID;
-    /** @TODO: Update task id */
+    /** Update task id */
+    let updatedID = "t-" + (parseInt(id.slice(-2)) + 1).toString();
+    let updatedContainer = {"name":"nextTaskIdContainer", "nextTaskID":updatedID};
+    const next = await collection.updateOne({ name: "nextTaskIdContainer" }, { $set: updatedContainer });
     return id;
 }
 

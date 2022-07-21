@@ -1,5 +1,9 @@
 /* DatabaseUtil.js */
 
+const validateTask = (task) => {
+    /** @TODO: Add task validation */
+    let valid = {"status": true, "reason": null};
+    return valid;
 }
 
 const updateIDs = (id, task) => {

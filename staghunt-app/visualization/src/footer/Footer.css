@@ -1,0 +1,24 @@
+.footer{
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f1f1f1;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.oxyHeader {
+  font-weight: bold;
+  color: black;
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 15px;
+  line-height: 25px;
+  border-radius: 4px;
+}
+
+.footer-right {
+    float: right;
+}
