@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import reportWebVitals from './reportWebVitals';
-import Task from './task/Task.js';
-import Header from './header/Header.js';
+import Task from './components/task/Task.js';
+import Header from './components/header/Header.js';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
