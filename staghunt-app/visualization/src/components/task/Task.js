@@ -14,8 +14,6 @@ import Game from '../game/Game.js';
 import Sidebar from '../sidebar/Sidebar.js';
 import Prompts from '../prompts/Prompts.js';
 import Payment from '../payments/Payment.js';
-import UserSelection from '../users/UserSelection.js';
-import Authorize from '../authorization/Authorization.js';
 
 /* Custom Modules */
 import SlackService from '../notifications/Notify.js';
@@ -42,7 +40,7 @@ class Task extends React.Component {
             id: "p-xx",
             seeds: seeds,
             games: games,
-            userType: "Empty",
+            userType: this.props.userType,
             startTime: new Date().toString(),
             gameCtr: 0,
             playing: false,
@@ -76,25 +74,6 @@ class Task extends React.Component {
             games.push(game);
         }
         return games;
-    }
-
-    /**
-     * Set the user's origin (i.e. Amazon Mechanical Turk, Oxy, or Other)
-     * @param {string} type - The type of user
-     */
-    setUser = (type) => {
-        this.setState({
-            userType: type
-        });
-    }
-
-    /**
-     * Authorize the user to take the survey.
-     */
-    setAuthorize = () => {
-        this.setState({
-            authorized: true
-        });
     }
 
     /**
@@ -193,24 +172,10 @@ class Task extends React.Component {
             }
         }else{
             if(this.state.gameCtr === 0){
-                if(this.state.userType !== "Empty"){
-                    if(this.state.authorized){
-                        // display study info prompt
-                        prompt = <Prompts promptLabel="studyInfoPrompt" />;
-                        // display begin task button
-                        display = <Button variant="primary" size="lg" className="beginTaskButton" onClick={this.startGame}>Begin Study</Button>;
-                    }else{
-                        // display authorization code input prompt
-                        prompt = <Prompts prompLabel="authorizationPrompt" />;
-                        // display authorization code input
-                        display = <Authorize handleSubmit={this.setAuthorize}/>;
-                    }
-                }else{
-                    // display user selection prompt
-                    prompt = <Prompts prompLabel="userPrompt" />;
-                    // have user select which user type they are
-                    display = <UserSelection handleSubmit={this.setUser}/>;
-                }
+                // display study info prompt
+                prompt = <Prompts promptLabel="studyInfoPrompt" />;
+                // display begin task button
+                display = <Button variant="primary" size="lg" className="beginTaskButton" onClick={this.startGame}>Begin Study</Button>;
             }else if(this.state.gameCtr > 0){
                 if(!this.state.complete){
                     // display next game

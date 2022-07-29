@@ -20,9 +20,10 @@ import './Huntspace.css';
  * @param {number} stateCounter - The current timestep.
  * @return {JSX} The huntspace SVG.
  */
-function RenderHuntspace({ characters, map, stateCounter }) {
-  const svgWidth = 500;
-  const svgHeight = 500;
+function RenderHuntspace({ characters, map, stateCounter, config }) {
+  const svgWidth = (config && config.hasOwnProperty("svgWidth") ? config.svgWidth : 500);
+  const svgHeight = (config && config.hasOwnProperty("svgHeight") ? config.svgWidth : 500);
+  const playMode = (config && config.hasOwnProperty("playMode") ? config.playMode : true);
 
   const ref = useD3(
     (svg) => {
@@ -32,12 +33,14 @@ function RenderHuntspace({ characters, map, stateCounter }) {
       const {cellWidth, cellHeight, labelOffset, labelOffsetGroups, dLookup} = setupData;
 
       const scale = d3.scaleLinear()
-          .domain([0, 7])
+          .domain([0, mapWidth])
           .range([0, svgWidth]);
+
+      const scaleStroke = (strokeWidth) => { return (svgWidth * strokeWidth/500); };
 
       // init character space
       svg.select(".characters")
-          .attr("stroke-width", 1.5)
+          .attr("stroke-width", scaleStroke(1.5))
           .attr("font-family", "sans-serif")
           .attr("font-size", cellWidth/3.);
 
@@ -53,7 +56,7 @@ function RenderHuntspace({ characters, map, stateCounter }) {
             .attr("y", function(d) { return scale(d.y); })
             .attr("width", cellWidth)
             .attr("height", cellHeight)
-            .style("stroke-width", "1px")
+            .style("stroke-width", (scaleStroke(1) + "px"))
             .style("stroke", "#ebebeb")
             .style("fill", function(d) { return d.wall;});
 
@@ -64,7 +67,7 @@ function RenderHuntspace({ characters, map, stateCounter }) {
             .join("text")
             .text(d => d.id)
             .style("fill", "red")
-            .style("font-size", "12px")
+            .style("font-size", (scaleStroke(12) + "px"))
             .style("dominant-baseline", function(d) {
                 return ((d.displayData.groupSize > 1) ? labelOffsetGroups[d.displayData.groupId][3] : labelOffset[d.id][3]);
             })
@@ -80,39 +83,56 @@ function RenderHuntspace({ characters, map, stateCounter }) {
             .attr("y", function(d) { return scale(d.y + ((d.displayData.groupSize > 1) ? labelOffsetGroups[d.displayData.groupId][1] : labelOffset[d.id][1])); });
 
         // draw character icons
-        svg.select(".characters")
-            .selectAll("path")
-            .data(characters, d => d.id)
-            .join(
-          enter => enter.append("path"),
-          update => update
-            .call(update => update
-              .transition().duration(function() {
-                      return (stateCounter) ? 1000 : 0;
-                  })
-              .attr("transform", function (d) {
-                      return "translate(" +
-                      scale(((d.displayData.groupSize > 1) ? d.displayData.x : d.x) + .25)
-                      + "," +
-                      scale(((d.displayData.groupSize > 1) ? d.displayData.y : d.y) + .25)
-                      + ") scale("+ d.displayData.size +")";
-                  })
-              .attr("d", function (d) {
-                      return dLookup[d.type];
-                  })
-            ).style("fill", function(d) {
-                if(!d.inPlay && d.points >= 0){
-                    return "black";
-                }
-                if(d.points < 0){
-                    return "red";
-                }else{
-                    // return "black";
-                    return getCharacterColor(d);
-                }
-            }),
-          exit => exit.remove()
-        );
+        if(playMode){
+            svg.select(".characters")
+                .selectAll("path")
+                .data(characters, d => d.id)
+                .join(
+              enter => enter.append("path"),
+              update => update
+                .call(update => update
+                  .transition().duration(function() {
+                          return (stateCounter) ? 1000 : 0;
+                      })
+                  .attr("transform", function (d) {
+                          return "translate(" +
+                          scale(((d.displayData.groupSize > 1) ? d.displayData.x : d.x) + .25)
+                          + "," +
+                          scale(((d.displayData.groupSize > 1) ? d.displayData.y : d.y) + .25)
+                          + ") scale("+ d.displayData.size +")";
+                      })
+                  .attr("d", function (d) {
+                          return dLookup[d.type];
+                      })
+                ).style("fill", function(d) {
+                    if(!d.inPlay && d.points >= 0){
+                        return "black";
+                    }
+                    if(d.points < 0){
+                        return "red";
+                    }else{
+                        // return "black";
+                        return getCharacterColor(d);
+                    }
+                }),
+              exit => exit.remove()
+            );
+        } else {
+            svg.select(".characters")
+               .selectAll("dot")
+               .data(characters, d => d.id)
+               .enter()
+               .append("circle")
+               .attr("r", scaleStroke(250))
+               .style("fill", function(d) { return getCharacterColor(d); })
+               .attr("transform", function (d) {
+                       return "translate(" +
+                       scale(((d.displayData.groupSize > 1) ? d.displayData.x : d.x) + .5)
+                       + "," +
+                       scale(((d.displayData.groupSize > 1) ? d.displayData.y : d.y) + .5)
+                       + ") scale("+ d.displayData.size +")";
+                   });
+        }
 
     }, [characters]
   );

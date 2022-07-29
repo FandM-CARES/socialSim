@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { uploadTask } = require('../db/service');
+const { uploadTask } = require('../db/uploadService');
 
 
 /* Uploads complete task to MongoDB. */

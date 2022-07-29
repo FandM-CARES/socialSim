@@ -1,5 +1,6 @@
 /**
  * Set of helper functions for the huntspace visualization related operations.
+ * Only able to render 2 hunters, 2 rabbits, and 3 stags
  * @utility HuntspaceUtil
  */
 
@@ -23,7 +24,8 @@ export const getSetupData = (svgWidth, svgHeight, mapWidth) => {
     r1: [.05, .5, "start", "middle"],
     r2: [.95, .5, "end", "middle"],
     s1: [.05, .5, "start", "baseline"],
-    s2: [.95, .5, "end", "baseline"]
+    s2: [.95, .5, "end", "baseline"],
+    s3: [.5, .5, "middle", "baseline"]
   };
 
   const labelOffsetGroups = [
@@ -33,6 +35,7 @@ export const getSetupData = (svgWidth, svgHeight, mapWidth) => {
       [.05, .5, "start", "middle"],
       [.5, .5, "middle", "middle"],
       [.95, .5, "end", "middle"],
+      [.5, .5, "start", "middle"]
   ];
 
   // rabbit

@@ -17,7 +17,7 @@ When running the app, use "npm install" to install the required dependencies loc
 For the backend, open an additional terminal, navigate to the **server** directory in the staghunt-app folder, and execute the following commands:
 
     npm install
-    npm run serverStart
+    npm run serverstart
 
 To complete a task, open [localhost:3000](https://localhost:3000) to view the webapp. On the prompts sign in as GUEST and use the "test" authorization code.
 Then follow the instructions given.

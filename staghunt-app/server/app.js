@@ -7,6 +7,7 @@ var cors = require('cors');
 
 var indexRouter = require('./routes/index');
 var testAPIRouter = require('./routes/testAPI');
+var libraryRouter = require('./routes/library');
 var uploadTaskRouter = require('./routes/uploadTask');
 var notificationRouter = require('./routes/notify');
 
@@ -25,6 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/testAPI', testAPIRouter);
+app.use('/library', libraryRouter);
 app.use('/uploadTask', uploadTaskRouter);
 app.use('/notify', notificationRouter);
 

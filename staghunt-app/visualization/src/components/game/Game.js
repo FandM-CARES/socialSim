@@ -98,7 +98,7 @@ class Game extends React.Component {
         let nextState = updateCharacters(npcMoves,[player]);
 
         /** Enforce game rules and stop the game, if finished */
-        let {gameStatus, updatedCharacters} = enforceGameRules(this.state.history.length, this.state.map, nextState);
+        let {gameStatus, updatedCharacters} = enforceGameRules(this.state.history.length, this.state.map, nextState, true);
 
         /** If all moves are valid, then update game positions */
         if(gameStatus.validMoves){

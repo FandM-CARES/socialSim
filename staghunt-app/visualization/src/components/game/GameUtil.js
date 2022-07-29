@@ -103,7 +103,10 @@ export const updatePoints = (group) => {
 
         characterDict['h'][i%numHunters].inPlay = false;
         characterDict['h'][(i+1)%numHunters].inPlay = false;
-        characterDict['r'][i].inPlay = false;
+
+        if(characterDict['r'].length > 0){
+            characterDict['r'][i].inPlay = false;
+        }
     }
 
     const updatedSubGroups = Object.keys(characterDict).map(function(key){
@@ -152,6 +155,9 @@ export const scaleDisplay = (group) => {
     for(let i=0; i < groupSize; i++){
         group[i].displayData.groupSize = groupSize;
         group[i].displayData.groupId = i;
+        if(group[i].hasOwnProperty("tag")){
+            delete group[i].tag
+        }
     }
     return group;
 }
@@ -305,22 +311,28 @@ export const getCharacter = (characters, id) => {
  * @return {object} A boolean representing whether the game is over and an
  * array of characters, possibly with updated "inPlay" values.
  */
-function checkGameOver(timesteps, originalCharacters){
+function checkGameOver(timesteps, playMode, originalCharacters){
     let characters = originalCharacters.slice();
     let gameOver = false;
 
-    // scenario 1: stag is caught
-    let stag = getCharacter(characters, "s1");
-    let scenario1 = !stag.inPlay;
+    // scenario 1: all stags are caught
+    let stag1 = getCharacter(characters, "s1");
+    let stag2 = getCharacter(characters, "s2");
+
+    let scenario1_1 = (stag1 && stag1.hasOwnProperty("inPlay") ? !stag1.inPlay : false);
+    let scenario1_2 = (stag2 && stag2.hasOwnProperty("inPlay") ? !stag2.inPlay : false);
+
+    let scenario1 = scenario1_1 && scenario1_2;
 
     // scenario 2: player has caught a stag or a rabbit
     let player = getCharacter(characters, "h1");
-    let scenario2 = player.points > 0;
+
+    let scenario2 = (playMode && player && player.hasOwnProperty("points") ? false : player.points > 0);
 
     // scenario 3: no more hares to catch and player hasn't caught anything
     let hare1 = getCharacter(characters, "r1");
     let hare2 = getCharacter(characters, "r2");
-    let scenario3 = (!hare1.inPlay && !hare2.inPlay && player.points === 0);
+    let scenario3 = ((hare1 && hare1.hasOwnProperty("inPlay") ? !hare1.inPlay : false) && (hare2 && hare2.hasOwnProperty("inPlay") ? !hare2.inPlay : false) && player.points === 0);
 
     // scenario 4: x amount of turns has passed
     const MAX_GAME_LENGTH = 10;
@@ -344,8 +356,8 @@ function checkGameOver(timesteps, originalCharacters){
  * @return {object} A boolean representing whether the game is over and an
  * array of updated characters.
  */
-export const enforceGameRules = (timesteps, map, characters) => {
-    const newChars = characters.slice();
+export const enforceGameRules = (timesteps, map, characters, playMode) => {
+    const newChars = JSON.parse(JSON.stringify(characters));
 
     let gameStatus = {
         gameOver: true,
@@ -377,7 +389,7 @@ export const enforceGameRules = (timesteps, map, characters) => {
     }
 
     // check if the game is over
-    let gameState = checkGameOver(timesteps, updatedCharacters);
+    let gameState = checkGameOver(timesteps, playMode, updatedCharacters);
     gameStatus.gameOver = gameState.gameOver;
     updatedCharacters = gameState.characters;
 

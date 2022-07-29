@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 
 /* Custom Components */
-import Task from './components/task/Task.js';
+import SignIn from './components/signin/SignIn.js';
 import Header from './components/header/Header.js';
 
 /* Styling */
@@ -19,7 +19,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <Header />
-    <Task />
+    <SignIn />
   </React.StrictMode>
 );
 

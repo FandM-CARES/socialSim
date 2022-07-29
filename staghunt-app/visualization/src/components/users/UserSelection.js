@@ -22,7 +22,7 @@ function UserSelection({ handleSubmit }) {
   }
 
   const checkValid = () => {
-      if(['AMT', 'OXY', 'GUEST'].includes(userType)){
+      if(['AMT', 'OXY', 'GUEST', 'ADMIN'].includes(userType)){
           return true;
       }
       alert("Please pick one of the 3 options.");
@@ -46,6 +46,7 @@ function UserSelection({ handleSubmit }) {
           <option value="AMT">Amazon Mechanical Turk</option>
           <option value="OXY">Occidental College</option>
           <option value="GUEST">Guest</option>
+          <option value="ADMIN">Administrator</option>
         </Form.Control>
       </Form.Group>
       <Button className="userSubmit" variant="primary" type="submit" onClick={handleSubmitForm}>Done</Button>

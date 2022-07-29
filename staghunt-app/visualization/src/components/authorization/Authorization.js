@@ -23,7 +23,7 @@ function Authorize({ handleSubmit }) {
   }
 
   const checkValid = () => {
-      if(['OXYCODE', 'AMTCODE', 'GUESTCODE', 'test'].includes(authCode)){
+      if(['OXYCODE', 'AMTCODE', 'test', 'ADMIN123'].includes(authCode)){
           return true;
       }
       alert("Incorrect code. Please try again.");
