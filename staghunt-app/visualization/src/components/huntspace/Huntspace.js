@@ -59,7 +59,7 @@ class Huntspace extends React.Component {
         }
     }
 
-    let header = (showHeader ? <h2 style={{'font-size': headerSize + 'pt'}}>{headerText}</h2> : <></>);
+    let header = (showHeader ? <h2 style={{'fontSize': headerSize + 'pt'}}>{headerText}</h2> : <></>);
 
     return(
       <div className="Huntspace">
